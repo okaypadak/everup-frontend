@@ -30,7 +30,7 @@
           <a href="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">Sprint Oluştur</a>
           <a href="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">Sprint Görev Listesi</a>
           <a href="/sprint/meta" class="dropdown-item" @click="showSprintMenu = false">Sprint Meta Bilgileri</a>
-          <a href="/sprint/burndown" class="dropdown-item" @click="showSprintMenu = false">Burndown Chart</a>
+          <a href="/sprint/chart" class="dropdown-item" @click="showSprintMenu = false">Sprint Charts</a>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ const showUserMenu = ref(false)
 const showNotifications = ref(false)
 
 const user = {
-  name: "Ayşe Yılmaz",
+  name: "Okay Padak",
   avatar: "https://randomuser.me/api/portraits/women/44.jpg"
 }
 

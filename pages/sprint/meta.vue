@@ -9,19 +9,19 @@
     <main class="flex-1">
       <div class="max-w-5xl mx-auto px-4 py-10">
         <div class="bg-white p-6 rounded-xl shadow-lg space-y-6">
-
           <!-- Başlık -->
           <h1 class="text-2xl font-bold text-sky-700">🚀 Aktif Sprint Özeti</h1>
 
-          <!-- Sprint Detayları -->
-          <div class="space-y-6">
+          <div v-if="isSprintActive" class="space-y-6">
+            <!-- Sprint Detayları -->
             <SprintMetaInfo :sprint="sprint" />
             <SprintProgressBar :completed="5" :total="8" />
+            <SprintTaskTable :tasks="sprintTasks" />
           </div>
 
-          <!-- Görev Tablosu -->
-          <SprintTaskTable :tasks="sprintTasks" />
-
+          <div v-else class="text-center py-10 text-gray-500">
+            📭 Şu anda aktif bir sprint bulunmamaktadır.
+          </div>
         </div>
       </div>
     </main>
@@ -32,20 +32,23 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
 import SprintMetaInfo from '../components/sprint/SprintMetaInfo.vue'
 import SprintProgressBar from '../components/sprint/SprintProgressBar.vue'
 import SprintTaskTable from '../components/sprint/SprintTaskTable.vue'
 
+// Sprint bilgileri
 const sprint = {
   id: "sprint-14",
   name: "Sprint 14 - Haziran",
-  startDate: "2025-06-01",
+  startDate: "2025-05-29",
   endDate: "2025-06-14",
   goal: "Kullanıcı kayıt akışındaki hataları düzeltmek ve mobil responsive tasarımı tamamlamak."
 }
 
+// Görev listesi
 const sprintTasks = [
   { id: 1, title: "Kayıt formu validasyon hatası", status: "Tamamlandı", type: "hata", seviye: "kritik", time: "2025-06-01" },
   { id: 2, title: "Mobil görünüm test et", status: "Bekliyor", type: "gorev", seviye: "öncelikli", time: "2025-06-02" },
@@ -56,4 +59,12 @@ const sprintTasks = [
   { id: 7, title: "Profil düzenleme sayfasında bug", status: "Tamamlandı", type: "hata", seviye: "öncelikli", time: "2025-06-07" },
   { id: 8, title: "Yeni kullanıcı kaydı sonrası e-posta yönlendirmesi", status: "Tamamlandı", type: "gorev", seviye: "normal", time: "2025-06-08" }
 ]
+
+// Aktif sprint kontrolü (bugünün tarihi sprint aralığında mı?)
+const isSprintActive = computed(() => {
+  const today = new Date()
+  const start = new Date(sprint.startDate)
+  const end = new Date(sprint.endDate)
+  return today >= start && today <= end
+})
 </script>

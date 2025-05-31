@@ -1,43 +1,14 @@
+<!-- SprintBurndownChart.vue -->
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Navbar -->
-    <div class="bg-white w-full h-16 flex items-center px-8 shadow">
-      <Navbar />
+  <div class="bg-white p-6 rounded-xl shadow space-y-4">
+    <h2 class="text-lg font-semibold text-sky-700">📉 Sprint Burndown Grafiği</h2>
+    <div class="w-full" style="height: 320px;">
+      <Line :data="chartData" :options="chartOptions" class="w-full h-full" />
     </div>
-
-    <!-- İçerik -->
-    <main class="flex-1">
-      <div class="max-w-5xl mx-auto px-4 py-10">
-        <div class="bg-white p-6 rounded-xl shadow-lg">
-
-          <!-- Başlık -->
-          <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold text-sky-700 flex items-center gap-2">
-              📉 Sprint Burndown Grafiği
-            </h1>
-            <span class="text-sm text-gray-500">Sprint 14 – Haziran</span>
-          </div>
-
-          <!-- Grafik Alanı -->
-          <div class="w-full" style="height: 320px;">
-            <LineChart
-                :data="chartData"
-                :options="chartOptions"
-                class="w-full h-full"
-            />
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Footer -->
-    <Footer />
   </div>
 </template>
 
 <script setup>
-import Navbar from '../components/bar/Navbar.vue'
-import Footer from '../components/bar/Footer.vue'
 import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -46,8 +17,6 @@ import {
 } from 'chart.js'
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
-
-const LineChart = Line
 
 const chartData = {
   labels: ['1.Gün', '2.Gün', '3.Gün', '4.Gün', '5.Gün', '6.Gün', '7.Gün'],
