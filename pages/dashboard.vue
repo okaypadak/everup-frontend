@@ -1,11 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="bg-gray-100 min-h-screen bg-gray-50">
 
-    <div class="w-full bg-blue-300 h-16 flex items-center px-8 mb-6 shadow">
-      <span class="text-xl font-bold text-white tracking-wide flex items-center gap-3">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-        CycleUp Dashboard
-      </span>
+    <div class="bg-white w-full h-16 flex items-center px-8 mb-6 shadow">
+      <Navbar />
     </div>
 
     <div class="flex flex-row gap-6 px-8" style="height: calc(100vh - 7rem);">
@@ -24,7 +21,7 @@
           </div>
         </div>
       </div>
-      
+
       <TaskListPanel
           :filteredTasks="filteredTasks"
           :taskFilter="taskFilter"
@@ -45,6 +42,7 @@
           :newTaskTitle="newTaskTitle"
           :newTaskDesc="newTaskDesc"
           :newTaskDeadline="newTaskDeadline"
+
           @update:selectedProject="selectedProject = $event"
           @update:assignedUser="assignedUser = $event"
           @update:userSearch="userSearch = $event"
@@ -69,12 +67,39 @@ import NotificationsPanel from './components/dashboard/notificationsPanel.vue';
 import TaskListPanel from './components/dashboard/taskListPanel.vue';
 import TaskCreatePanel from './components/dashboard/taskCreatePanel.vue';
 import CommentListPanel from './components/dashboard/commentListPanel.vue';
+import Navbar from './components/bar/Navbar.vue';
 
 const projects = ref([
-  { id: 1, name: 'Web Platformu' },
-  { id: 2, name: 'Mobil Uygulama' },
-  { id: 3, name: 'Backend API' },
-]);
+  {
+    id: 1,
+    name: 'CycleUp Platformu',
+    users: [
+      { id: 101, name: 'Ali Geliştirici', role: 'developer' },
+      { id: 102, name: 'Zeynep Testçi', role: 'tester' },
+      { id: 103, name: 'Mehmet Takım Lideri', role: 'leader' }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Mobil App Projesi',
+    users: [
+      { id: 201, name: 'Caner Dev', role: 'developer' },
+      { id: 202, name: 'Elif QA', role: 'tester' },
+      { id: 203, name: 'Serkan Lider', role: 'leader' }
+    ]
+  },
+  {
+    id: 3,
+    name: 'Web Dashboard',
+    users: [
+      { id: 301, name: 'Merve Yazılımcı', role: 'developer' },
+      { id: 302, name: 'Burak Test Uzmanı', role: 'tester' },
+      { id: 303, name: 'Tuba Lead', role: 'leader' }
+    ]
+  }
+])
+
+
 const usersByProject = {
   1: [
     { id: 1, name: 'Ahmet' },
@@ -105,18 +130,19 @@ const filteredUsers = computed(() => {
   );
 });
 
+
 const notifications = ref([
-  { id: 1, type: 'gorev', gorevKodu: 'GOREV-1005', time: '3 dk önce' },
+  { id: 1, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1005', time: '3 dk önce' },
   { id: 2, type: 'yorum', kisi: 'Ahmet', gorevKodu: 'GOREV-1005', time: '5 dk önce' },
   { id: 3, type: 'yorum', kisi: 'Merve', gorevKodu: 'GOREV-1001', time: '1 saat önce' },
-  { id: 4, type: 'gorev', gorevKodu: 'GOREV-1007', time: '2 saat önce' },
-  { id: 5, type: 'yorum', kisi: 'Emre', gorevKodu: 'GOREV-1003', time: '2 saat önce' },
+  { id: 4, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1007', time: '2 saat önce' },
+  { id: 5, type: 'yorum', kisi: 'Emre',  gorevKodu: 'GOREV-1003', time: '2 saat önce' },
 ]);
 const tasks = ref([
   { id: 1, projectId: 1, gorevKodu: 'GOREV-1005', title: 'API dokümantasyonu güncelle', status: 'Devam', type: 'gorev', seviye: 'normal', time: 'Bugün 12:30', deadline: '2025-06-05' },
   { id: 2, projectId: 1, gorevKodu: 'GOREV-1001', title: 'Kullanıcı testi', status: 'Tamamlandı', type: 'gorev', seviye: 'oncelikli', time: 'Dün 17:10', deadline: '' },
   { id: 3, projectId: 2, gorevKodu: 'GOREV-1003', title: 'Login bug fix', status: 'Devam', type: 'hata', seviye: 'kritik', time: 'Bugün 09:45', deadline: '' },
-  { id: 4, projectId: 1, gorevKodu: 'GOREV-1007', title: 'Yeni modül tasarımı', status: 'Devam', type: 'gorev', seviye: 'adimadim', bagliGorev: 2, bagliGorevTitle: 'Kullanıcı testi', time: 'Bugün 08:20', deadline: '2025-06-10' },
+  { id: 4, projectId: 1, gorevKodu: 'GOREV-1007', title: 'Yeni modül tasarımı', status: 'Beklemede', type: 'gorev', seviye: 'adimadim', bagliGorev: 2, bagliGorevTitle: 'Kullanıcı testi', time: 'Bugün 08:20', deadline: '2025-06-10' },
   { id: 5, projectId: 3, gorevKodu: 'GOREV-1009', title: 'Sunucu bakımı', status: 'Tamamlandı', type: 'hata', seviye: 'normal', time: 'Dün 16:00', deadline: '' },
 ]);
 
@@ -126,7 +152,7 @@ const bagliGorev = ref('');
 const taskFilter = ref('devam');
 const filteredTasks = computed(() => {
   if (taskFilter.value === 'devam') {
-    return tasks.value.filter(t => t.status === 'Devam');
+    return tasks.value.filter(t => t.status === 'Devam' || t.status === 'Beklemede');
   }
   return tasks.value;
 });
@@ -163,9 +189,9 @@ function addTask() {
     }
     tasks.value.unshift({
       id: Date.now(),
-      projectId: selectedProject.value,        // Proje id ekleniyor!
+      projectId: selectedProject.value,
       gorevKodu: yeniGorevKodu,
-      title: newTaskTitle.value,               // SADECE başlık!
+      title: newTaskTitle.value,
       status: 'Devam',
       type: newTaskType.value,
       seviye: newTaskLevel.value,

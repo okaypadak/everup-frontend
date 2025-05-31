@@ -27,12 +27,30 @@
           @change="onSelectProject"
           class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-gray-700 shadow-sm focus:border-gray-400 focus:ring-2 focus:ring-gray-200 px-3 py-2"
       >
-        <option value="" disabled>Proje seçiniz</option>
+        <option value="">Proje seçiniz</option>
         <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
       </select>
     </label>
+
+    <!-- Tür seçimi -->
+    <label class="block">
+      <span class="block text-gray-700 text-base font-semibold mb-1">Tür</span>
+      <select
+          :value="newTaskType"
+          @change="onTaskType"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
+      >
+        <option value="">Tür Seçiniz</option>
+        <option value="gorev">Görev</option>
+        <option value="hata">Hata</option>
+        <option value="test">Test</option>
+        <option value="onay">Onay</option>
+
+      </select>
+    </label>
+
     <!-- Kişi arama ve seçim -->
-    <label class="block" v-if="selectedProject">
+    <label class="block">
       <input
           :value="userSearch"
           @input="onUserSearch"
@@ -46,24 +64,12 @@
           :value="assignedUser"
           @change="onAssignedUser"
           class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
-          :disabled="!selectedProject"
       >
         <option value="" disabled>Kişi seçiniz</option>
         <option v-for="user in filteredUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
       </select>
     </label>
-    <!-- Tür seçimi -->
-    <label class="block">
-      <span class="block text-gray-700 text-base font-semibold mb-1">Tür</span>
-      <select
-          :value="newTaskType"
-          @change="onTaskType"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
-      >
-        <option value="gorev">Görev</option>
-        <option value="hata">Hata</option>
-      </select>
-    </label>
+
     <!-- Seviye seçimi -->
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Seviye</span>
@@ -75,7 +81,6 @@
         <template v-if="newTaskType === 'gorev'">
           <option value="normal">Normal</option>
           <option value="oncelikli">Öncelikli</option>
-          <option value="adimadim">Adım Adım</option>
         </template>
         <template v-else>
           <option value="normal">Normal</option>
@@ -85,14 +90,14 @@
       </select>
     </label>
     <!-- Bağlanacak görev seçimi sadece adım adımda göster -->
-    <label v-if="newTaskType === 'gorev' && newTaskLevel === 'adimadim'" class="block">
+    <label v-if="newTaskType === 'gorev'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlanacak Görev</span>
       <select
           :value="bagliGorev"
           @change="onBagliGorev"
           class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
       >
-        <option value="" disabled>Bir görev seçiniz</option>
+        <option value="">Bağımsız</option>
         <option v-for="g in tumGorevlerSecim" :key="g.id" :value="g.id">{{ g.title }}</option>
       </select>
     </label>
@@ -122,7 +127,7 @@
     ></textarea>
     <button
         @click="addTaskLocal"
-        :disabled="!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && newTaskLevel==='adimadim' && !bagliGorev)"
+        :disabled="!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && !bagliGorev)"
         :class="[
         'inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 hover:from-blue-500 hover:to-green-500 hover:shadow-lg transition-all text-white font-bold py-2 px-6 rounded-xl shadow-md active:scale-95',
         (!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && newTaskLevel==='adimadim' && !bagliGorev)) && 'opacity-50 cursor-not-allowed'
@@ -140,6 +145,7 @@
 interface Project { id: number | string; name: string }
 interface User { id: number | string; name: string }
 interface Task { id: number | string; title: string }
+
 
 defineProps<{
   projects: Project[]

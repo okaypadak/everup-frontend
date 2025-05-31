@@ -50,7 +50,7 @@ const user = useState('user')
 const router = useRouter()
 
 async function login(): Promise<void> {
-  if (username.value === 'admin' && password.value === 'sifre123') {
+  if (username.value === 'admin' && password.value === '1234') {
     user.value = 'statictoken'
     router.push('/dashboard')
   } else {
