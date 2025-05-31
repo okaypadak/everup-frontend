@@ -69,64 +69,107 @@ import TaskCreatePanel from './components/dashboard/taskCreatePanel.vue';
 import CommentListPanel from './components/dashboard/commentListPanel.vue';
 import Navbar from './components/bar/Navbar.vue';
 
+const selectedProject = ref('');
+const assignedUser = ref('');
+const userSearch = ref('');
+const newTaskDeadline = ref('');
+
 const projects = ref([
   {
     id: 1,
     name: 'CycleUp Platformu',
+    description: 'Geri dönüşüm temalı sürdürülebilirlik platformu',
+    createdAt: '2024-11-01',
+    status: 'active'
+  },
+  {
+    id: 2,
+    name: 'Mobil App Projesi',
+    description: 'iOS ve Android için ortak mobil uygulama',
+    createdAt: '2024-12-10',
+    status: 'maintenance'
+  },
+  {
+    id: 3,
+    name: 'Web Dashboard',
+    description: 'Yönetici paneli ve analiz ekranları',
+    createdAt: '2025-01-15',
+    status: 'archived'
+  }
+]);
+
+const users = ref([
+  { id: 1, name: 'Ali Yılmaz' },
+  { id: 2, name: 'Zeynep Demir' },
+  { id: 3, name: 'Mehmet Çelik' },
+  { id: 4, name: 'Caner Aydın' },
+  { id: 5, name: 'Elif Kaya' },
+  { id: 6, name: 'Serkan Koç' },
+  { id: 7, name: 'Merve Yıldız' },
+  { id: 8, name: 'Burak Şahin' },
+  { id: 9, name: 'Tuba Aslan' }
+]);
+
+
+const usersByProject = ref([
+  {
+    id: 1,
+    name: 'CycleUp Platformu',
     users: [
-      { id: 101, name: 'Ali Geliştirici', role: 'developer' },
-      { id: 102, name: 'Zeynep Testçi', role: 'tester' },
-      { id: 103, name: 'Mehmet Takım Lideri', role: 'leader' }
+      { id: 101, userId: 1, role: 'developer' },
+      { id: 102, userId: 2, role: 'tester' },
+      { id: 103, userId: 3, role: 'leader' }
     ]
   },
   {
     id: 2,
     name: 'Mobil App Projesi',
     users: [
-      { id: 201, name: 'Caner Dev', role: 'developer' },
-      { id: 202, name: 'Elif QA', role: 'tester' },
-      { id: 203, name: 'Serkan Lider', role: 'leader' }
+      { id: 201, userId: 4, role: 'developer' },
+      { id: 202, userId: 5, role: 'tester' },
+      { id: 203, userId: 6, role: 'leader' }
     ]
   },
   {
     id: 3,
     name: 'Web Dashboard',
     users: [
-      { id: 301, name: 'Merve Yazılımcı', role: 'developer' },
-      { id: 302, name: 'Burak Test Uzmanı', role: 'tester' },
-      { id: 303, name: 'Tuba Lead', role: 'leader' }
+      { id: 301, userId: 7, role: 'developer' },
+      { id: 302, userId: 8, role: 'tester' },
+      { id: 303, userId: 9, role: 'leader' }
     ]
   }
-])
+]);
 
 
-const usersByProject = {
-  1: [
-    { id: 1, name: 'Ahmet' },
-    { id: 2, name: 'Merve' },
-    { id: 3, name: 'Zeynep' },
-  ],
-  2: [
-    { id: 4, name: 'Emre' },
-    { id: 5, name: 'Burcu' },
-    { id: 2, name: 'Merve' },
-  ],
-  3: [
-    { id: 6, name: 'Onur' },
-    { id: 7, name: 'Tayfun' },
-  ],
+const assignableRolesByTaskType = {
+  gorev: ['developer', 'leader'],
+  test: ['tester'],
+  hata: ['developer', 'tester'],
+  onay: ['leader']
 };
 
-const selectedProject = ref('');
-const assignedUser = ref('');
-const userSearch = ref('');
-const newTaskDeadline = ref('');
-
 const filteredUsers = computed(() => {
-  const users = usersByProject[selectedProject.value] || [];
-  if (!userSearch.value.trim()) return users;
-  return users.filter(u =>
-      u.name.toLowerCase().includes(userSearch.value.trim().toLowerCase())
+  const selectedProj = usersByProject.value.find(p => p.id === +selectedProject.value);
+  const allowedRoles = assignableRolesByTaskType[newTaskType.value] || [];
+
+  if (!selectedProj) return [];
+
+  // Proje içindeki rollerden sadece geçerli role sahipleri al
+  const matched = selectedProj.users
+      .filter(u => allowedRoles.includes(u.role))
+      .map(pu => {
+        const userInfo = users.value.find(u => u.id === pu.userId);
+        return userInfo ? { id: userInfo.id, name: userInfo.name } : null;
+      })
+      .filter(Boolean); // null olanları temizle
+
+  // Arama filtresi varsa uygula
+  const search = userSearch.value.trim().toLowerCase();
+  if (!search) return matched;
+
+  return matched.filter(u =>
+      u.name.toLowerCase().includes(search)
   );
 });
 
@@ -138,12 +181,13 @@ const notifications = ref([
   { id: 4, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1007', time: '2 saat önce' },
   { id: 5, type: 'yorum', kisi: 'Emre',  gorevKodu: 'GOREV-1003', time: '2 saat önce' },
 ]);
+
 const tasks = ref([
-  { id: 1, projectId: 1, gorevKodu: 'GOREV-1005', title: 'API dokümantasyonu güncelle', status: 'Devam', type: 'gorev', seviye: 'normal', time: 'Bugün 12:30', deadline: '2025-06-05' },
+  { id: 1, projectId: 1, gorevKodu: 'GOREV-1001', title: 'API dokümantasyonu güncelle', status: 'Devam', type: 'gorev', seviye: 'normal', time: 'Bugün 12:30', deadline: '2025-06-05' },
   { id: 2, projectId: 1, gorevKodu: 'GOREV-1001', title: 'Kullanıcı testi', status: 'Tamamlandı', type: 'gorev', seviye: 'oncelikli', time: 'Dün 17:10', deadline: '' },
   { id: 3, projectId: 2, gorevKodu: 'GOREV-1003', title: 'Login bug fix', status: 'Devam', type: 'hata', seviye: 'kritik', time: 'Bugün 09:45', deadline: '' },
   { id: 4, projectId: 1, gorevKodu: 'GOREV-1007', title: 'Yeni modül tasarımı', status: 'Beklemede', type: 'gorev', seviye: 'adimadim', bagliGorev: 2, bagliGorevTitle: 'Kullanıcı testi', time: 'Bugün 08:20', deadline: '2025-06-10' },
-  { id: 5, projectId: 3, gorevKodu: 'GOREV-1009', title: 'Sunucu bakımı', status: 'Tamamlandı', type: 'hata', seviye: 'normal', time: 'Dün 16:00', deadline: '' },
+  { id: 5, projectId: 3, gorevKodu: 'GOREV-1009', title: 'Sunucu bakımı', status: 'Hazır', type: 'hata', seviye: 'normal', time: 'Dün 16:00', deadline: '' },
 ]);
 
 const newTaskType = ref('gorev');

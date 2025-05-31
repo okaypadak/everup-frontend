@@ -41,43 +41,62 @@
             :key="task.id"
             :class="[
             'rounded-md px-3 py-4 flex flex-col shadow-sm transition-all border-l-4',
-            task.status === 'Devam' ? 'bg-yellow-50 bg-green-50' :
+            task.status === 'Devam' && task.type === 'hata' ? 'bg-red-100 border-red-400' :
+            task.status === 'Devam' ? 'bg-yellow-100 border-yellow-400' :
             task.status === 'Beklemede' ? 'border-gray-400 bg-gray-100 opacity-60 cursor-not-allowed pointer-events-none' :
             task.status === 'Tamamlandı' ? 'border-green-300 bg-white text-gray-500' :
             'bg-white border-gray-200'
           ]"
         >
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span v-if="task.type === 'gorev'" class="bg-blue-500 text-white text-xs font-bold rounded-full px-2 py-0.5">Görev</span>
-              <span v-else class="bg-red-500 text-white text-xs font-bold rounded-full px-2 py-0.5">Hata</span>
-
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Görev Türü -->
               <span
                   :class="[
-                  task.type === 'gorev'
-                    ? (task.seviye === 'adimadim' ? 'bg-indigo-500 text-white' :
-                       task.seviye === 'oncelikli' ? 'bg-orange-500 text-white' : 'bg-gray-300 text-gray-800')
-                    : (task.seviye === 'kritik' ? 'bg-red-600 text-white' :
-                       task.seviye === 'acil' ? 'bg-orange-500 text-white' : 'bg-gray-300 text-gray-800'),
+                  task.type === 'gorev' ? 'bg-blue-500' :
+                  task.type === 'test' ? 'bg-purple-500' :
+                  task.type === 'onay' ? 'bg-teal-600' :
+                  task.type === 'hata' ? 'bg-red-500' :
+                  'bg-gray-400',
+                  'text-white text-xs font-bold rounded-full px-2 py-0.5'
+                ]"
+              >
+                {{
+                  task.type === 'gorev' ? 'Görev' :
+                      task.type === 'test' ? 'Test' :
+                          task.type === 'onay' ? 'Onay' :
+                              task.type === 'hata' ? 'Hata' :
+                                  'Bilinmiyor'
+                }}
+              </span>
+
+              <!-- Seviye -->
+              <span
+                  :class="[
+                  task.seviye === 'kritik' ? 'bg-red-600 text-white' :
+                  task.seviye === 'acil' ? 'bg-orange-500 text-white' :
+                  task.seviye === 'öncelikli' ? 'bg-yellow-500 text-white' :
+                  'bg-gray-300 text-gray-800',
                   'text-xs font-bold rounded-full px-2 py-0.5'
                 ]"
               >
                 {{
-                  task.type === 'gorev'
-                      ? (task.seviye === 'adimadim' ? 'Adım Adım' :
-                          task.seviye === 'oncelikli' ? 'Öncelikli' : 'Normal')
-                      : (task.seviye === 'kritik' ? 'Kritik' :
-                          task.seviye === 'acil' ? 'Acil' : 'Normal')
+                  task.seviye === 'kritik' ? 'Kritik' :
+                      task.seviye === 'acil' ? 'Acil' :
+                          task.seviye === 'öncelikli' ? 'Öncelikli' :
+                              'Normal'
                 }}
               </span>
 
+              <!-- Önceki görev varsa -->
               <span
-                  v-if="task.type === 'gorev' && task.seviye === 'adimadim' && task.bagliGorev"
+                  v-if="task.bagliGorev"
                   class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5"
               >
-                Sonraki: {{ task.bagliGorevTitle || 'Bağlı görev' }}
+                Önce: {{ task.bagliGorevTitle || 'Bağlı görev' }}
               </span>
 
+              <!-- Başlık -->
               <span
                   class="font-medium"
                   :class="task.status === 'Tamamlandı' ? 'line-through text-gray-500' : 'text-gray-900'"
@@ -86,7 +105,7 @@
               </span>
             </div>
 
-            <!-- 🔁 Duruma göre ikonlar -->
+            <!-- Durum rozetleri -->
             <span
                 v-if="task.status === 'Devam'"
                 class="bg-yellow-200 text-green-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1"
@@ -97,7 +116,6 @@
               </svg>
               Devam Ediyor
             </span>
-
             <span
                 v-else-if="task.status === 'Beklemede'"
                 class="bg-gray-300 text-gray-700 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1"
@@ -108,7 +126,6 @@
               </svg>
               Beklemede
             </span>
-
             <span
                 v-else-if="task.status === 'Tamamlandı'"
                 class="bg-green-200 text-green-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1"
@@ -128,17 +145,16 @@
           <div v-if="task.deadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.deadline }}
           </div>
-          <a
-              :href="`/tasks/${task.gorevKodu}`"
+          <NuxtLink
+              :to="`/tasks/${task.gorevKodu}`"
               class="text-xs text-blue-500 underline self-end mt-1 flex items-center gap-1 transition-all hover:text-blue-700 hover:scale-110"
               target="_blank"
-              rel="noopener noreferrer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             Ayrıntı
-          </a>
+          </NuxtLink>
         </li>
       </template>
       <template v-else>
@@ -157,8 +173,8 @@ interface Task {
   gorevKodu: string
   title: string
   status: string
-  type: string
-  seviye: string
+  type: 'gorev' | 'test' | 'onay' | 'hata'
+  seviye: 'kritik' | 'acil' | 'öncelikli' | 'normal'
   bagliGorev?: number | string | null
   bagliGorevTitle?: string
   deadline?: string

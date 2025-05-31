@@ -130,7 +130,7 @@
         :disabled="!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && !bagliGorev)"
         :class="[
         'inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 hover:from-blue-500 hover:to-green-500 hover:shadow-lg transition-all text-white font-bold py-2 px-6 rounded-xl shadow-md active:scale-95',
-        (!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && newTaskLevel==='adimadim' && !bagliGorev)) && 'opacity-50 cursor-not-allowed'
+        (!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && !bagliGorev)) && 'opacity-50 cursor-not-allowed'
       ]"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
