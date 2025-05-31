@@ -1,5 +1,6 @@
 <template>
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4" style="height: 100%; max-height: 100%;">
+    <!-- Başlık ve Filtreler -->
     <div class="flex items-center justify-between mb-2">
       <div class="flex items-center gap-2 text-lg font-semibold text-gray-700">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +24,17 @@
         <button
             :class="[
             'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
+            taskFilter === 'hazir'
+              ? 'bg-blue-400 text-white border-blue-400 shadow'
+              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
+          ]"
+            @click="$emit('update:taskFilter', 'hazir')"
+        >
+          Hazır Görevler
+        </button>
+        <button
+            :class="[
+            'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
             taskFilter === 'tum'
               ? 'bg-blue-400 text-white border-blue-400 shadow'
               : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
@@ -34,16 +46,18 @@
       </div>
     </div>
 
+    <!-- Görev Listesi -->
     <ul class="space-y-2 flex-1 overflow-y-auto min-h-0 pr-1" style="max-height: 100%;">
-      <template v-if="filteredTasks.length > 0">
+      <template v-if="filteredVisibleTasks.length > 0">
         <li
-            v-for="task in filteredTasks"
+            v-for="task in filteredVisibleTasks"
             :key="task.id"
             :class="[
             'rounded-md px-3 py-4 flex flex-col shadow-sm transition-all border-l-4',
             task.status === 'Devam' && task.type === 'hata' ? 'bg-red-100 border-red-400' :
             task.status === 'Devam' ? 'bg-yellow-100 border-yellow-400' :
             task.status === 'Beklemede' ? 'border-gray-400 bg-gray-100 opacity-60 cursor-not-allowed pointer-events-none' :
+            task.status === 'Hazır' ? 'border-blue-400 bg-blue-50' :
             task.status === 'Tamamlandı' ? 'border-green-300 bg-white text-gray-500' :
             'bg-white border-gray-200'
           ]"
@@ -88,7 +102,7 @@
                 }}
               </span>
 
-              <!-- Önceki görev varsa -->
+              <!-- Önceki görev -->
               <span
                   v-if="task.bagliGorev"
                   class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5"
@@ -105,7 +119,7 @@
               </span>
             </div>
 
-            <!-- Durum rozetleri -->
+            <!-- Durum Rozetleri -->
             <span
                 v-if="task.status === 'Devam'"
                 class="bg-yellow-200 text-green-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1"
@@ -115,6 +129,16 @@
                 <circle cx="12" cy="12" r="10" stroke-width="2"/>
               </svg>
               Devam Ediyor
+            </span>
+            <span
+                v-else-if="task.status === 'Hazır'"
+                class="bg-blue-200 text-blue-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 6v6h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              </svg>
+              Başlamaya Hazır
             </span>
             <span
                 v-else-if="task.status === 'Beklemede'"
@@ -159,7 +183,11 @@
       </template>
       <template v-else>
         <li class="text-gray-400 text-center py-6 select-none">
-          {{ taskFilter === 'devam' ? 'Devam eden bir görev yok.' : 'Henüz bir görev yok.' }}
+          {{
+            taskFilter === 'devam' ? 'Devam eden bir görev yok.' :
+                taskFilter === 'hazir' ? 'Başlamaya hazır görev yok.' :
+                    'Henüz bir görev yok.'
+          }}
         </li>
       </template>
     </ul>
@@ -167,12 +195,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Task {
   id: number | string
   projectId: number | string
   gorevKodu: string
   title: string
-  status: string
+  status: string // Devam | Hazır | Beklemede | Tamamlandı
   type: 'gorev' | 'test' | 'onay' | 'hata'
   seviye: 'kritik' | 'acil' | 'öncelikli' | 'normal'
   bagliGorev?: number | string | null
@@ -180,6 +210,7 @@ interface Task {
   deadline?: string
   time: string
 }
+
 interface Project {
   id: number | string
   name: string
@@ -194,6 +225,15 @@ const { filteredTasks, taskFilter, projects } = defineProps<{
 const emit = defineEmits<{
   (e: 'update:taskFilter', value: string): void
 }>()
+
+const filteredVisibleTasks = computed(() =>
+    filteredTasks.filter(task => {
+      if (taskFilter === 'tum') return true
+      if (taskFilter === 'devam') return task.status === 'Devam'
+      if (taskFilter === 'hazir') return task.status === 'Hazır'
+      return false
+    })
+)
 
 function getProjectName(projectId: number | string): string {
   const found = projects.find(p => p.id === projectId)
