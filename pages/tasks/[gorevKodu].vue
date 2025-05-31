@@ -111,22 +111,60 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import Navbar from "~/pages/components/bar/Navbar.vue";
 
-const task = ref({
-  title: 'API dokümantasyonu güncelle',
-  description: `CycleUp API'de yapılan son güncellemeler sonrasında dökümantasyon güncellenmeli. Özellikle yeni filtreleme endpoint'leri eklenmeli.`,
-  createdAt: '2025-05-28',
-  status: 'Hazır',
-  dependencies: [
-    { id: 1, title: 'Kullanıcı testi', status: 'Tamamlandı' }
-  ],
-  comments: [
-    { id: 1, content: 'Filtreleme endpoint’i eklendi mi kontrol edilebilir.', author: 'Zeynep', date: '2025-05-30' },
-    { id: 2, content: 'Swagger tarafı eksik kalmış, ona da bakacağım.', author: 'Ali', date: '2025-05-31' }
-  ]
+const route = useRoute();
+const gorevKodu = (route.params.gorevKodu || '').toString().trim();
+
+const tasks = ref([
+  {
+    gorevKodu: 'GOREV-1003',
+    title: 'API dokümantasyonu güncelle',
+    description: `CycleUp API'de yapılan son güncellemeler sonrasında dökümantasyon güncellenmeli. Özellikle yeni filtreleme endpoint'leri eklenmeli.`,
+    createdAt: '2025-05-28',
+    status: 'Hazır',
+    dependencies: [
+      { id: 1, title: 'Kullanıcı testi', status: 'Tamamlandı' }
+    ],
+    comments: [
+      { id: 1, content: 'Filtreleme endpoint’i eklendi mi kontrol edilebilir.', author: 'Zeynep', date: '2025-05-30' },
+      { id: 2, content: 'Swagger tarafı eksik kalmış, ona da bakacağım.', author: 'Ali', date: '2025-05-31' }
+    ]
+  },
+  {
+    gorevKodu: 'GOREV-1006',
+    title: 'Veritabanı performans analizi',
+    description: `Mobil App Projesi kapsamında sorgu sürelerinin optimize edilmesi gerekiyor.
+Özellikle kullanıcı giriş ve işlem kayıtları tablolarında yavaşlamalar gözlenmekte.
+Query plan analizi ve index önerileri yapılmalı.`,
+    createdAt: '2025-05-30',
+    status: 'Devam',
+    dependencies: [
+      { id: 1, title: 'Giriş ekranı kod güncellemesi', status: 'Devam' }
+    ],
+    comments: [
+      { id: 1, content: 'EXPLAIN ANALYZE sonuçlarını dosyaya aktardım.', author: 'Elif', date: '2025-05-30' }
+    ]
+  }
+]);
+
+const task = computed(() => {
+  const found = tasks.value.find(t => t.gorevKodu.trim() === gorevKodu);
+  if (!found) {
+    console.warn('Görev bulunamadı, gelen kod:', gorevKodu);
+  }
+  return found || {
+    title: 'Görev Bulunamadı',
+    description: 'Görev kodu geçersiz veya sistemde tanımlı değil.',
+    createdAt: new Date().toISOString(),
+    status: 'Hazır',
+    dependencies: [],
+    comments: []
+  };
 });
+
 
 const statusOptions = [
   { value: 'Hazır', label: 'Başlamaya Hazır', activeClass: 'bg-blue-100 text-blue-700 border-blue-300' },
@@ -156,3 +194,4 @@ function submitComment() {
   }
 }
 </script>
+
