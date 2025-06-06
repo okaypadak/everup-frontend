@@ -1,9 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Navbar -->
-    <div class="bg-white w-full h-16 flex items-center px-8 shadow">
-      <Navbar />
-    </div>
+
+    <Navbar />
 
     <!-- İçerik -->
     <main class="flex-1">
@@ -12,6 +10,25 @@
           <h2 class="text-2xl font-bold text-sky-700 mb-6">🌀 Yeni Sprint Oluştur</h2>
 
           <form @submit.prevent="submitSprint" class="space-y-6">
+            <!-- Proje Seçimi -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
+              <select
+                  v-model="form.projectId"
+                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                  required
+              >
+                <option value="" disabled selected>Bir proje seçin</option>
+                <option
+                    v-for="project in projects"
+                    :key="project.id"
+                    :value="project.id"
+                >
+                  {{ project.name }}
+                </option>
+              </select>
+            </div>
+
             <!-- Sprint Adı -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Adı</label>
@@ -71,7 +88,6 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <Footer />
   </div>
 </template>
@@ -84,13 +100,26 @@ import Footer from '../components/bar/Footer.vue'
 const emit = defineEmits(['created'])
 
 const form = reactive({
+  projectId: '',
   name: '',
   startDate: '',
   endDate: '',
   goal: ''
 })
 
+// Geçici örnek proje listesi (props ile almak istersen aşağıda gösterdim)
+const projects = [
+  { id: '1', name: 'Mobil App Projesi' },
+  { id: '2', name: 'Web CRM Geliştirme' },
+  { id: '3', name: 'API Refactoring' }
+]
+
 const submitSprint = () => {
+  if (!form.projectId) {
+    alert('Lütfen bir proje seçin.')
+    return
+  }
+
   const newSprint = {
     ...form,
     id: Date.now().toString()
@@ -99,6 +128,7 @@ const submitSprint = () => {
   emit('created', newSprint)
 
   // Formu sıfırla
+  form.projectId = ''
   form.name = ''
   form.startDate = ''
   form.endDate = ''

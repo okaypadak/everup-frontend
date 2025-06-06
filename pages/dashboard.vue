@@ -1,12 +1,12 @@
 <template>
+
+
   <div class="bg-gray-50 min-h-screen">
-    <!-- Üst Navbar -->
-    <div class="bg-white w-full h-16 flex items-center px-8 mb-6 shadow">
-      <Navbar />
-    </div>
+
+    <Navbar />
 
     <!-- 1:3:2 oranında grid -->
-    <div class="grid px-8 gap-6" style="height: calc(100vh - 7rem); grid-template-columns: 1fr 3fr 2fr;">
+    <div class="grid px-8 gap-6 py-6" style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr; ">
       <!-- Bildirimler + Yorumlar -->
       <div class="bg-white rounded-xl shadow h-full flex flex-col overflow-hidden">
         <div class="flex-1 min-h-0 flex flex-col">

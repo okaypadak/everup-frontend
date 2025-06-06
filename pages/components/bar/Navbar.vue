@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-white px-4 py-2 flex items-center justify-between w-full">
+  <nav class="bg-white px-4 py-2 flex items-center justify-between w-full border-b border-gray-200 shadow-sm">
     <!-- Logo -->
     <div class="flex items-center gap-2">
       <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
@@ -13,9 +13,10 @@
 
     <!-- Menü Linkleri -->
     <div class="hidden md:flex gap-6 items-center">
-      <a href="/dashboard" class="nav-link">Projeler</a>
+      <a href="/dashboard" class="nav-link">Kontrol Paneli</a>
+      <a href="/documentList" class="nav-link">Döküman Yaz</a>
 
-      <!-- Sprint Menüsü (Tıkla → Aç/Kapat) -->
+      <!-- Sprint Menüsü -->
       <div class="relative">
         <button @click="showSprintMenu = !showSprintMenu" class="nav-link flex items-center gap-1">
           Sprint Yönetimi
@@ -34,7 +35,22 @@
         </div>
       </div>
 
-<!--      <a href="/reports" class="nav-link">Raporlar</a>-->
+      <!-- Proje Menüsü -->
+      <div class="relative">
+        <button @click="showProjectMenu = !showProjectMenu" class="nav-link flex items-center gap-1">
+          Proje Yönetimi
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div
+            v-if="showProjectMenu"
+            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
+        >
+          <a href="/projects/create" class="dropdown-item" @click="showProjectMenu = false">Proje Oluştur</a>
+          <a href="/projects/members" class="dropdown-item" @click="showProjectMenu = false">Katılımcılar</a>
+        </div>
+      </div>
     </div>
 
     <!-- Sağ Kısım: Bildirim ve Kullanıcı -->
@@ -48,7 +64,7 @@
               class="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
       </button>
 
-      <!-- Kullanıcı Menüsü (Tıkla → Aç/Kapat) -->
+      <!-- Kullanıcı Menüsü -->
       <div class="relative">
         <button @click="showUserMenu = !showUserMenu"
                 class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
@@ -72,6 +88,7 @@
 import { ref } from 'vue'
 
 const showSprintMenu = ref(false)
+const showProjectMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
 

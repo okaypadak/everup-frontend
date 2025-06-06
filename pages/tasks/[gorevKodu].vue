@@ -120,7 +120,7 @@ const gorevKodu = (route.params.gorevKodu || '').toString().trim();
 
 const tasks = ref([
   {
-    gorevKodu: 'GOREV-1003',
+    gorevKodu: 'GOREV-1001',
     title: 'API dokümantasyonu güncelle',
     description: `CycleUp API'de yapılan son güncellemeler sonrasında dökümantasyon güncellenmeli. Özellikle yeni filtreleme endpoint'leri eklenmeli.`,
     createdAt: '2025-05-28',
@@ -147,7 +147,22 @@ Query plan analizi ve index önerileri yapılmalı.`,
     comments: [
       { id: 1, content: 'EXPLAIN ANALYZE sonuçlarını dosyaya aktardım.', author: 'Elif', date: '2025-05-30' }
     ]
+  },
+  {
+    gorevKodu: 'GOREV-1003',
+    title: 'Login bug fix',
+    description: `Mobil uygulamada bazı kullanıcıların giriş işlemi sırasında hata ile karşılaştığı rapor edildi. Özellikle token üretimi ve yönlendirme sırasında "Kullanıcı bulunamadı" hatası alınıyor. Kullanıcı adı/şifre doğrulama ve oturum başlatma akışı yeniden test edilmeli. Hata ayıklama logları toplanıp, sorunun hangi aşamada oluştuğu tespit edilmeli ve ilgili düzeltme yapılmalı.`,
+    createdAt: '2025-06-01',
+    status: 'Devam',
+    dependencies: [
+      { id: 1, title: 'Kullanıcı testi', status: 'Devam' }
+    ],
+    comments: [
+      { id: 1, content: 'Bazı eski kullanıcılar hatayı sürekli alıyor, token yenileme sürecine bakılmalı.', author: 'Ahmet', date: '2025-06-01' },
+      { id: 2, content: 'Loglar incelendi, hata belirli bir kullanıcı grubunda tekrarlanıyor.', author: 'Ayşe', date: '2025-06-02' }
+    ]
   }
+
 ]);
 
 const task = computed(() => {
