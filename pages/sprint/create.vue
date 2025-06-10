@@ -96,6 +96,7 @@
 import { reactive } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
+import { toast } from 'vue3-toastify'
 
 const emit = defineEmits(['created'])
 
@@ -116,7 +117,7 @@ const projects = [
 
 const submitSprint = () => {
   if (!form.projectId) {
-    alert('Lütfen bir proje seçin.')
+    toast.success('Lütfen bir proje seçin.')
     return
   }
 

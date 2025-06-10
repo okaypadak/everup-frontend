@@ -16,8 +16,8 @@
       <a href="/dashboard" class="nav-link">Kontrol Paneli</a>
       <a href="/documentList" class="nav-link">Döküman Yaz</a>
 
-      <!-- Sprint Menüsü -->
-      <div class="relative">
+      <!-- Sprint Menüsü (takım lideri veya direktör) -->
+      <div class="relative" v-if="canSeeSprintMenu">
         <button @click="showSprintMenu = !showSprintMenu" class="nav-link flex items-center gap-1">
           Sprint Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -28,15 +28,15 @@
             v-if="showSprintMenu"
             class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
         >
-          <a href="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">Sprint Oluştur</a>
-          <a href="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">Sprint Görev Listesi</a>
+          <a v-if="isDirector" href="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">Sprint Oluştur</a>
+          <a v-if="isDirector" href="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">Sprint Görev Listesi</a>
           <a href="/sprint/meta" class="dropdown-item" @click="showSprintMenu = false">Sprint Meta Bilgileri</a>
           <a href="/sprint/chart" class="dropdown-item" @click="showSprintMenu = false">Sprint Charts</a>
         </div>
       </div>
 
-      <!-- Proje Menüsü -->
-      <div class="relative">
+      <!-- Proje Menüsü (sadece direktör) -->
+      <div class="relative" v-if="canSeeProjectMenu">
         <button @click="showProjectMenu = !showProjectMenu" class="nav-link flex items-center gap-1">
           Proje Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -49,6 +49,22 @@
         >
           <a href="/projects/create" class="dropdown-item" @click="showProjectMenu = false">Proje Oluştur</a>
           <a href="/projects/members" class="dropdown-item" @click="showProjectMenu = false">Katılımcılar</a>
+        </div>
+      </div>
+
+      <!-- Kullanıcı Menüsü (sadece admin) -->
+      <div class="relative" v-if="canSeeUserMenu">
+        <button @click="showUserManagementMenu = !showUserManagementMenu" class="nav-link flex items-center gap-1">
+          Kullanıcı Yönetimi
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div
+            v-if="showUserManagementMenu"
+            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
+        >
+          <a href="/users/create" class="dropdown-item" @click="showUserManagementMenu = false">Kullanıcı Oluştur</a>
         </div>
       </div>
     </div>
@@ -64,7 +80,7 @@
               class="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
       </button>
 
-      <!-- Kullanıcı Menüsü -->
+      <!-- Kullanıcı Profili -->
       <div class="relative">
         <button @click="showUserMenu = !showUserMenu"
                 class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
@@ -75,8 +91,8 @@
         </button>
         <div v-if="showUserMenu"
              class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-2 z-50">
-          <a href="/profile" class="dropdown-item" @click="showUserMenu = false">Profil</a>
-          <a href="/settings" class="dropdown-item" @click="showUserMenu = false">Ayarlar</a>
+<!--          <a href="/profile" class="dropdown-item" @click="showUserMenu = false">Profil</a>-->
+<!--          <a href="/settings" class="dropdown-item" @click="showUserMenu = false">Ayarlar</a>-->
           <button @click="logout" class="dropdown-item text-red-600">Çıkış Yap</button>
         </div>
       </div>
@@ -85,22 +101,40 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { toast } from 'vue3-toastify'
 
+// Menü aç/kapa state
 const showSprintMenu = ref(false)
 const showProjectMenu = ref(false)
+const showUserManagementMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
+const isDirector = computed(() => user.roles.includes('admin','director'))
 
+// Örnek kullanıcı (admin rolünde)
 const user = {
   name: "Okay Padak",
-  avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+  roles: ['admin'] // ['admin', 'director', 'teamLead']
 }
 
+// Bildirim sayısı
 const notifications = ref(3)
 
+// Rol kontrolü
+const hasRole = (roles) => {
+  return roles.some(role => user.roles.includes(role))
+}
+
+// Menü görünürlüğü
+const canSeeSprintMenu = computed(() => hasRole(['admin', 'teamLead', 'director', 'developer']))
+const canSeeProjectMenu = computed(() => hasRole(['admin', 'director']))
+const canSeeUserMenu = computed(() => hasRole(['admin']))
+
+// Çıkış
 const logout = () => {
-  alert('Çıkış yapıldı!')
+  toast.success('Çıkış yapıldı!')
 }
 </script>
 
@@ -109,7 +143,7 @@ const logout = () => {
   font-size: 1rem;
   font-weight: 500;
   color: #0369a1;
-  transition: color .2s;
+  transition: color 0.2s;
   text-decoration: none;
 }
 .nav-link:hover {

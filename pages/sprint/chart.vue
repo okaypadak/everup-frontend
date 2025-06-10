@@ -1,17 +1,12 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
     <Navbar />
-
     <main class="flex-1">
       <div class="max-w-5xl mx-auto px-4 py-10">
         <div class="bg-white p-6 rounded-xl shadow-lg space-y-10">
-
-          <!-- Başlık -->
           <h1 class="text-2xl font-bold text-sky-700 flex items-center gap-2">
             🚀 Aktif Sprint Özeti
           </h1>
-
-          <!-- Proje Seçimi -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
             <select
@@ -24,23 +19,6 @@
               </option>
             </select>
           </div>
-
-          <!-- Sprint Seçimi -->
-          <div v-if="filteredSprints.length > 0">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Seç</label>
-            <select
-                v-model="selectedSprintId"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                @change="updateSelectedSprint"
-            >
-              <option disabled value="">Bir sprint seçin</option>
-              <option v-for="sprint in filteredSprints" :key="sprint.id" :value="sprint.id">
-                {{ sprint.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Sprint Bilgisi ve Grafikler -->
           <div v-if="selectedSprint">
             <div class="space-y-2">
               <h2 class="text-lg font-semibold text-gray-700">
@@ -53,16 +31,17 @@
                 Kalan Gün: {{ remainingDays }} gün
               </p>
             </div>
-
             <div class="space-y-6 mt-6">
               <SprintBurndownChart :tasks="selectedSprintTasks" />
               <SprintCompletedTasksChart :tasks="selectedSprintTasks" />
             </div>
           </div>
+          <div v-else class="py-6 text-center text-gray-400">
+            Aktif sprint yok
+          </div>
         </div>
       </div>
     </main>
-
     <Footer />
   </div>
 </template>
@@ -74,34 +53,15 @@ import Footer from '../components/bar/Footer.vue'
 import SprintBurndownChart from '../components/sprint/SprintBurndownChart.vue'
 import SprintCompletedTasksChart from '../components/sprint/SprintCompletedBarChart.vue'
 
-// Örnek veriler
 const projects = [
   { id: '1', name: 'Mobil App Projesi' },
   { id: '2', name: 'Web Panel' }
 ]
 
 const sprints = [
-  {
-    id: 'sprint-14',
-    name: 'Sprint 14 - Haziran',
-    startDate: '2025-05-29',
-    endDate: '2025-06-14',
-    projectId: '1'
-  },
-  {
-    id: 'sprint-15',
-    name: 'Sprint 15 - Temmuz',
-    startDate: '2025-06-20',
-    endDate: '2025-07-05',
-    projectId: '1'
-  },
-  {
-    id: 'sprint-A',
-    name: 'Sprint A',
-    startDate: '2025-06-01',
-    endDate: '2025-06-15',
-    projectId: '2'
-  }
+  { id: 'sprint-14', name: 'Sprint 14 - Haziran', startDate: '2025-05-29', endDate: '2025-06-14', projectId: '1' },
+  { id: 'sprint-15', name: 'Sprint 15 - Temmuz', startDate: '2025-06-20', endDate: '2025-07-05', projectId: '1' },
+  { id: 'sprint-A', name: 'Sprint A', startDate: '2025-06-01', endDate: '2025-06-15', projectId: '2' }
 ]
 
 const allTasks = [
@@ -117,25 +77,24 @@ const allTasks = [
   { id: 10, sprintId: 'sprint-A', title: 'Admin panel güncelleme', status: 'Bekliyor' }
 ]
 
-// Seçimler
 const selectedProjectId = ref('')
-const selectedSprintId = ref('')
-const selectedSprint = ref(null)
 
-// Seçilen projeye ait sprintler
-const filteredSprints = computed(() =>
-    sprints.filter(s => s.projectId === selectedProjectId.value)
-)
+// Bugünün tarihine göre otomatik sprint seçimi:
+const selectedSprint = computed(() => {
+  if (!selectedProjectId.value) return null;
+  const today = new Date();
+  return sprints.find(s =>
+      s.projectId === selectedProjectId.value &&
+      new Date(s.startDate) <= today &&
+      today <= new Date(s.endDate)
+  ) || null;
+});
 
-// Seçili sprint objesi
-const updateSelectedSprint = () => {
-  selectedSprint.value = sprints.find(s => s.id === selectedSprintId.value)
-}
-
-// Seçilen sprintin görevleri
 const selectedSprintTasks = computed(() =>
-    allTasks.filter(t => t.sprintId === selectedSprintId.value)
-)
+    selectedSprint.value
+        ? allTasks.filter(t => t.sprintId === selectedSprint.value.id)
+        : []
+);
 
 const formatDate = (dateStr) => {
   const options = { day: '2-digit', month: 'short', year: 'numeric' }
@@ -143,10 +102,10 @@ const formatDate = (dateStr) => {
 }
 
 const remainingDays = computed(() => {
-  if (!selectedSprint.value) return 0
-  const today = new Date()
-  const end = new Date(selectedSprint.value.endDate)
-  const diff = end.getTime() - today.getTime()
-  return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0)
-})
+  if (!selectedSprint.value) return 0;
+  const today = new Date();
+  const end = new Date(selectedSprint.value.endDate);
+  const diff = end.getTime() - today.getTime();
+  return Math.max(Math.ceil(diff / (1000 * 60 * 60 * 24)), 0);
+});
 </script>

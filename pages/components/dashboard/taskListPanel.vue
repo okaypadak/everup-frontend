@@ -83,7 +83,6 @@
                                   'Bilinmiyor'
                 }}
               </span>
-
               <!-- Seviye -->
               <span
                   :class="[
@@ -101,7 +100,6 @@
                               'Normal'
                 }}
               </span>
-
               <!-- Önceki görev -->
               <span
                   v-if="task.bagliGorev"
@@ -109,16 +107,14 @@
               >
                 Önce: {{ task.bagliGorevTitle || 'Bağlı görev' }}
               </span>
-
               <!-- Başlık -->
               <span
                   class="font-medium"
                   :class="task.status === 'Tamamlandı' ? 'line-through text-gray-500' : 'text-gray-900'"
               >
-                {{ getProjectName(task.projectId) }} - {{ task.title }}
+                {{ task.title }}
               </span>
             </div>
-
             <!-- Durum Rozetleri -->
             <span
                 v-if="task.status === 'Devam'"
@@ -164,7 +160,6 @@
               Tamamlandı
             </span>
           </div>
-
           <div class="text-xs text-gray-400 mt-1">{{ task.time }}</div>
           <div v-if="task.deadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.deadline }}
@@ -197,46 +192,79 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-interface Task {
+// Sadece Task arayüzü
+interface RawTask {
   id: number | string
-  projectId: number | string
-  gorevKodu: string
   title: string
-  status: string // Devam | Hazır | Beklemede | Tamamlandı
-  type: 'gorev' | 'test' | 'onay' | 'hata'
-  seviye: 'kritik' | 'acil' | 'öncelikli' | 'normal'
-  bagliGorev?: number | string | null
-  bagliGorevTitle?: string
-  deadline?: string
-  time: string
+  description: string
+  status: string
+  type: string
+  level: string
+  createdAt: string
+  deadline?: string | null
+  dependentTaskId?: number | string | null
 }
 
-interface Project {
-  id: number | string
-  name: string
+// Mapping fonksiyonları
+function mapStatus(status: string) {
+  switch (status) {
+    case 'Ready': return 'Hazır'
+    case 'Waiting': return 'Beklemede'
+    case 'InProgress': return 'Devam'
+    case 'Completed': return 'Tamamlandı'
+    default: return status
+  }
+}
+function mapType(type: string) {
+  switch (type) {
+    case 'task': return 'gorev'
+    case 'test': return 'test'
+    case 'approval': return 'onay'
+    case 'bug': return 'hata'
+    default: return type
+  }
+}
+function mapLevel(level: string) {
+  switch (level) {
+    case 'critical': return 'kritik'
+    case 'urgent': return 'acil'
+    case 'priority': return 'öncelikli'
+    case 'normal': return 'normal'
+    default: return level
+  }
 }
 
-const { filteredTasks, taskFilter, projects } = defineProps<{
-  filteredTasks: Task[]
+function formatTime(createdAt: string) {
+  const d = new Date(createdAt)
+  return d.toLocaleString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+const { filteredTasks, taskFilter } = defineProps<{
+  filteredTasks: RawTask[]
   taskFilter: string
-  projects: Project[]
 }>()
 
 const emit = defineEmits<{
   (e: 'update:taskFilter', value: string): void
 }>()
 
+const tasksForView = computed(() => filteredTasks.map(task => ({
+  ...task,
+  gorevKodu: task.id,             // Ayrıntı linki için
+  status: mapStatus(task.status),
+  type: mapType(task.type),
+  seviye: mapLevel(task.level),
+  bagliGorev: task.dependentTaskId,
+  bagliGorevTitle: '',            // Bağlı görev adı eklemek istersen doldur
+  time: formatTime(task.createdAt),
+})))
+
 const filteredVisibleTasks = computed(() =>
-    filteredTasks.filter(task => {
+    tasksForView.value.filter(task => {
       if (taskFilter === 'tum') return true
       if (taskFilter === 'devam') return task.status === 'Devam'
       if (taskFilter === 'hazir') return task.status === 'Hazır'
       return false
     })
 )
-
-function getProjectName(projectId: number | string): string {
-  const found = projects.find(p => p.id === projectId)
-  return found ? found.name : ''
-}
 </script>

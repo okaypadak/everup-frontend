@@ -76,8 +76,8 @@
 <script setup>
 import Navbar from '/pages/components/bar/Navbar.vue'
 import { ref, computed } from 'vue'
+import { toast } from 'vue3-toastify'
 
-// Projeler
 const projects = ref([
   {
     id: 'p1',
@@ -117,10 +117,10 @@ const selectedProject = computed(() => {
 })
 
 function addMember() {
-  if (!selectedProject.value) return alert('Önce proje seçin.')
+  if (!selectedProject.value) return toast.success('Lütfen bir proje seçin.')
   const user = allUsers.value.find(u => u.id === newMember.value.userId)
   if (!user || !newMember.value.projectRole) return
-  if (selectedProject.value.members.some(m => m.userId === user.id)) return alert('Bu kullanıcı zaten eklendi.')
+  if (selectedProject.value.members.some(m => m.userId === user.id)) return toast.success('Bu kullanıcı zaten eklendi.')
 
   selectedProject.value.members.push({
     userId: user.id,

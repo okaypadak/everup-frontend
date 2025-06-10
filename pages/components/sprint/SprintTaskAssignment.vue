@@ -50,7 +50,7 @@
 
 <script setup>
 import { ref } from 'vue'
-
+import { toast } from 'vue3-toastify'
 const emit = defineEmits(['sprint-selected'])
 
 // Demo veriler (gerçekte API'den gelir)
@@ -76,10 +76,7 @@ const emitSprint = () => {
 }
 
 const assignTasks = () => {
-  console.log('Atanan görev ID\'leri:', selectedTaskIds.value)
-  console.log('Seçilen Sprint ID:', selectedSprintId.value)
-  alert('Görevler başarıyla sprint\'e atandı!')
-
+  toast.success('Görevler başarıyla sprint\'e atandı!')
   selectedTaskIds.value = []
 }
 </script>

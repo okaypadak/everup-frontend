@@ -1,9 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Navbar -->
-    <div class="bg-white w-full h-16 flex items-center px-8 shadow-sm border-b border-gray-200">
+
       <Navbar />
-    </div>
+
 
     <!-- İçerik -->
     <div class="max-w-5xl mx-auto px-4 py-10">

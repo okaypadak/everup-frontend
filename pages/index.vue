@@ -50,11 +50,25 @@ const user = useState('user')
 const router = useRouter()
 
 async function login(): Promise<void> {
-  if (username.value === 'admin' && password.value === '1234') {
-    user.value = 'statictoken'
-    router.push('/dashboard')
-  } else {
-    error.value = 'Kullanıcı adı veya şifre hatalı'
+  try {
+    const res = await $fetch<LoginResponse>('/api/auth/login', {
+      method: 'POST',
+      body: {
+        username: username.value,
+        password: password.value
+      }
+    })
+
+    if (res.statusCode === 200) {
+      user.value = res.token
+      router.push('/dashboard')
+    } else {
+      error.value = res.message || 'Kullanıcı adı veya şifre hatalı'
+    }
+
+  } catch (err) {
+    console.error('İstek hatası:', err)
+    error.value = 'Sunucuya erişilemiyor. Lütfen daha sonra tekrar deneyin.'
   }
 }
 </script>
