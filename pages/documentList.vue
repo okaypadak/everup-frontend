@@ -71,9 +71,9 @@ const projects = ref([
   { id: 'proj2', name: 'E-Ticaret Platformu' },
   { id: 'proj3', name: 'Mobil App' }
 ])
-
 const allDocs = ref([...docsData])
 const selectedProject = ref('')
+const user = useState('user')
 const router = useRouter()
 
 function loadDocs() {}

@@ -8,7 +8,6 @@
           <ellipse cx="32" cy="32" rx="15" ry="27" stroke="#38BDF8" stroke-width="4" />
           <path d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
                 fill="#3CB371" fill-opacity="0.12" />
-          <!-- Sonsuzluk döngüsüne benzer, içine yaprak dokunuşlu şekil -->
         </svg>
       </div>
 
@@ -24,12 +23,15 @@
           <label class="block text-sm font-semibold text-gray-700 mb-1">Şifre</label>
           <input v-model="password" type="password" placeholder="••••••••" class="input-field" required />
         </div>
+
         <button
             type="submit"
             class="w-full py-2.5 bg-gradient-to-r from-sky-600 to-green-500 text-white font-semibold rounded-lg shadow hover:scale-105 transition transform duration-150"
         >
           Giriş Yap
         </button>
+
+        <p v-if="error" class="text-red-600 text-sm mt-2 text-center">{{ error }}</p>
       </form>
 
       <div class="mt-8 text-xs text-gray-400 text-center">
@@ -42,16 +44,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuth } from '~/composables/useAuth'
 
-const username = ref<string>('')
-const password = ref<string>('')
-const error = ref<string>('')
-const user = useState('user')
+const { user } = useAuth()
 const router = useRouter()
+const error = ref('')
+const username = ref('')
+const password = ref('')
 
 async function login(): Promise<void> {
   try {
-    const res = await $fetch<LoginResponse>('/api/auth/login', {
+    const res = await $fetch<any>('/api/auth/login', {
       method: 'POST',
       body: {
         username: username.value,
@@ -60,7 +63,10 @@ async function login(): Promise<void> {
     })
 
     if (res.statusCode === 200) {
-      user.value = res.token
+      // Token set edildikten sonra güncel kullanıcı bilgisi çek
+      const me = await $fetch('/api/me')
+      user.value = me.user
+
       router.push('/dashboard')
     } else {
       error.value = res.message || 'Kullanıcı adı veya şifre hatalı'
@@ -73,12 +79,9 @@ async function login(): Promise<void> {
 }
 </script>
 
-
 <style scoped>
 @reference 'tailwindcss';
-
 .input-field {
-    @apply w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition;
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition;
 }
 </style>
-

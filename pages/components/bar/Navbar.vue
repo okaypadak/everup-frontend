@@ -13,58 +13,66 @@
 
     <!-- Menü Linkleri -->
     <div class="hidden md:flex gap-6 items-center">
-      <a href="/dashboard" class="nav-link">Kontrol Paneli</a>
-      <a href="/documentList" class="nav-link">Döküman Yaz</a>
+      <NuxtLink to="/dashboard" class="nav-link">Kontrol Paneli</NuxtLink>
+      <NuxtLink to="/documentList" class="nav-link">Döküman Yaz</NuxtLink>
 
-      <!-- Sprint Menüsü (takım lideri veya direktör) -->
+      <!-- Sprint Menüsü -->
       <div class="relative" v-if="canSeeSprintMenu">
-        <button @click="showSprintMenu = !showSprintMenu" class="nav-link flex items-center gap-1">
+        <button @click="toggleSprintMenu" class="nav-link flex items-center gap-1">
           Sprint Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div
-            v-if="showSprintMenu"
-            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
-        >
-          <a v-if="isDirector" href="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">Sprint Oluştur</a>
-          <a v-if="isDirector" href="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">Sprint Görev Listesi</a>
-          <a href="/sprint/meta" class="dropdown-item" @click="showSprintMenu = false">Sprint Meta Bilgileri</a>
-          <a href="/sprint/chart" class="dropdown-item" @click="showSprintMenu = false">Sprint Charts</a>
+        <div v-if="showSprintMenu"
+             class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
+          <NuxtLink v-if="isDirector" to="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">
+            Sprint Oluştur
+          </NuxtLink>
+          <NuxtLink v-if="isDirector" to="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">
+            Sprint Görev Listesi
+          </NuxtLink>
+          <NuxtLink to="/sprint/meta" class="dropdown-item" @click="showSprintMenu = false">
+            Sprint Meta Bilgileri
+          </NuxtLink>
+          <NuxtLink to="/sprint/chart" class="dropdown-item" @click="showSprintMenu = false">
+            Sprint Charts
+          </NuxtLink>
         </div>
       </div>
 
-      <!-- Proje Menüsü (sadece direktör) -->
+      <!-- Proje Menüsü -->
       <div class="relative" v-if="canSeeProjectMenu">
-        <button @click="showProjectMenu = !showProjectMenu" class="nav-link flex items-center gap-1">
+        <button @click="toggleProjectMenu" class="nav-link flex items-center gap-1">
           Proje Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div
-            v-if="showProjectMenu"
-            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
-        >
-          <a href="/projects/create" class="dropdown-item" @click="showProjectMenu = false">Proje Oluştur</a>
-          <a href="/projects/members" class="dropdown-item" @click="showProjectMenu = false">Katılımcılar</a>
+        <div v-if="showProjectMenu"
+             class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
+          <NuxtLink to="/projects/create" class="dropdown-item" @click="showProjectMenu = false">
+            Proje Oluştur
+          </NuxtLink>
+          <NuxtLink to="/projects/members" class="dropdown-item" @click="showProjectMenu = false">
+            Katılımcılar
+          </NuxtLink>
         </div>
       </div>
 
-      <!-- Kullanıcı Menüsü (sadece admin) -->
+      <!-- Kullanıcı Menüsü -->
       <div class="relative" v-if="canSeeUserMenu">
-        <button @click="showUserManagementMenu = !showUserManagementMenu" class="nav-link flex items-center gap-1">
+        <button @click="toggleUserManagementMenu" class="nav-link flex items-center gap-1">
           Kullanıcı Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div
-            v-if="showUserManagementMenu"
-            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
-        >
-          <a href="/users/create" class="dropdown-item" @click="showUserManagementMenu = false">Kullanıcı Oluştur</a>
+        <div v-if="showUserManagementMenu"
+             class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
+          <NuxtLink to="/users/create" class="dropdown-item" @click="showUserManagementMenu = false">
+            Kullanıcı Oluştur
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -81,18 +89,14 @@
       </button>
 
       <!-- Kullanıcı Profili -->
-      <div class="relative">
-        <button @click="showUserMenu = !showUserMenu"
-                class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
-          <img :src="user.avatar" alt="Kullanıcı" class="w-8 h-8 rounded-full object-cover border border-sky-200" />
+      <div class="relative" v-if="isLoggedIn">
+        <button @click="showUserMenu = !showUserMenu" class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
           <span class="font-semibold text-gray-700 hidden sm:inline">{{ user.name }}</span>
           <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2"
                viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
         </button>
         <div v-if="showUserMenu"
              class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-2 z-50">
-<!--          <a href="/profile" class="dropdown-item" @click="showUserMenu = false">Profil</a>-->
-<!--          <a href="/settings" class="dropdown-item" @click="showUserMenu = false">Ayarlar</a>-->
           <button @click="logout" class="dropdown-item text-red-600">Çıkış Yap</button>
         </div>
       </div>
@@ -100,41 +104,43 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { toast } from 'vue3-toastify'
+import { useRouter } from 'vue-router'
+import { useAuth } from '~/composables/useAuth'
 
-// Menü aç/kapa state
+const { user, isLoggedIn, isDirector } = useAuth()
+
+const router = useRouter()
+
 const showSprintMenu = ref(false)
 const showProjectMenu = ref(false)
 const showUserManagementMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
-const isDirector = computed(() => user.roles.includes('admin','director'))
-
-// Örnek kullanıcı (admin rolünde)
-const user = {
-  name: "Okay Padak",
-  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-  roles: ['admin'] // ['admin', 'director', 'teamLead']
-}
-
-// Bildirim sayısı
 const notifications = ref(3)
 
-// Rol kontrolü
-const hasRole = (roles) => {
-  return roles.some(role => user.roles.includes(role))
-}
+// Menü kontrolü için roller
+const canSeeSprintMenu = computed(() =>
+    ['admin', 'teamLead', 'director', 'developer'].includes(user.value?.role ?? '')
+)
 
-// Menü görünürlüğü
-const canSeeSprintMenu = computed(() => hasRole(['admin', 'teamLead', 'director', 'developer']))
-const canSeeProjectMenu = computed(() => hasRole(['admin', 'director']))
-const canSeeUserMenu = computed(() => hasRole(['admin']))
+const canSeeProjectMenu = computed(() =>
+    ['admin', 'director'].includes(user.value?.role ?? '')
+)
 
-// Çıkış
-const logout = () => {
-  toast.success('Çıkış yapıldı!')
+const canSeeUserMenu = computed(() =>
+    user.value?.role === 'admin'
+)
+
+const toggleSprintMenu = () => showSprintMenu.value = !showSprintMenu.value
+const toggleProjectMenu = () => showProjectMenu.value = !showProjectMenu.value
+const toggleUserManagementMenu = () => showUserManagementMenu.value = !showUserManagementMenu.value
+
+const logout = async () => {
+  await $fetch('/api/logout', { method: 'POST' })
+  user.value = { name: '', avatar: '', role: '' }
+  router.push('/')
 }
 </script>
 
@@ -145,6 +151,10 @@ const logout = () => {
   color: #0369a1;
   transition: color 0.2s;
   text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 }
 .nav-link:hover {
   color: #059669;
@@ -160,6 +170,9 @@ const logout = () => {
   color: #374151;
   cursor: pointer;
   transition: background-color 0.2s;
+  background: none;
+  border: none;
+  outline: none;
 }
 .dropdown-item:hover {
   background-color: #e0f2fe;

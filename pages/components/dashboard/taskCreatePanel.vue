@@ -1,58 +1,45 @@
 <template>
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4 h-full overflow-y-auto min-h-0">
-    <!-- Başlık: Yeni Görev/Hata -->
     <div class="flex items-center gap-2 mb-2 text-xl font-bold text-gray-700">
       <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M4 7h16M4 12h8m-8 5h16" stroke-width="2" stroke-linecap="round"/>
       </svg>
       Yeni Görev/Hata Oluştur
-      <svg v-if="newTaskType === 'hata'" class="w-6 h-6 text-red-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <!-- Basit bir bug/bug/hatayı simgeleyen SVG -->
-        <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2"/>
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2"/>
-        <circle cx="12" cy="12" r="2" fill="currentColor"/>
-      </svg>
-      <svg v-else class="w-6 h-6 text-green-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <!-- Kalem veya görev için başka ikon -->
-        <path d="M15.232 5.232l3.536 3.536M9 13l6-6 3 3-6 6H9v-3z" stroke="currentColor" stroke-width="2"/>
-      </svg>
     </div>
-    <!-- Form Alanı (Aynı senin kodun, scroll'da kalacak) -->
+
+    <!-- Proje Seç -->
     <label class="block">
-      <span class="block text-gray-700 text-base font-semibold mb-1 flex items-center gap-1">
-        Proje Seç
-      </span>
+      <span class="block text-gray-700 text-base font-semibold mb-1">Proje Seç</span>
       <select
-          :value="selectedProject"
+          :value="props.selectedProject"
           @change="onSelectProject"
-          class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-gray-700 shadow-sm focus:border-gray-400 focus:ring-2 focus:ring-gray-200 px-3 py-2"
+          class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Proje seçiniz</option>
         <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
       </select>
     </label>
 
-    <!-- Tür seçimi -->
+    <!-- Tür -->
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Tür</span>
       <select
-          :value="newTaskType"
+          :value="props.newTaskType"
           @change="onTaskType"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Tür Seçiniz</option>
         <option value="gorev">Görev</option>
         <option value="hata">Hata</option>
         <option value="test">Test</option>
         <option value="onay">Onay</option>
-
       </select>
     </label>
 
-    <!-- Kişi arama ve seçim -->
+    <!-- Kişi Arama ve Seç -->
     <label class="block">
       <input
-          :value="userSearch"
+          :value="props.userSearch"
           @input="onUserSearch"
           class="mb-2 w-full rounded px-2 py-1 border border-gray-300 focus:ring-2 focus:ring-blue-200"
           placeholder="Kişi ara..."
@@ -61,24 +48,24 @@
       />
       <span class="block text-gray-700 text-base font-semibold mb-1">Atanacak Kişi</span>
       <select
-          :value="assignedUser"
+          :value="props.assignedUser"
           @change="onAssignedUser"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="" disabled>Kişi seçiniz</option>
         <option v-for="user in filteredUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
       </select>
     </label>
 
-    <!-- Seviye seçimi -->
+    <!-- Seviye -->
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Seviye</span>
       <select
-          :value="newTaskLevel"
+          :value="props.newTaskLevel"
           @change="onTaskLevel"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
-        <template v-if="newTaskType === 'gorev'">
+        <template v-if="props.newTaskType === 'gorev'">
           <option value="normal">Normal</option>
           <option value="oncelikli">Öncelikli</option>
         </template>
@@ -89,48 +76,56 @@
         </template>
       </select>
     </label>
-    <!-- Bağlanacak görev seçimi sadece adım adımda göster -->
-    <label v-if="newTaskType === 'gorev'" class="block">
+
+    <!-- Bağlı Görev -->
+    <label v-if="props.newTaskType === 'gorev'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlanacak Görev</span>
       <select
-          :value="bagliGorev"
+          :value="props.bagliGorev"
           @change="onBagliGorev"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 px-3 py-2"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Bağımsız</option>
-        <option v-for="g in tumGorevlerSecim" :key="g.id" :value="g.id">{{ g.title }}</option>
+        <option v-for="g in tumGorevler" :key="g.id" :value="g.id">{{ g.title }}</option>
       </select>
     </label>
-    <!-- Bitiş Tarihi (Opsiyonel) -->
+
+    <!-- Deadline -->
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bitiş Tarihi</span>
       <input
-          :value="newTaskDeadline"
+          :value="props.newTaskDeadline"
           @input="onTaskDeadline"
           type="date"
           class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           placeholder="Tarih seçiniz"
       />
     </label>
+
+    <!-- Başlık -->
     <input
-        :value="newTaskTitle"
+        :value="props.newTaskTitle"
         @input="onTaskTitle"
         placeholder="Yeni görev başlığı"
         class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
     />
+
+    <!-- Açıklama -->
     <textarea
-        :value="newTaskDesc"
+        :value="props.newTaskDesc"
         @input="onTaskDesc"
         rows="10"
         placeholder="Açıklama"
         class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
     ></textarea>
+
+    <!-- Görev Oluştur Butonu -->
     <button
         @click="addTaskLocal"
-        :disabled="!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && !bagliGorev)"
+        :disabled="isDisabled"
         :class="[
-        'inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 hover:from-blue-500 hover:to-green-500 hover:shadow-lg transition-all text-white font-bold py-2 px-6 rounded-xl shadow-md active:scale-95',
-        (!newTaskTitle || !selectedProject || !assignedUser || (newTaskType==='gorev' && !bagliGorev)) && 'opacity-50 cursor-not-allowed'
+        'inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 text-white font-bold py-2 px-6 rounded-xl shadow-md active:scale-95 transition-all duration-150',
+        isDisabled ? 'opacity-50' : 'hover:from-blue-500 hover:to-green-500 hover:shadow-lg'
       ]"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -142,14 +137,13 @@
 </template>
 
 <script setup lang="ts">
-interface Project { id: number | string; name: string }
-interface User { id: number | string; name: string }
+import { ref, onMounted, watch, computed } from 'vue'
+
+interface Project { id: number; name: string }
+interface User { id: number; name: string }
 interface Task { id: number | string; title: string }
 
-
-defineProps<{
-  projects: Project[]
-  filteredUsers: User[]
+const props = defineProps<{
   tumGorevlerSecim: Task[]
   selectedProject: string | number
   assignedUser: string | number
@@ -175,34 +169,70 @@ const emit = defineEmits<{
   (e: 'add-task'): void
 }>()
 
-function onSelectProject(e: Event) {
-  emit('update:selectedProject', (e.target as HTMLSelectElement).value)
-}
-function onAssignedUser(e: Event) {
-  emit('update:assignedUser', (e.target as HTMLSelectElement).value)
-}
-function onUserSearch(e: Event) {
-  emit('update:userSearch', (e.target as HTMLInputElement).value)
-}
-function onTaskType(e: Event) {
-  emit('update:newTaskType', (e.target as HTMLSelectElement).value)
-}
-function onTaskLevel(e: Event) {
-  emit('update:newTaskLevel', (e.target as HTMLSelectElement).value)
-}
-function onBagliGorev(e: Event) {
-  emit('update:bagliGorev', (e.target as HTMLSelectElement).value)
-}
-function onTaskTitle(e: Event) {
-  emit('update:newTaskTitle', (e.target as HTMLInputElement).value)
-}
-function onTaskDesc(e: Event) {
-  emit('update:newTaskDesc', (e.target as HTMLTextAreaElement).value)
-}
-function onTaskDeadline(e: Event) {
-  emit('update:newTaskDeadline', (e.target as HTMLInputElement).value)
-}
+const projects = ref<Project[]>([])
+const allUsers = ref<User[]>([])
+const tumGorevler = ref<Task[]>([])
+
+const isDisabled = computed(() =>
+    !props.newTaskTitle || !props.selectedProject || !props.assignedUser
+)
+
+onMounted(async () => {
+  try {
+    const data = await $fetch<Project[]>('/api/projects')
+    projects.value = data
+  } catch (err) {
+    console.error('Projeler yüklenemedi:', err)
+  }
+})
+
+watch(() => props.selectedProject, async (newId) => {
+  if (!newId) return
+
+  try {
+    const projectUsers = await $fetch<{ id: number; name: string; members: any[] }>(`/api/projects/${newId}/users`)
+    allUsers.value = projectUsers.members.map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
+  } catch (err) {
+    console.error('Kullanıcılar yüklenemedi:', err)
+  }
+
+  try {
+    const taskList = await $fetch<Task[]>(`/api/tasks/${newId}`)
+    tumGorevler.value = taskList
+  } catch (err) {
+    console.error('Görevler yüklenemedi:', err)
+  }
+})
+
+const filteredUsers = computed(() => {
+  if (!props.userSearch) return allUsers.value
+  return allUsers.value.filter(u =>
+      u.name.toLowerCase().includes(props.userSearch.toLowerCase())
+  )
+})
+
+// Emit’ler
+function onSelectProject(e: Event) { emit('update:selectedProject', (e.target as HTMLSelectElement).value) }
+function onAssignedUser(e: Event) { emit('update:assignedUser', (e.target as HTMLSelectElement).value) }
+function onUserSearch(e: Event) { emit('update:userSearch', (e.target as HTMLInputElement).value) }
+function onTaskType(e: Event) { emit('update:newTaskType', (e.target as HTMLSelectElement).value) }
+function onTaskLevel(e: Event) { emit('update:newTaskLevel', (e.target as HTMLSelectElement).value) }
+function onBagliGorev(e: Event) { emit('update:bagliGorev', (e.target as HTMLSelectElement).value) }
+function onTaskTitle(e: Event) { emit('update:newTaskTitle', (e.target as HTMLInputElement).value) }
+function onTaskDesc(e: Event) { emit('update:newTaskDesc', (e.target as HTMLTextAreaElement).value) }
+function onTaskDeadline(e: Event) { emit('update:newTaskDeadline', (e.target as HTMLInputElement).value) }
+
 function addTaskLocal() {
+  console.log('✅ Görev bilgileri:', {
+    proje: props.selectedProject,
+    kişi: props.assignedUser,
+    başlık: props.newTaskTitle,
+    açıklama: props.newTaskDesc,
+    tür: props.newTaskType,
+    seviye: props.newTaskLevel,
+    bağlı: props.bagliGorev,
+    deadline: props.newTaskDeadline
+  })
   emit('add-task')
 }
 </script>
