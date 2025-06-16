@@ -29,10 +29,10 @@
           class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Tür Seçiniz</option>
-        <option value="gorev">Görev</option>
-        <option value="hata">Hata</option>
+        <option value="task">Görev</option>
+        <option value="bug">Hata</option>
         <option value="test">Test</option>
-        <option value="onay">Onay</option>
+        <option value="approval">Onay</option>
       </select>
     </label>
 
@@ -65,20 +65,19 @@
           @change="onTaskLevel"
           class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
-        <template v-if="props.newTaskType === 'gorev'">
+        <template v-if="props.newTaskType === 'task'">
           <option value="normal">Normal</option>
-          <option value="oncelikli">Öncelikli</option>
+          <option value="priority">Öncelikli</option>
         </template>
         <template v-else>
           <option value="normal">Normal</option>
-          <option value="acil">Acil</option>
-          <option value="kritik">Kritik</option>
+          <option value="critical">Kritik</option>
         </template>
       </select>
     </label>
 
     <!-- Bağlı Görev -->
-    <label v-if="props.newTaskType === 'gorev'" class="block">
+    <label v-if="props.newTaskType === 'task'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlanacak Görev</span>
       <select
           :value="props.bagliGorev"
@@ -98,7 +97,6 @@
           @input="onTaskDeadline"
           type="date"
           class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder="Tarih seçiniz"
       />
     </label>
 
@@ -138,6 +136,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { toast } from 'vue3-toastify'
 
 interface Project { id: number; name: string }
 interface User { id: number; name: string }
@@ -190,14 +189,14 @@ watch(() => props.selectedProject, async (newId) => {
   if (!newId) return
 
   try {
-    const projectUsers = await $fetch<{ id: number; name: string; members: any[] }>(`/api/projects/${newId}/users`)
+    const projectUsers = await $fetch<{ id: number; members: any[] }>(`/api/projects/${newId}/users`)
     allUsers.value = projectUsers.members.map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
   } catch (err) {
     console.error('Kullanıcılar yüklenemedi:', err)
   }
 
   try {
-    const taskList = await $fetch<Task[]>(`/api/tasks/${newId}`)
+    const taskList = await $fetch<Task[]>(`/api/tasks/project/${newId}`)
     tumGorevler.value = taskList
   } catch (err) {
     console.error('Görevler yüklenemedi:', err)
@@ -211,7 +210,6 @@ const filteredUsers = computed(() => {
   )
 })
 
-// Emit’ler
 function onSelectProject(e: Event) { emit('update:selectedProject', (e.target as HTMLSelectElement).value) }
 function onAssignedUser(e: Event) { emit('update:assignedUser', (e.target as HTMLSelectElement).value) }
 function onUserSearch(e: Event) { emit('update:userSearch', (e.target as HTMLInputElement).value) }
@@ -223,16 +221,7 @@ function onTaskDesc(e: Event) { emit('update:newTaskDesc', (e.target as HTMLText
 function onTaskDeadline(e: Event) { emit('update:newTaskDeadline', (e.target as HTMLInputElement).value) }
 
 function addTaskLocal() {
-  console.log('✅ Görev bilgileri:', {
-    proje: props.selectedProject,
-    kişi: props.assignedUser,
-    başlık: props.newTaskTitle,
-    açıklama: props.newTaskDesc,
-    tür: props.newTaskType,
-    seviye: props.newTaskLevel,
-    bağlı: props.bagliGorev,
-    deadline: props.newTaskDeadline
-  })
   emit('add-task')
+  toast.success('🎉 Görev başarıyla oluşturuldu!')
 }
 </script>

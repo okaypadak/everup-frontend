@@ -56,7 +56,7 @@
             'rounded-md px-3 py-4 flex flex-col shadow-sm transition-all border-l-4',
             task.status === 'Devam' && task.type === 'hata' ? 'bg-red-100 border-red-400' :
             task.status === 'Devam' ? 'bg-yellow-100 border-yellow-400' :
-            task.status === 'Beklemede' ? 'border-gray-400 bg-gray-100 opacity-60 cursor-not-allowed pointer-events-none' :
+            task.status === 'Beklemede' ? 'border-gray-400 bg-gray-100' :
             task.status === 'Hazır' ? 'border-blue-400 bg-blue-50' :
             task.status === 'Tamamlandı' ? 'border-green-300 bg-white text-gray-500' :
             'bg-white border-gray-200'

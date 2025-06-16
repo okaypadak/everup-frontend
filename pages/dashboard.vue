@@ -69,7 +69,7 @@ const selectedProject = ref('')
 const assignedUser = ref('')
 const userSearch = ref('')
 const newTaskDeadline = ref('')
-const newTaskType = ref('gorev')
+const newTaskType = ref('task')
 const newTaskLevel = ref('normal')
 const bagliGorev = ref('')
 const newTaskTitle = ref('')
@@ -154,45 +154,31 @@ const notifications = ref([
 ])
 
 // Görev ekleme
-function addTask() {
-  if (
-      newTaskTitle.value.trim() &&
-      selectedProject.value &&
-      assignedUser.value
-  ) {
-    const gorevKodu = `GOREV-${Math.floor(1000 + Math.random() * 9000)}`
-    const bagli = tasks.value.find(t => t.id === +bagliGorev.value)
-    const newTask: Task = {
-      id: Date.now(),
-      projectId: selectedProject.value,
-      gorevKodu,
-      title: newTaskTitle.value,
-      status: 'Devam',
-      type: newTaskType.value,
-      level: newTaskLevel.value,
-      bagliGorev: bagliGorev.value ? +bagliGorev.value : null,
-      bagliGorevTitle: bagli?.title || '',
-      deadline: newTaskDeadline.value || '',
-      time: 'Şimdi'
-    }
-    tasks.value.unshift(newTask)
-    notifications.value.unshift({
-      id: Date.now(),
-      type: 'gorev',
-      gorevKodu,
-      time: 'Şimdi'
-    })
+async function addTask() {
+  try {
 
-    // Formu temizle
-    newTaskTitle.value = ''
-    newTaskDesc.value = ''
-    selectedProject.value = ''
-    assignedUser.value = ''
-    newTaskType.value = 'gorev'
-    newTaskLevel.value = 'normal'
-    bagliGorev.value = ''
-    userSearch.value = ''
-    newTaskDeadline.value = ''
+    const payload = {
+      title: newTaskTitle.value,
+      description: newTaskDesc.value,
+      assignedTo: Number(assignedUser.value),
+      project: Number(selectedProject.value),
+      type: newTaskType.value || 'TASK',
+      level: newTaskLevel.value || 'NORMAL',
+      dependentTaskId: bagliGorev.value ? +bagliGorev.value : null,
+      deadline: newTaskDeadline.value
+          ? new Date(newTaskDeadline.value).toISOString()
+          : null,
+    };
+
+    const result = await $fetch('/api/tasks', {
+      method: 'POST',
+      body: payload,
+      credentials: 'include',
+    });
+
+    console.log('Görev başarıyla eklendi:', result);
+  } catch (error) {
+    console.error('Görev eklenemedi:', error);
   }
 }
 </script>
