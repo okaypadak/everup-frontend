@@ -1,4 +1,3 @@
-// server/api/tasks/[id].ts
 import { defineEventHandler, getCookie } from 'h3'
 import { ofetch } from 'ofetch'
 
@@ -7,17 +6,17 @@ export default defineEventHandler(async (event) => {
     const token = getCookie(event, 'auth_token')
 
     if (!token) {
-        console.warn('[API /tasks/:id] Token bulunamadı')
-        return { statusCode: 401, message: 'Giriş yapmanız gerekiyor.' }
+        console.warn('[API /tasks/project/:id] Token bulunamadı, yetkisiz erişim')
+        return {
+            statusCode: 401,
+            message: 'Giriş yapmanız gerekiyor.'
+        }
     }
 
     const projectId = event.context.params?.id
-    if (!projectId) {
-        return { statusCode: 400, message: 'Proje ID eksik' }
-    }
 
     try {
-        const response = await ofetch(`${config.apiBaseUrl}/tasks/${projectId}`, {
+        const response = await ofetch(`${config.apiBaseUrl}/tasks/project/${projectId}`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -26,7 +25,8 @@ export default defineEventHandler(async (event) => {
 
         return response
     } catch (err: any) {
-        console.error('Görevler alınamadı:', err)
+        console.error('Proje görevleri alınamadı:', err)
+
         return {
             statusCode: err.response?.status || 500,
             message: err.data?.message || 'Sunucu hatası'

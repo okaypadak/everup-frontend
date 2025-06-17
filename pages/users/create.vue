@@ -62,9 +62,7 @@ const form = ref({
 })
 
 const createUser = () => {
-  // Buraya backend entegrasyonu yapılabilir
-  console.log('Yeni kullanıcı:', form.value)
-  alert('Kullanıcı oluşturuldu!')
+
 }
 </script>
 
