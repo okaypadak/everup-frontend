@@ -3,7 +3,7 @@
     <div class="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
       <p class="text-gray-800">{{ comment.content }}</p>
       <div class="flex justify-between items-center mt-2">
-        <p class="text-xs text-gray-500">{{ comment.author }} – {{ formatDate(comment.date) }}</p>
+        <p class="text-xs text-gray-500">{{ comment.author }} – {{ formatDate(comment.createdAt) }}</p>
         <button
             @click="$emit('replyToggle', comment.id)"
             class="text-xs text-blue-500 hover:underline"

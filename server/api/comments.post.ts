@@ -1,3 +1,5 @@
+// server/api/comments.post.ts
+
 import { defineEventHandler, readBody, getCookie } from 'h3'
 import { ofetch } from 'ofetch'
 
@@ -6,27 +8,31 @@ export default defineEventHandler(async (event) => {
     const token = getCookie(event, 'auth_token')
 
     if (!token) {
-        console.warn('[API /tasks POST] Token bulunamadı')
+        console.warn('[API /comments] Token bulunamadı, yetkisiz erişim')
         return {
             statusCode: 401,
             message: 'Giriş yapmanız gerekiyor.'
         }
     }
 
+    const payload = await readBody(event)
+
+    console.log('payload', payload)
+
     try {
-        const body = await readBody(event)
-        const response = await ofetch(`${config.apiBaseUrl}/tasks`, {
+        const response = await ofetch(`${config.apiBaseUrl}/comments`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body
+            body: payload
         })
+
         return response
     } catch (err: any) {
-        console.error('[API /tasks POST] Hata:', err)
-        console.error('[API /tasks POST] Backend response:', err?.response?._data || err.data || 'Yok')
+        console.error('Yorum gönderilemedi:', err)
+
         return {
             statusCode: err.response?.status || 500,
             message: err.data?.message || 'Sunucu hatası'

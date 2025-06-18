@@ -40,6 +40,32 @@
           </p>
         </section>
 
+        <!-- Bağlı Görevler -->
+        <section v-if="task.dependencies?.length">
+          <h2 class="text-lg font-semibold text-gray-700 mb-4">🔗 Bağlı Görevler</h2>
+          <ul class="grid sm:grid-cols-2 gap-4">
+            <li
+                v-for="dep in task.dependencies"
+                :key="dep.id"
+                class="flex justify-between items-center p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
+            >
+              <span class="text-gray-800 font-medium">{{ dep.title }}</span>
+              <span
+                  class="text-xs font-semibold px-2 py-1 rounded"
+                  :class="{
+          'bg-green-100 text-green-700': dep.status === 'Completed',
+          'bg-yellow-100 text-yellow-800': dep.status === 'In Progress',
+          'bg-blue-100 text-blue-700': dep.status === 'Ready',
+          'bg-gray-200 text-gray-600': dep.status === 'Waiting'
+        }"
+              >
+        {{ dep.status }}
+      </span>
+            </li>
+          </ul>
+        </section>
+
+
         <!-- Yorumlar -->
         <section>
           <h2 class="text-lg font-semibold text-gray-700 mb-4">💬 Yorumlar</h2>
@@ -89,11 +115,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '/pages/components/bar/Navbar.vue'
-import CommentItem from './components/CommentItem.vue'
+import CommentItem from '/pages/tasks/CommentItem.vue'
 
 const route = useRoute()
 const taskId = route.params.id
@@ -116,6 +142,15 @@ const statusOptions = [
 const canManuallyUpdateStatus = computed(() => {
   return !task.value?.dependencies || task.value.dependencies.length === 0
 })
+
+type Comment = {
+  id: number
+  content: string
+  createdAt: string
+  author: string
+  parentId?: number | null
+  children?: Comment[]
+}
 
 function buildCommentTree(comments) {
   const map = new Map()
@@ -169,7 +204,10 @@ function toggleReply(commentId) {
 
 async function submitComment() {
   const trimmed = newComment.value.trim()
-  if (!trimmed) return
+  if (!trimmed || !task.value?.id) {
+    console.warn('Yorum veya taskId eksik')
+    return
+  }
 
   const payload = {
     content: trimmed,
@@ -180,32 +218,39 @@ async function submitComment() {
   try {
     const res = await fetch('/api/comments', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
 
-    if (!res.ok) throw new Error('Yorum gönderilemedi')
+    const result = await res.json()
 
-    const saved = await res.json()
+    if (!res.ok) {
+      throw new Error(result.message || 'Sunucu hatası')
+    }
 
-    task.value.comments.push({
-      ...saved,
-      author: 'Siz',
-      date: new Date().toISOString()
-    })
+    // Yorum başarıyla eklendi, yeniden veri çek
+    await fetchTaskById()
+
 
     newComment.value = ''
     selectedParentId.value = null
-  } catch (e) {
-    console.error('Yorum eklenemedi:', e)
+
+  } catch (err) {
+    console.error('Yorum gönderilemedi:', err)
   }
 }
+
 
 async function fetchTaskById() {
   try {
     const res = await fetch(`/api/tasks/detail/${taskId}`)
     if (!res.ok) throw new Error('Görev alınamadı')
+
     const data = await res.json()
+
+    if (!Array.isArray(data.comments)) {
+      data.comments = []
+    }
+
     task.value = data
   } catch (e) {
     console.error('Görev yüklenemedi:', e)
@@ -219,6 +264,7 @@ async function fetchTaskById() {
     }
   }
 }
+
 
 watch(task, (newVal) => {
   if (!newVal?.dependencies) return

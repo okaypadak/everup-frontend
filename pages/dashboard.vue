@@ -175,8 +175,6 @@ async function addTask() {
       body: payload,
       credentials: 'include',
     });
-
-    console.log('Görev başarıyla eklendi:', result);
   } catch (error) {
     console.error('Görev eklenemedi:', error);
   }

@@ -29,7 +29,6 @@ export default defineEventHandler(async (event) => {
             }
         })
 
-        console.log('[API /tasks/detail/:id GET] Başarılı:', response)
         return response
     } catch (err: any) {
         console.error('[API /tasks/detail/:id GET] Hata:', err)
