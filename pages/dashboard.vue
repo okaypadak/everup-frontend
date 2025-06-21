@@ -75,6 +75,7 @@ const bagliGorev = ref('')
 const newTaskTitle = ref('')
 const newTaskDesc = ref('')
 const taskFilter = ref('devam')
+const tumGorevlerSecim = ref([]);
 
 // Görev listesi
 interface Task {

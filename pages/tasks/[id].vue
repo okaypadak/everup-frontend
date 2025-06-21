@@ -132,6 +132,29 @@ const selectedParentAuthor = computed(() => {
   return found?.author || null
 })
 
+type Comment = {
+  id: number
+  content: string
+  createdAt: string
+  author: string
+  parentId?: number | null
+  children?: Comment[]
+}
+
+type Task = {
+  id: number
+  title: string
+  description: string
+  createdAt: string
+  status: 'Waiting' | 'Ready' | 'In Progress' | 'Completed'
+  dependencies: {
+    id: number
+    title: string
+    status: 'Waiting' | 'Ready' | 'In Progress' | 'Completed'
+  }[]
+  comments: Comment[]
+}
+
 const statusOptions = [
   { value: 'Ready', label: 'Başlamaya Hazır', activeClass: 'bg-blue-100 text-blue-700 border-blue-300' },
   { value: 'In Progress', label: 'Görev Başlatıldı', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
@@ -143,14 +166,43 @@ const canManuallyUpdateStatus = computed(() => {
   return !task.value?.dependencies || task.value.dependencies.length === 0
 })
 
-type Comment = {
-  id: number
-  content: string
-  createdAt: string
-  author: string
-  parentId?: number | null
-  children?: Comment[]
+async function updateStatus(newStatus: Task['status']) {
+  console.log('🟢 [updateStatus] çağrıldı:', newStatus)
+
+  if (!task.value?.id) {
+    console.warn('⚠️ [updateStatus] Task ID yok')
+    return
+  }
+
+  try {
+    const res = await fetch(`/api/tasks/${task.value.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    })
+
+    console.log('📨 [updateStatus] PATCH gönderildi')
+
+    const result = await res.json()
+
+    console.log('📥 [updateStatus] Yanıt geldi:', result)
+
+    if (!res.ok) {
+      console.error('⛔ [updateStatus] Sunucu hatası:', result.message)
+      throw new Error(result.message || 'Durum güncellenemedi')
+    }
+
+    // Güncel veriyi çek
+    console.log('🔄 [updateStatus] fetchTaskById çağrılıyor...')
+    await fetchTaskById()
+
+  } catch (err) {
+    console.error('❌ [updateStatus] Hata:', err)
+  }
 }
+
 
 function buildCommentTree(comments) {
   const map = new Map()
@@ -266,11 +318,7 @@ async function fetchTaskById() {
 }
 
 
-watch(task, (newVal) => {
-  if (!newVal?.dependencies) return
-  const allCompleted = newVal.dependencies.every(d => d.status === 'Completed')
-  task.value.status = allCompleted ? 'Ready' : 'Waiting'
-})
+
 
 onMounted(fetchTaskById)
 </script>

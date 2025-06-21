@@ -142,6 +142,7 @@ interface Project { id: number; name: string }
 interface User { id: number; name: string }
 interface Task { id: number | string; title: string }
 
+
 const props = defineProps<{
   tumGorevlerSecim: Task[]
   selectedProject: string | number

@@ -25,8 +25,6 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
-
 const props = defineProps({ comment: Object })
 defineEmits(['replyToggle'])
 
