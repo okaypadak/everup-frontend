@@ -11,8 +11,7 @@
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Proje Seç</span>
       <select
-          :value="props.selectedProject"
-          @change="onSelectProject"
+          v-model="selectedProject"
           class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Proje seçiniz</option>
@@ -24,9 +23,8 @@
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Tür</span>
       <select
-          :value="props.newTaskType"
-          @change="onTaskType"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+          v-model="newTaskType"
+          class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="">Tür Seçiniz</option>
         <option value="task">Görev</option>
@@ -39,8 +37,7 @@
     <!-- Kişi Arama ve Seç -->
     <label class="block">
       <input
-          :value="props.userSearch"
-          @input="onUserSearch"
+          v-model="userSearch"
           class="mb-2 w-full rounded px-2 py-1 border border-gray-300 focus:ring-2 focus:ring-blue-200"
           placeholder="Kişi ara..."
           autocomplete="off"
@@ -48,9 +45,8 @@
       />
       <span class="block text-gray-700 text-base font-semibold mb-1">Atanacak Kişi</span>
       <select
-          :value="props.assignedUser"
-          @change="onAssignedUser"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+          v-model="assignedUser"
+          class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
         <option value="" disabled>Kişi seçiniz</option>
         <option v-for="user in filteredUsers" :key="user.id" :value="user.id">{{ user.name }}</option>
@@ -61,11 +57,10 @@
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Seviye</span>
       <select
-          :value="props.newTaskLevel"
-          @change="onTaskLevel"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+          v-model="newTaskLevel"
+          class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
       >
-        <template v-if="props.newTaskType === 'task'">
+        <template v-if="newTaskType === 'task'">
           <option value="normal">Normal</option>
           <option value="priority">Öncelikli</option>
         </template>
@@ -77,7 +72,7 @@
     </label>
 
     <!-- Çoklu Bağlı Görev -->
-    <label v-if="props.newTaskType === 'task'" class="block">
+    <label v-if="newTaskType === 'task'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlı Görevler</span>
       <select
           multiple
@@ -92,8 +87,7 @@
     <label class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bitiş Tarihi</span>
       <input
-          :value="props.newTaskDeadline"
-          @input="onTaskDeadline"
+          v-model="newTaskDeadline"
           type="date"
           class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
       />
@@ -101,16 +95,14 @@
 
     <!-- Başlık -->
     <input
-        :value="props.newTaskTitle"
-        @input="onTaskTitle"
+        v-model="newTaskTitle"
         placeholder="Yeni görev başlığı"
         class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
     />
 
     <!-- Açıklama -->
     <textarea
-        :value="props.newTaskDesc"
-        @input="onTaskDesc"
+        v-model="newTaskDesc"
         rows="10"
         placeholder="Açıklama"
         class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -136,43 +128,27 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { toast } from 'vue3-toastify'
+const emit = defineEmits(['add-task'])
 
 interface Project { id: number; name: string }
 interface User { id: number; name: string }
 interface Task { id: number | string; title: string }
 
-const props = defineProps<{
-  tumGorevlerSecim: Task[]
-  selectedProject: string | number
-  assignedUser: string | number
-  userSearch: string
-  newTaskType: string
-  newTaskLevel: string
-  newTaskTitle: string
-  newTaskDesc: string
-  newTaskDeadline: string
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:selectedProject', value: string | number): void
-  (e: 'update:assignedUser', value: string | number): void
-  (e: 'update:userSearch', value: string): void
-  (e: 'update:newTaskType', value: string): void
-  (e: 'update:newTaskLevel', value: string): void
-  (e: 'update:newTaskTitle', value: string): void
-  (e: 'update:newTaskDesc', value: string): void
-  (e: 'update:newTaskDeadline', value: string): void
-  (e: 'add-task'): void
-}>()
+const selectedProject = ref('')
+const assignedUser = ref('')
+const userSearch = ref('')
+const newTaskType = ref('task')
+const newTaskLevel = ref('normal')
+const newTaskTitle = ref('')
+const newTaskDesc = ref('')
+const newTaskDeadline = ref('')
+const bagliGorevler = ref<(string | number)[]>([])
 
 const projects = ref<Project[]>([])
 const allUsers = ref<User[]>([])
 const tumGorevler = ref<Task[]>([])
-const bagliGorevler = ref<(string | number)[]>([])
 
-const isDisabled = computed(() =>
-    !props.newTaskTitle || !props.selectedProject || !props.assignedUser
-)
+const isDisabled = computed(() => !newTaskTitle.value || !selectedProject.value || !assignedUser.value)
 
 onMounted(async () => {
   try {
@@ -183,7 +159,7 @@ onMounted(async () => {
   }
 })
 
-watch(() => props.selectedProject, async (newId) => {
+watch(() => selectedProject.value, async (newId) => {
   if (!newId) return
 
   try {
@@ -202,32 +178,21 @@ watch(() => props.selectedProject, async (newId) => {
 })
 
 const filteredUsers = computed(() => {
-  if (!props.userSearch) return allUsers.value
+  if (!userSearch.value) return allUsers.value
   return allUsers.value.filter(u =>
-      u.name.toLowerCase().includes(props.userSearch.toLowerCase())
+      u.name.toLowerCase().includes(userSearch.value.toLowerCase())
   )
 })
 
-function onSelectProject(e: Event) { emit('update:selectedProject', (e.target as HTMLSelectElement).value) }
-function onAssignedUser(e: Event) { emit('update:assignedUser', (e.target as HTMLSelectElement).value) }
-function onUserSearch(e: Event) { emit('update:userSearch', (e.target as HTMLInputElement).value) }
-function onTaskType(e: Event) { emit('update:newTaskType', (e.target as HTMLSelectElement).value) }
-function onTaskLevel(e: Event) { emit('update:newTaskLevel', (e.target as HTMLSelectElement).value) }
-function onTaskTitle(e: Event) { emit('update:newTaskTitle', (e.target as HTMLInputElement).value) }
-function onTaskDesc(e: Event) { emit('update:newTaskDesc', (e.target as HTMLTextAreaElement).value) }
-function onTaskDeadline(e: Event) { emit('update:newTaskDeadline', (e.target as HTMLInputElement).value) }
-
 function addTaskLocal() {
   const payload = {
-    title: props.newTaskTitle,
-    description: props.newTaskDesc,
-    assignedTo: Number(props.assignedUser),
-    project: Number(props.selectedProject),
-    type: props.newTaskType || 'TASK',
-    level: props.newTaskLevel || 'NORMAL',
-    deadline: props.newTaskDeadline
-        ? new Date(props.newTaskDeadline).toISOString()
-        : null,
+    title: newTaskTitle.value,
+    description: newTaskDesc.value,
+    assignedTo: Number(assignedUser.value),
+    project: Number(selectedProject.value),
+    type: newTaskType.value || 'TASK',
+    level: newTaskLevel.value || 'NORMAL',
+    deadline: newTaskDeadline.value ? new Date(newTaskDeadline.value).toISOString() : null,
     dependencyIds: bagliGorevler.value.map(id => Number(id)),
   }
 

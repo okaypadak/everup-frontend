@@ -37,7 +37,7 @@ interface Comment {
   time: string
 }
 
-const props = defineProps<{
+defineProps<{
   comments: Comment[]
 }>()
 </script>

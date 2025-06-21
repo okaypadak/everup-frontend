@@ -30,28 +30,10 @@
 
       <!-- Görev Oluştur -->
       <TaskCreatePanel
-          :tumGorevlerSecim="tumGorevlerSecim"
-          :selectedProject="selectedProject"
-          :assignedUser="assignedUser"
-          :userSearch="userSearch"
-          :newTaskType="newTaskType"
-          :newTaskLevel="newTaskLevel"
-          :bagliGorevler="bagliGorevler"
-          :newTaskTitle="newTaskTitle"
-          :newTaskDesc="newTaskDesc"
-          :newTaskDeadline="newTaskDeadline"
-          @update:selectedProject="selectedProject = $event"
-          @update:assignedUser="assignedUser = $event"
-          @update:userSearch="userSearch = $event"
-          @update:newTaskType="newTaskType = $event"
-          @update:newTaskLevel="newTaskLevel = $event"
-          @update:bagliGorevler="bagliGorevler = $event"
-          @update:newTaskTitle="newTaskTitle = $event"
-          @update:newTaskDesc="newTaskDesc = $event"
-          @update:newTaskDeadline="newTaskDeadline = $event"
           @add-task="fetchTasks"
           class="flex flex-col h-full"
       />
+
     </div>
   </div>
 </template>
@@ -64,20 +46,8 @@ import TaskCreatePanel from './components/dashboard/taskCreate.vue'
 import CommentListPanel from './components/dashboard/commentList.vue'
 import Navbar from './components/bar/Navbar.vue'
 
-// Form state'leri
-const selectedProject = ref('')
-const assignedUser = ref('')
-const userSearch = ref('')
-const newTaskDeadline = ref('')
-const newTaskType = ref('task')
-const newTaskLevel = ref('normal')
-const newTaskTitle = ref('')
-const newTaskDesc = ref('')
+// State
 const taskFilter = ref('devam')
-const tumGorevlerSecim = ref([]);
-const bagliGorevler = ref([]);
-
-
 
 // Görev listesi
 interface Task {
@@ -95,7 +65,6 @@ interface Task {
   gorevKodu?: string
   time?: string
 }
-
 
 const tasks = ref<Task[]>([])
 const isLoadingTasks = ref(true)
@@ -155,5 +124,4 @@ const notifications = ref([
   { id: 1, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1001', time: '3 dk önce' },
   { id: 2, type: 'yorum', kisi: 'Merve', gorevKodu: 'GOREV-1003', time: '1 saat önce' }
 ])
-
 </script>

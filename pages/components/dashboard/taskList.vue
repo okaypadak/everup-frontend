@@ -137,7 +137,7 @@ const { filteredTasks, taskFilter } = defineProps<{
   taskFilter: string
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:taskFilter', value: string): void
 }>()
 
