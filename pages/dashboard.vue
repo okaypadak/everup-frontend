@@ -49,6 +49,7 @@
           @update:newTaskTitle="newTaskTitle = $event"
           @update:newTaskDesc="newTaskDesc = $event"
           @update:newTaskDeadline="newTaskDeadline = $event"
+          @add-task="fetchTasks"
           class="flex flex-col h-full"
       />
     </div>
