@@ -76,15 +76,15 @@
       </select>
     </label>
 
-    <!-- Bağlı Görev -->
+    <!-- Çoklu Bağlı Görev -->
     <label v-if="props.newTaskType === 'task'" class="block">
-      <span class="block text-gray-700 text-base font-semibold mb-1">Bağlanacak Görev</span>
+      <span class="block text-gray-700 text-base font-semibold mb-1">Bağlı Görevler</span>
       <select
-          :value="props.bagliGorev"
-          @change="onBagliGorev"
-          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+          multiple
+          :value="props.bagliGorevler"
+          @change="onBagliGorevler"
+          class="block w-full mt-1 rounded-md border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2 h-32"
       >
-        <option value="">Bağımsız</option>
         <option v-for="g in tumGorevler" :key="g.id" :value="g.id">{{ g.title }}</option>
       </select>
     </label>
@@ -134,6 +134,7 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { toast } from 'vue3-toastify'
@@ -142,7 +143,6 @@ interface Project { id: number; name: string }
 interface User { id: number; name: string }
 interface Task { id: number | string; title: string }
 
-
 const props = defineProps<{
   tumGorevlerSecim: Task[]
   selectedProject: string | number
@@ -150,11 +150,12 @@ const props = defineProps<{
   userSearch: string
   newTaskType: string
   newTaskLevel: string
-  bagliGorev: string | number
+  bagliGorevler: number[]
   newTaskTitle: string
   newTaskDesc: string
   newTaskDeadline: string
 }>()
+
 
 const emit = defineEmits<{
   (e: 'update:selectedProject', value: string | number): void
@@ -162,7 +163,7 @@ const emit = defineEmits<{
   (e: 'update:userSearch', value: string): void
   (e: 'update:newTaskType', value: string): void
   (e: 'update:newTaskLevel', value: string): void
-  (e: 'update:bagliGorev', value: string | number): void
+  (e: 'update:bagliGorevler', value: (string | number)[]): void
   (e: 'update:newTaskTitle', value: string): void
   (e: 'update:newTaskDesc', value: string): void
   (e: 'update:newTaskDeadline', value: string): void
@@ -216,13 +217,46 @@ function onAssignedUser(e: Event) { emit('update:assignedUser', (e.target as HTM
 function onUserSearch(e: Event) { emit('update:userSearch', (e.target as HTMLInputElement).value) }
 function onTaskType(e: Event) { emit('update:newTaskType', (e.target as HTMLSelectElement).value) }
 function onTaskLevel(e: Event) { emit('update:newTaskLevel', (e.target as HTMLSelectElement).value) }
-function onBagliGorev(e: Event) { emit('update:bagliGorev', (e.target as HTMLSelectElement).value) }
+function onBagliGorevler(e: Event) {
+  const selected = Array.from((e.target as HTMLSelectElement).selectedOptions).map(opt => Number(opt.value))
+  console.log('Seçilen görevler:', selected)
+  emit('update:bagliGorevler', selected)
+}
 function onTaskTitle(e: Event) { emit('update:newTaskTitle', (e.target as HTMLInputElement).value) }
 function onTaskDesc(e: Event) { emit('update:newTaskDesc', (e.target as HTMLTextAreaElement).value) }
 function onTaskDeadline(e: Event) { emit('update:newTaskDeadline', (e.target as HTMLInputElement).value) }
 
 function addTaskLocal() {
-  emit('add-task')
+  const payload = {
+    title: props.newTaskTitle,
+    description: props.newTaskDesc,
+    assignedTo: Number(props.assignedUser),
+    project: Number(props.selectedProject),
+    type: props.newTaskType || 'TASK',
+    level: props.newTaskLevel || 'NORMAL',
+    deadline: props.newTaskDeadline
+        ? new Date(props.newTaskDeadline).toISOString()
+        : null,
+    dependencyIds: props.bagliGorevler?.map(id => Number(id)),
+  };
+
+  console.log('📦 Payload:', payload);
+
+  $fetch('/api/tasks', {
+    method: 'POST',
+    body: payload,
+    credentials: 'include',
+  })
+      .then(() => {
+        toast.success('🎉 Görev başarıyla oluşturuldu!');
+        emit('add-task'); // üst bileşende fetchTasks tetiklemek için hâlâ kullanabilirsin
+      })
+      .catch(err => {
+        console.error('Görev eklenemedi:', err);
+        toast.error('❌ Görev eklenirken bir hata oluştu.');
+      });
+
   toast.success('🎉 Görev başarıyla oluşturuldu!')
 }
+
 </script>

@@ -99,7 +99,7 @@
           <div v-if="task.deadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.deadline }}
           </div>
-          <NuxtLink :to="`/tasks/${task.gorevKodu}`" class="text-xs text-blue-500 underline self-end mt-1 hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1" target="_blank">
+          <NuxtLink :to="`/tasks/${task.gorevKodu}`" class="text-xs text-blue-500 underline self-end mt-1 hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1">
             🔍 Ayrıntı
           </NuxtLink>
         </li>
@@ -124,7 +124,7 @@ interface RawTask {
   id: number | string
   title: string
   description: string
-  status: string // İngilizce enum: 'Ready', 'In Progress', ...
+  status: string
   type: string
   level: string
   createdAt: string

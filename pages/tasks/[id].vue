@@ -163,7 +163,7 @@ const statusOptions = [
 ]
 
 const canManuallyUpdateStatus = computed(() => {
-  return !task.value?.dependencies || task.value.dependencies.length === 0
+  return !task.value?.dependencies?.length || task.value.dependencies.every(d => d.status === 'Completed')
 })
 
 async function updateStatus(newStatus: Task['status']) {
@@ -304,6 +304,19 @@ async function fetchTaskById() {
     }
 
     task.value = data
+
+    // ✅ Tüm dependent görevler tamamlandıysa otomatik "Ready" yap
+    if (task.value.dependencies?.length) {
+      const allCompleted = task.value.dependencies.every(dep => dep.status === 'Completed')
+      const anyIncomplete = task.value.dependencies.some(dep => dep.status !== 'Completed')
+
+      if (allCompleted && task.value.status !== 'Ready') {
+        await updateStatus('Ready')
+      } else if (anyIncomplete && task.value.status === 'Ready') {
+        await updateStatus('Waiting')
+      }
+    }
+
   } catch (e) {
     console.error('Görev yüklenemedi:', e)
     task.value = {

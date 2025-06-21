@@ -36,7 +36,7 @@
           :userSearch="userSearch"
           :newTaskType="newTaskType"
           :newTaskLevel="newTaskLevel"
-          :bagliGorev="bagliGorev"
+          :bagliGorevler="bagliGorevler"
           :newTaskTitle="newTaskTitle"
           :newTaskDesc="newTaskDesc"
           :newTaskDeadline="newTaskDeadline"
@@ -45,11 +45,10 @@
           @update:userSearch="userSearch = $event"
           @update:newTaskType="newTaskType = $event"
           @update:newTaskLevel="newTaskLevel = $event"
-          @update:bagliGorev="bagliGorev = $event"
+          @update:bagliGorevler="bagliGorevler = $event"
           @update:newTaskTitle="newTaskTitle = $event"
           @update:newTaskDesc="newTaskDesc = $event"
           @update:newTaskDeadline="newTaskDeadline = $event"
-          @add-task="addTask"
           class="flex flex-col h-full"
       />
     </div>
@@ -58,10 +57,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import NotificationsPanel from './components/dashboard/notificationsPanel.vue'
-import TaskListPanel from './components/dashboard/taskListPanel.vue'
-import TaskCreatePanel from './components/dashboard/taskCreatePanel.vue'
-import CommentListPanel from './components/dashboard/commentListPanel.vue'
+import NotificationsPanel from './components/dashboard/notifications.vue'
+import TaskListPanel from './components/dashboard/taskList.vue'
+import TaskCreatePanel from './components/dashboard/taskCreate.vue'
+import CommentListPanel from './components/dashboard/commentList.vue'
 import Navbar from './components/bar/Navbar.vue'
 
 // Form state'leri
@@ -71,11 +70,13 @@ const userSearch = ref('')
 const newTaskDeadline = ref('')
 const newTaskType = ref('task')
 const newTaskLevel = ref('normal')
-const bagliGorev = ref('')
 const newTaskTitle = ref('')
 const newTaskDesc = ref('')
 const taskFilter = ref('devam')
 const tumGorevlerSecim = ref([]);
+const bagliGorevler = ref([]);
+
+
 
 // Görev listesi
 interface Task {
@@ -88,13 +89,12 @@ interface Task {
   level?: string
   createdAt?: string
   deadline?: string | null
-  dependentTaskId?: number | string | null
-  dependentTaskTitle?: string
+  dependencyIds?: (number | string)[]
+  dependencyTitles?: string[]
   gorevKodu?: string
   time?: string
-  bagliGorev?: number | string | null
-  bagliGorevTitle?: string
 }
+
 
 const tasks = ref<Task[]>([])
 const isLoadingTasks = ref(true)
@@ -106,6 +106,7 @@ async function fetchTasks() {
       method: 'GET',
       credentials: 'include'
     })
+
     tasks.value = data.map(task => ({
       ...task,
       gorevKodu: task.gorevKodu || `GOREV-${task.id}`,
@@ -115,8 +116,8 @@ async function fetchTasks() {
             timeStyle: 'short'
           })
           : '',
-      bagliGorev: task.dependentTaskId || null,
-      bagliGorevTitle: task.dependentTaskTitle || ''
+      dependencyIds: task.dependencyIds || [],
+      dependencyTitles: task.dependencyTitles || []
     }))
   } catch (error) {
     console.error('Görevler çekilemedi:', error)
@@ -154,30 +155,4 @@ const notifications = ref([
   { id: 2, type: 'yorum', kisi: 'Merve', gorevKodu: 'GOREV-1003', time: '1 saat önce' }
 ])
 
-// Görev ekleme
-async function addTask() {
-  try {
-
-    const payload = {
-      title: newTaskTitle.value,
-      description: newTaskDesc.value,
-      assignedTo: Number(assignedUser.value),
-      project: Number(selectedProject.value),
-      type: newTaskType.value || 'TASK',
-      level: newTaskLevel.value || 'NORMAL',
-      dependentTaskId: bagliGorev.value ? +bagliGorev.value : null,
-      deadline: newTaskDeadline.value
-          ? new Date(newTaskDeadline.value).toISOString()
-          : null,
-    };
-
-    const result = await $fetch('/api/tasks', {
-      method: 'POST',
-      body: payload,
-      credentials: 'include',
-    });
-  } catch (error) {
-    console.error('Görev eklenemedi:', error);
-  }
-}
 </script>
