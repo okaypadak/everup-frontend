@@ -97,7 +97,7 @@
           </div>
           <div class="text-xs text-gray-400 mt-1">{{ task.time }}</div>
           <div v-if="task.deadline" class="text-xs text-blue-500 mt-1">
-            Bitiş Tarihi: {{ task.deadline }}
+            Bitiş Tarihi: {{ task.formattedDeadline }}
           </div>
           <NuxtLink :to="`/tasks/${task.gorevKodu}`" class="text-xs text-blue-500 underline self-end mt-1 hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1">
             🔍 Ayrıntı
@@ -191,7 +191,8 @@ const tasksForView = computed(() => filteredTasks.map(task => ({
   time: formatTime(task.createdAt),
   seviye: task.level,
   bagliGorev: task.dependentTaskId,
-  bagliGorevTitle: '' // opsiyonel
+  bagliGorevTitle: '',
+  formattedDeadline: task.deadline ? formatTime(task.deadline) : null
 })))
 
 const filteredVisibleTasks = computed(() =>
@@ -202,4 +203,6 @@ const filteredVisibleTasks = computed(() =>
       return false
     })
 )
+
+
 </script>
