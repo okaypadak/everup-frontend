@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '/pages/components/bar/Navbar.vue'
 import CommentItem from '/pages/tasks/CommentItem.vue'
@@ -169,35 +169,27 @@ const canManuallyUpdateStatus = computed(() => {
 async function updateStatus(newStatus: Task['status']) {
   console.log('🟢 [updateStatus] çağrıldı:', newStatus)
 
-  if (!task.value?.id) {
-    console.warn('⚠️ [updateStatus] Task ID yok')
-    return
+  if (!task.value?.id) return
+
+  const hasUncompletedDependencies = task.value.dependencies?.some(dep => dep.status !== 'Completed')
+
+  if (hasUncompletedDependencies) {
+    const confirmOverride = confirm('Tüm bağlı görevler tamamlanmadı. Yine de durumu değiştirmek istiyor musunuz?')
+    if (!confirmOverride) return
   }
 
   try {
     const res = await fetch(`/api/tasks/${task.value.id}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
     })
 
-    console.log('📨 [updateStatus] PATCH gönderildi')
-
     const result = await res.json()
 
-    console.log('📥 [updateStatus] Yanıt geldi:', result)
+    if (!res.ok) throw new Error(result.message || 'Durum güncellenemedi')
 
-    if (!res.ok) {
-      console.error('⛔ [updateStatus] Sunucu hatası:', result.message)
-      throw new Error(result.message || 'Durum güncellenemedi')
-    }
-
-    // Güncel veriyi çek
-    console.log('🔄 [updateStatus] fetchTaskById çağrılıyor...')
     await fetchTaskById()
-
   } catch (err) {
     console.error('❌ [updateStatus] Hata:', err)
   }
@@ -304,18 +296,6 @@ async function fetchTaskById() {
     }
 
     task.value = data
-
-    // ✅ Tüm dependent görevler tamamlandıysa otomatik "Ready" yap
-    if (task.value.dependencies?.length) {
-      const allCompleted = task.value.dependencies.every(dep => dep.status === 'Completed')
-      const anyIncomplete = task.value.dependencies.some(dep => dep.status !== 'Completed')
-
-      if (allCompleted && task.value.status !== 'Ready') {
-        await updateStatus('Ready')
-      } else if (anyIncomplete && task.value.status === 'Ready') {
-        await updateStatus('Waiting')
-      }
-    }
 
   } catch (e) {
     console.error('Görev yüklenemedi:', e)
