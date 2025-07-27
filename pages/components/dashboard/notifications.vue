@@ -7,7 +7,8 @@
     </div>
     <ul class="space-y-2">
       <template v-if="notifications.length > 0">
-        <li v-for="n in notifications" :key="n.id"
+        <li
+v-for="n in notifications" :key="n.id"
             class="bg-blue-50 rounded-md px-3 py-2 flex items-center gap-2 transition-all hover:shadow hover:scale-105 cursor-pointer">
           <span>
             <svg v-if="n.type === 'gorev'" class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

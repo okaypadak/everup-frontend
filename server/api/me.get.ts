@@ -1,4 +1,5 @@
-import { defineEventHandler, getCookie, H3Event } from 'h3'
+import type { H3Event } from 'h3';
+import { defineEventHandler, getCookie } from 'h3'
 import { jwtDecode } from 'jwt-decode'
 
 type JwtPayload = {

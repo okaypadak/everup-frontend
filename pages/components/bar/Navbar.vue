@@ -5,7 +5,8 @@
       <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
         <ellipse cx="32" cy="32" rx="27" ry="15" stroke="#3CB371" stroke-width="3" />
         <ellipse cx="32" cy="32" rx="15" ry="27" stroke="#38BDF8" stroke-width="3" />
-        <path d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
+        <path
+d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
               fill="#3CB371" fill-opacity="0.12" />
       </svg>
       <span class="text-2xl font-extrabold tracking-tight text-sky-700">CycleUp</span>
@@ -17,14 +18,15 @@
       <NuxtLink to="/documentList" class="nav-link">Döküman Yaz</NuxtLink>
 
       <!-- Sprint Menüsü -->
-      <div class="relative" v-if="canSeeSprintMenu">
-        <button @click="toggleSprintMenu" class="nav-link flex items-center gap-1">
+      <div v-if="canSeeSprintMenu" class="relative">
+        <button class="nav-link flex items-center gap-1" @click="toggleSprintMenu">
           Sprint Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showSprintMenu"
+        <div
+v-if="showSprintMenu"
              class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
           <NuxtLink v-if="isDirector" to="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">
             Sprint Oluştur
@@ -42,14 +44,15 @@
       </div>
 
       <!-- Proje Menüsü -->
-      <div class="relative" v-if="canSeeProjectMenu">
-        <button @click="toggleProjectMenu" class="nav-link flex items-center gap-1">
+      <div v-if="canSeeProjectMenu" class="relative">
+        <button class="nav-link flex items-center gap-1" @click="toggleProjectMenu">
           Proje Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showProjectMenu"
+        <div
+v-if="showProjectMenu"
              class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
           <NuxtLink to="/projects/create" class="dropdown-item" @click="showProjectMenu = false">
             Proje Oluştur
@@ -61,14 +64,15 @@
       </div>
 
       <!-- Kullanıcı Menüsü -->
-      <div class="relative" v-if="canSeeUserMenu">
-        <button @click="toggleUserManagementMenu" class="nav-link flex items-center gap-1">
+      <div v-if="canSeeUserMenu" class="relative">
+        <button class="nav-link flex items-center gap-1" @click="toggleUserManagementMenu">
           Kullanıcı Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showUserManagementMenu"
+        <div
+v-if="showUserManagementMenu"
              class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
           <NuxtLink to="/users/create" class="dropdown-item" @click="showUserManagementMenu = false">
             Kullanıcı Oluştur
@@ -84,20 +88,23 @@
         <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.163 6 9.388 6 12v2.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-        <span v-if="notifications > 0"
-              class="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
+        <span
+v-if="notifications > 0"
+              class="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"/>
       </button>
 
       <!-- Kullanıcı Profili -->
-      <div class="relative" v-if="isLoggedIn">
-        <button @click="showUserMenu = !showUserMenu" class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
+      <div v-if="isLoggedIn" class="relative">
+        <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition" @click="showUserMenu = !showUserMenu">
           <span class="font-semibold text-gray-700 hidden sm:inline">{{ user.name }}</span>
-          <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2"
+          <svg
+class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2"
                viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
         </button>
-        <div v-if="showUserMenu"
+        <div
+v-if="showUserMenu"
              class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-2 z-50">
-          <button @click="logout" class="dropdown-item text-red-600">Çıkış Yap</button>
+          <button class="dropdown-item text-red-600" @click="logout">Çıkış Yap</button>
         </div>
       </div>
     </div>

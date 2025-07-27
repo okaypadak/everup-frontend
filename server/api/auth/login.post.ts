@@ -1,4 +1,5 @@
-import { defineEventHandler, readBody, setCookie, H3Event } from 'h3'
+import type { H3Event } from 'h3';
+import { defineEventHandler, readBody, setCookie } from 'h3'
 import { ofetch } from 'ofetch'
 import { jwtDecode } from 'jwt-decode'
 

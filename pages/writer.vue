@@ -22,24 +22,24 @@
           </div>
           <!-- Başlık -->
           <input
-              type="text"
               v-model="doc.title"
+              type="text"
               placeholder="Başlık..."
               class="w-full text-3xl font-extrabold border-0 border-b-2 border-sky-100 focus:border-sky-500 bg-transparent px-1 mb-3 py-3 outline-none transition"
-          />
+          >
           <!-- Özet -->
           <input
-              type="text"
               v-model="doc.desc"
+              type="text"
               placeholder="Özet (isteğe bağlı)..."
               class="w-full text-lg font-medium border-0 border-b border-gray-100 focus:border-sky-500 bg-transparent px-1 mb-8 py-2 outline-none transition text-gray-500"
-          />
+          >
           <!-- Editör Alanı -->
           <div class="flex-1 flex flex-col">
             <div class="flex-1">
               <EditorWrapper
                   class="ProseMirror-Word"
-                  :initialContent="doc.content"
+                  :initial-content="doc.content"
               />
             </div>
           </div>

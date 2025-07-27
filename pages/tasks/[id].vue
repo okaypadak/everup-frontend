@@ -3,7 +3,7 @@
     <Navbar />
 
     <div class="max-w-5xl mx-auto px-4 py-10">
-      <div class="bg-white p-8 rounded-2xl shadow-lg space-y-10 border border-gray-100" v-if="task">
+      <div v-if="task" class="bg-white p-8 rounded-2xl shadow-lg space-y-10 border border-gray-100">
         <!-- Başlık -->
         <header class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div class="flex-1">
@@ -17,7 +17,6 @@
             <button
                 v-for="statusOption in statusOptions"
                 :key="statusOption.value"
-                @click="updateStatus(statusOption.value)"
                 :disabled="!canManuallyUpdateStatus"
                 :class="[
                 'px-3 py-1 text-sm rounded-lg font-medium border shadow-sm transition-all',
@@ -26,6 +25,7 @@
                   : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100',
                 !canManuallyUpdateStatus ? 'opacity-50 cursor-not-allowed' : ''
               ]"
+                @click="updateStatus(statusOption.value)"
             >
               {{ statusOption.label }}
             </button>
@@ -75,19 +75,19 @@
                 v-for="comment in commentTree"
                 :key="comment.id"
                 :comment="comment"
-                @replyToggle="toggleReply"
+                @reply-toggle="toggleReply"
             />
           </div>
           <p v-else class="text-gray-400 italic">Henüz yorum yapılmamış.</p>
 
           <!-- Yorum Yazma -->
-          <form @submit.prevent="submitComment" class="mt-6 space-y-2">
+          <form class="mt-6 space-y-2" @submit.prevent="submitComment">
             <div v-if="selectedParentAuthor" class="text-xs text-gray-500 italic">
               {{ selectedParentAuthor }} adlı yoruma yanıt yazıyorsunuz.
               <button
                   type="button"
-                  @click="selectedParentId = null"
                   class="ml-2 text-blue-500 hover:underline"
+                  @click="selectedParentId = null"
               >
                 İptal
               </button>
@@ -97,7 +97,7 @@
                 rows="4"
                 class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-200"
                 placeholder="Yorumunuzu yazın..."
-            ></textarea>
+            />
             <button
                 type="submit"
                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition"

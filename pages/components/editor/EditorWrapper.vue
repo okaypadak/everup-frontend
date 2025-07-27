@@ -2,51 +2,51 @@
   <ClientOnly>
     <div>
       <!-- Toolbar -->
-      <div class="flex flex-wrap gap-2 mb-4" v-if="editor">
+      <div v-if="editor" class="flex flex-wrap gap-2 mb-4">
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleBold().run()"
             :class="{ 'bg-black text-white': editor.isActive('bold') }"
+            @click="editor.chain().focus().toggleBold().run()"
         >B</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleItalic().run()"
             :class="{ 'bg-black text-white': editor.isActive('italic') }"
+            @click="editor.chain().focus().toggleItalic().run()"
         >I</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleUnderline().run()"
             :class="{ 'bg-black text-white': editor.isActive('underline') }"
+            @click="editor.chain().focus().toggleUnderline().run()"
         ><u>U</u></button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleStrike().run()"
             :class="{ 'bg-black text-white': editor.isActive('strike') }"
+            @click="editor.chain().focus().toggleStrike().run()"
         ><s>S</s></button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
             :class="{ 'bg-black text-white': editor.isActive('heading', { level: 2 }) }"
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
         >H2</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleCode().run()"
             :class="{ 'bg-black text-white': editor.isActive('code') }"
+            @click="editor.chain().focus().toggleCode().run()"
         >&lt;/&gt;</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleBulletList().run()"
             :class="{ 'bg-black text-white': editor.isActive('bulletList') }"
+            @click="editor.chain().focus().toggleBulletList().run()"
         >• Liste</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleOrderedList().run()"
             :class="{ 'bg-black text-white': editor.isActive('orderedList') }"
+            @click="editor.chain().focus().toggleOrderedList().run()"
         >1. Liste</button>
         <button
             class="px-2 py-1 border rounded text-sm"
-            @click="editor.chain().focus().toggleBlockquote().run()"
             :class="{ 'bg-black text-white': editor.isActive('blockquote') }"
+            @click="editor.chain().focus().toggleBlockquote().run()"
         >“ ”</button>
         <button
             class="px-2 py-1 border rounded text-sm"
@@ -66,12 +66,6 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-const props = defineProps({
-  initialContent: { type: String, default: '' }
-})
-
-// Nuxt için aşağıdaki kullanılır:
-const { $tiptapEditor, $tiptapContent } = useNuxtApp()
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Strike from '@tiptap/extension-strike'
@@ -79,6 +73,12 @@ import BulletList from '@tiptap/extension-bullet-list'
 import OrderedList from '@tiptap/extension-ordered-list'
 import Blockquote from '@tiptap/extension-blockquote'
 import Code from '@tiptap/extension-code'
+const props = defineProps({
+  initialContent: { type: String, default: '' }
+})
+
+// Nuxt için aşağıdaki kullanılır:
+const { $tiptapEditor, $tiptapContent } = useNuxtApp()
 
 const EditorContent = $tiptapContent
 const editor = ref(null)

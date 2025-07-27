@@ -11,20 +11,20 @@
             Yeni Proje Oluştur
           </h1>
 
-          <form @submit.prevent="submitForm" class="space-y-4">
+          <form class="space-y-4" @submit.prevent="submitForm">
             <div>
               <label class="block text-sm font-medium text-gray-700">Proje Adı</label>
-              <input v-model="form.title" type="text" required class="w-full mt-1 p-2 border rounded-lg" />
+              <input v-model="form.title" type="text" required class="w-full mt-1 p-2 border rounded-lg" >
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Açıklama</label>
-              <textarea v-model="form.description" rows="4" class="w-full mt-1 p-2 border rounded-lg"></textarea>
+              <textarea v-model="form.description" rows="4" class="w-full mt-1 p-2 border rounded-lg"/>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Başlangıç Tarihi</label>
-              <input v-model="form.startDate" type="date" class="w-full mt-1 p-2 border rounded-lg" />
+              <input v-model="form.startDate" type="date" class="w-full mt-1 p-2 border rounded-lg" >
             </div>
 
             <div class="flex justify-end">

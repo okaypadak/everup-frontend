@@ -5,8 +5,8 @@
       <div class="flex justify-between items-center mt-2">
         <p class="text-xs text-gray-500">{{ comment.author }} – {{ formatDate(comment.createdAt) }}</p>
         <button
-            @click="$emit('replyToggle', comment.id)"
             class="text-xs text-blue-500 hover:underline"
+            @click="$emit('replyToggle', comment.id)"
         >
           Cevapla
         </button>
@@ -18,7 +18,7 @@
           v-for="child in comment.children"
           :key="child.id"
           :comment="child"
-          @replyToggle="$emit('replyToggle', $event)"
+          @reply-toggle="$emit('replyToggle', $event)"
       />
     </div>
   </div>

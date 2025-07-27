@@ -32,21 +32,21 @@
                   <p class="text-sm text-gray-600">Ana Ünvan: {{ member.mainTitle }}</p>
                   <p class="text-sm text-gray-500">Projede Rolü: {{ member.projectRole }}</p>
                 </div>
-                <button @click="removeMember(member.userId)" class="text-red-500 hover:underline text-sm">❌ Kaldır</button>
+                <button class="text-red-500 hover:underline text-sm" @click="removeMember(member.userId)">❌ Kaldır</button>
               </div>
             </div>
           </div>
           <div v-else class="text-gray-500 mt-4">Bu projeye henüz katılımcı eklenmemiş.</div>
 
           <!-- Katılımcı Ekleme -->
-          <form @submit.prevent="addMember" class="bg-gray-50 p-4 rounded-xl border space-y-4 mt-6">
+          <form class="bg-gray-50 p-4 rounded-xl border space-y-4 mt-6" @submit.prevent="addMember">
             <h2 class="text-lg font-semibold text-sky-700">Yeni Katılımcı Ekle</h2>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Kullanıcı Seç</label>
               <select v-model="newMember.userId" class="w-full mt-1 p-2 border rounded-lg">
                 <option value="">-- Seçiniz --</option>
-                <option v-for="user in allUsers" :value="user.id" :key="user.id">
+                <option v-for="user in allUsers" :key="user.id" :value="user.id">
                   {{ user.fullName }} ({{ user.mainTitle }})
                 </option>
               </select>

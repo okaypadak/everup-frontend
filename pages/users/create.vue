@@ -12,17 +12,17 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Ad</label>
-              <input type="text" v-model="form.firstName" class="input" placeholder="Ad girin" />
+              <input v-model="form.firstName" type="text" class="input" placeholder="Ad girin" >
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Soyad</label>
-              <input type="text" v-model="form.lastName" class="input" placeholder="Soyad girin" />
+              <input v-model="form.lastName" type="text" class="input" placeholder="Soyad girin" >
             </div>
 
             <div class="sm:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input type="email" v-model="form.email" class="input" placeholder="ornek@mail.com" />
+              <input v-model="form.email" type="email" class="input" placeholder="ornek@mail.com" >
             </div>
 
             <div class="sm:col-span-2">
@@ -39,7 +39,7 @@
           </div>
 
           <div class="pt-4">
-            <button @click="createUser" class="px-6 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow">
+            <button class="px-6 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow" @click="createUser">
               Oluştur
             </button>
           </div>

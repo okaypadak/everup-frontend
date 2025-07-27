@@ -9,12 +9,12 @@
       </span>
       <span class="text-gray-400 text-xs">{{ node.desc }}</span>
       <button
-          @click.stop="$emit('addChild', node.id)"
           class="px-2 py-1 rounded bg-green-50 hover:bg-green-100 border border-green-200 text-green-600 text-xs font-semibold"
+          @click.stop="$emit('addChild', node.id)"
       >+ Alt Başlık</button>
       <button
-          @click.stop="$emit('delete', node.id)"
           class="px-2 py-1 rounded bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 text-xs font-semibold"
+          @click.stop="$emit('delete', node.id)"
       >X</button>
     </div>
     <ul v-if="node.children && node.children.length" class="pl-6 border-l-2 border-sky-100">
@@ -23,7 +23,7 @@
           :key="child.id"
           :node="child"
           @open="$emit('open', $event)"
-          @addChild="$emit('addChild', $event)"
+          @add-child="$emit('addChild', $event)"
           @delete="$emit('delete', $event)"
       />
     </ul>

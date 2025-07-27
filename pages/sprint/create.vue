@@ -9,7 +9,7 @@
         <div class="bg-white p-6 rounded-xl shadow-lg">
           <h2 class="text-2xl font-bold text-sky-700 mb-6">🌀 Yeni Sprint Oluştur</h2>
 
-          <form @submit.prevent="submitSprint" class="space-y-6">
+          <form class="space-y-6" @submit.prevent="submitSprint">
             <!-- Proje Seçimi -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
@@ -38,7 +38,7 @@
                   placeholder="Örn: Sprint 14 - Haziran"
                   class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                   required
-              />
+              >
             </div>
 
             <!-- Tarihler -->
@@ -50,7 +50,7 @@
                     type="date"
                     class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                     required
-                />
+                >
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi</label>
@@ -59,7 +59,7 @@
                     type="date"
                     class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                     required
-                />
+                >
               </div>
             </div>
 

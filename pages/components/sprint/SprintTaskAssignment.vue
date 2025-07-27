@@ -5,8 +5,8 @@
       <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Seç</label>
       <select
           v-model="selectedSprintId"
-          @change="emitSprint"
           class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-300"
+          @change="emitSprint"
       >
         <option disabled value="">Bir sprint seçin</option>
         <option v-for="s in sprints" :key="s.id" :value="s.id">
@@ -25,11 +25,11 @@
             class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2"
         >
           <input
-              type="checkbox"
               v-model="selectedTaskIds"
+              type="checkbox"
               :value="task.id"
               class="accent-sky-600 w-4 h-4"
-          />
+          >
           <span class="text-gray-700">{{ task.title }}</span>
         </div>
       </div>
@@ -38,9 +38,9 @@
     <!-- Atama Butonu -->
     <div class="text-right">
       <button
-          @click="assignTasks"
           class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2 rounded-xl shadow transition"
           :disabled="!selectedSprintId || selectedTaskIds.length === 0"
+          @click="assignTasks"
       >
         Seçilen Görevleri Ata
       </button>

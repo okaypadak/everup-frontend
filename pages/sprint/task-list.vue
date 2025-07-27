@@ -39,8 +39,8 @@
                 >
                   <span>✅ {{ task.title }}</span>
                   <button
-                      @click="removeFromSprint(task)"
                       class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm"
+                      @click="removeFromSprint(task)"
                   >
                     Sprint'ten Çıkar
                   </button>
@@ -62,8 +62,8 @@
                 >
                   <span>📝 {{ task.title }}</span>
                   <button
-                      @click="assignToSprint(task)"
                       class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-1 rounded text-sm"
+                      @click="assignToSprint(task)"
                   >
                     Ata
                   </button>

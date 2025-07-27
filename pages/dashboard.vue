@@ -23,15 +23,15 @@
 
       <!-- Görev Listesi -->
       <TaskListPanel
-          :filteredTasks="filteredTasks"
-          :taskFilter="taskFilter"
-          @update:taskFilter="taskFilter = $event"
+          :filtered-tasks="filteredTasks"
+          :task-filter="taskFilter"
+          @update:task-filter="taskFilter = $event"
       />
 
       <!-- Görev Oluştur -->
       <TaskCreatePanel
-          @add-task="fetchTasks"
           class="flex flex-col h-full"
+          @add-task="fetchTasks"
       />
 
     </div>

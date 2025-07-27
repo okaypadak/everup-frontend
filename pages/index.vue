@@ -6,7 +6,8 @@
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <ellipse cx="32" cy="32" rx="27" ry="15" stroke="#3CB371" stroke-width="4" />
           <ellipse cx="32" cy="32" rx="15" ry="27" stroke="#38BDF8" stroke-width="4" />
-          <path d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
+          <path
+d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
                 fill="#3CB371" fill-opacity="0.12" />
         </svg>
       </div>
@@ -14,14 +15,14 @@
       <h2 class="text-3xl font-bold text-sky-700 mb-2 tracking-tight">CycleUp</h2>
       <p class="text-sm text-gray-500 mb-8 text-center">Projelerini kolayca yönet, sürdürülebilir başarıya ulaş.</p>
 
-      <form @submit.prevent="login" class="w-full space-y-5">
+      <form class="w-full space-y-5" @submit.prevent="login">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Kullanıcı Adı</label>
-          <input v-model="username" type="text" placeholder="kullanici" class="input-field" required />
+          <input v-model="username" type="text" placeholder="kullanici" class="input-field" required >
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Şifre</label>
-          <input v-model="password" type="password" placeholder="••••••••" class="input-field" required />
+          <input v-model="password" type="password" placeholder="••••••••" class="input-field" required >
         </div>
 
         <button

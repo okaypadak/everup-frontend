@@ -42,7 +42,7 @@
           placeholder="Kişi ara..."
           autocomplete="off"
           type="text"
-      />
+      >
       <span class="block text-gray-700 text-base font-semibold mb-1">Atanacak Kişi</span>
       <select
           v-model="assignedUser"
@@ -75,8 +75,8 @@
     <label v-if="newTaskType === 'task'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlı Görevler</span>
       <select
-          multiple
           v-model="bagliGorevler"
+          multiple
           class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2 h-32"
       >
         <option v-for="g in tumGorevler" :key="g.id" :value="g.id">{{ g.title }}</option>
@@ -90,7 +90,7 @@
           v-model="newTaskDeadline"
           type="date"
           class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-      />
+      >
     </label>
 
     <!-- Başlık -->
@@ -98,7 +98,7 @@
         v-model="newTaskTitle"
         placeholder="Yeni görev başlığı"
         class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-    />
+    >
 
     <!-- Açıklama -->
     <textarea
@@ -106,16 +106,16 @@
         rows="10"
         placeholder="Açıklama"
         class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
-    ></textarea>
+    />
 
     <!-- Görev Oluştur Butonu -->
     <button
-        @click="addTaskLocal"
         :disabled="isDisabled"
         :class="[
         'inline-flex items-center gap-2 bg-gradient-to-r from-blue-400 to-green-400 text-white font-bold py-2 px-6 rounded-xl shadow-md active:scale-95 transition-all duration-150',
         isDisabled ? 'opacity-50' : 'hover:from-blue-500 hover:to-green-500 hover:shadow-lg'
       ]"
+        @click="addTaskLocal"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>

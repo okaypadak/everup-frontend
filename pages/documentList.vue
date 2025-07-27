@@ -20,8 +20,8 @@
             <!-- Proje seçici -->
             <select
                 v-model="selectedProject"
-                @change="loadDocs"
                 class="px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300 min-w-[220px]"
+                @change="loadDocs"
             >
               <option value="" disabled>Proje Seçiniz</option>
               <option v-for="proj in projects" :key="proj.id" :value="proj.id">{{ proj.name }}</option>
@@ -30,7 +30,7 @@
 
           <template v-if="selectedProject">
             <div class="flex items-center justify-between mb-8">
-              <span></span>
+              <span/>
               <button
                   class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-5 py-2 rounded-xl shadow transition"
                   @click="addRootDocument"
@@ -42,7 +42,7 @@
                   :key="node.id"
                   :node="node"
                   @open="openDoc"
-                  @addChild="addChildDocument"
+                  @add-child="addChildDocument"
                   @delete="deleteDocument"
               />
             </ul>

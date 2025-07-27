@@ -13,7 +13,7 @@
       <div
           class="h-full bg-sky-500 transition-all duration-500"
           :style="{ width: percent + '%' }"
-      ></div>
+      />
     </div>
   </div>
 </template>
