@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y python3 make g++
 WORKDIR /app
 
 COPY .env .env
-
 COPY package*.json ./
 RUN npm install
 
@@ -28,6 +27,7 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/.env .env
 
 EXPOSE 3000
 
