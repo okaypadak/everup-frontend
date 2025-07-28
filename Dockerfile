@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y python3 make g++
 
 WORKDIR /app
 
+COPY .env .env
+
 COPY package*.json ./
 RUN npm install
 
