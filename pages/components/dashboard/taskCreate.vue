@@ -105,7 +105,7 @@
         v-model="newTaskDesc"
         rows="10"
         placeholder="Açıklama"
-        class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 min-h-[300px]"
     />
 
     <!-- Görev Oluştur Butonu -->

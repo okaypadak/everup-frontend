@@ -9,7 +9,7 @@
 d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
               fill="#3CB371" fill-opacity="0.12" />
       </svg>
-      <span class="text-2xl font-extrabold tracking-tight text-sky-700">CycleUp</span>
+      <span class="text-2xl font-extrabold tracking-tight text-sky-700">EverUp</span>
     </div>
 
     <!-- Menü Linkleri -->
@@ -59,6 +59,30 @@ v-if="showProjectMenu"
           </NuxtLink>
           <NuxtLink to="/projects/members" class="dropdown-item" @click="showProjectMenu = false">
             Katılımcılar
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Müşteri Menüsü -->
+      <div class="relative">
+        <button class="nav-link flex items-center gap-1" @click="toggleCustomerMenu">
+          Müşteri Yönetimi
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div
+            v-if="showCustomerMenu"
+            class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64"
+        >
+          <NuxtLink to="/customers/create" class="dropdown-item" @click="showCustomerMenu = false">
+            Müşteri Kaydet
+          </NuxtLink>
+          <NuxtLink to="/customers/marketing" class="dropdown-item" @click="showCustomerMenu = false">
+            Pazarlama Takip
+          </NuxtLink>
+          <NuxtLink to="/customers/calendar" class="dropdown-item" @click="showCustomerMenu = false">
+            Takvim / Randevu
           </NuxtLink>
         </div>
       </div>
@@ -125,6 +149,7 @@ const showProjectMenu = ref(false)
 const showUserManagementMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
+const showCustomerMenu = ref(false)
 const notifications = ref(3)
 
 // Menü kontrolü için roller
@@ -143,6 +168,7 @@ const canSeeUserMenu = computed(() =>
 const toggleSprintMenu = () => showSprintMenu.value = !showSprintMenu.value
 const toggleProjectMenu = () => showProjectMenu.value = !showProjectMenu.value
 const toggleUserManagementMenu = () => showUserManagementMenu.value = !showUserManagementMenu.value
+const toggleCustomerMenu = () => showCustomerMenu.value = !showCustomerMenu.value
 
 const logout = async () => {
   await $fetch('/api/logout', { method: 'POST' })
