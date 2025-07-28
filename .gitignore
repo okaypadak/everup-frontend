@@ -15,10 +15,6 @@ dist/
 *.log
 *.tsbuildinfo
 
-# Local env files
-.env
-.env.*.local
-
 # OS / IDE / Editor
 .DS_Store
 Thumbs.db
