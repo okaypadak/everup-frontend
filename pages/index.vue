@@ -17,8 +17,8 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
 
       <form class="w-full space-y-5" @submit.prevent="login">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Kullanıcı Adı</label>
-          <input v-model="username" type="text" placeholder="kullanici" class="input-field" required >
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Eposta</label>
+          <input v-model="email" type="text" placeholder="eposta gir" class="input-field" required >
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Şifre</label>
@@ -50,7 +50,7 @@ import { useAuth } from '~/composables/useAuth'
 const { user } = useAuth()
 const router = useRouter()
 const error = ref('')
-const username = ref('')
+const email = ref('')
 const password = ref('')
 
 async function login(): Promise<void> {
@@ -58,7 +58,7 @@ async function login(): Promise<void> {
     const res = await $fetch<any>('/api/auth/login', {
       method: 'POST',
       body: {
-        username: username.value,
+        email: email.value,
         password: password.value
       }
     })

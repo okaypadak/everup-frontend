@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
     <Navbar />
+
     <main class="flex-1">
       <div class="max-w-5xl mx-auto px-4 py-10">
         <div class="bg-white p-6 rounded-xl shadow-lg space-y-10">
@@ -14,21 +15,39 @@
           <form class="space-y-4" @submit.prevent="submitForm">
             <div>
               <label class="block text-sm font-medium text-gray-700">Proje Adı</label>
-              <input v-model="form.title" type="text" required class="w-full mt-1 p-2 border rounded-lg" >
+              <input
+                  v-model="form.title"
+                  type="text"
+                  required
+                  class="w-full mt-1 p-2 border rounded-lg"
+              />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Açıklama</label>
-              <textarea v-model="form.description" rows="4" class="w-full mt-1 p-2 border rounded-lg"/>
+              <textarea
+                  v-model="form.description"
+                  rows="4"
+                  required
+                  class="w-full mt-1 p-2 border rounded-lg"
+              />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700">Başlangıç Tarihi</label>
-              <input v-model="form.startDate" type="date" class="w-full mt-1 p-2 border rounded-lg" >
+              <input
+                  v-model="form.startDate"
+                  type="date"
+                  required
+                  class="w-full mt-1 p-2 border rounded-lg"
+              />
             </div>
 
             <div class="flex justify-end">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-xl transition">
+              <button
+                  type="submit"
+                  class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-xl transition"
+              >
                 Kaydet
               </button>
             </div>
@@ -40,7 +59,7 @@
 </template>
 
 <script setup>
-import Navbar from '/pages/components/bar/Navbar.vue'
+import Navbar from '~/pages/components/bar/Navbar.vue'
 import { ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
@@ -50,7 +69,25 @@ const form = ref({
   startDate: ''
 })
 
-function submitForm() {
-  toast.success('Proje başarıyla oluşturuldu!')
+async function submitForm() {
+  try {
+    const res = await $fetch('/api/projects', {
+      method: 'POST',
+      body: {
+        name: form.value.title,
+        description: form.value.description,
+        startDate: form.value.startDate,
+      },
+    })
+
+    if (res.code === '00') {
+      toast.success(res.message || '✅ Proje başarıyla oluşturuldu!')
+      form.value = { title: '', description: '', startDate: '' }
+    } else {
+      toast.error(res.message || '⚠️ Bir hata oluştu')
+    }
+  } catch (err) {
+    toast.error(err?.data?.message || '🚨 Sunucu hatası')
+  }
 }
 </script>

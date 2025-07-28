@@ -4,7 +4,7 @@ import { ofetch } from 'ofetch'
 import { jwtDecode } from 'jwt-decode'
 
 type LoginRequestBody = {
-    username: string
+    email: string
     password: string
 }
 
