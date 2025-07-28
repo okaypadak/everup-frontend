@@ -43,7 +43,7 @@
           </div>
 
           <!-- Müşteri Detay Modalı -->
-          <div v-if="selectedCustomer" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60">
+          <div v-if="selectedCustomer" class="fixed inset-0 flex items-center justify-center z-50 bg-black/20 bg-opacity-60">
             <div class="bg-white max-w-xl w-full rounded-xl shadow-lg p-6 relative">
               <button @click="selectedCustomer = null" class="absolute top-2 right-3 text-gray-400 hover:text-gray-700">&#10005;</button>
               <h2 class="text-xl font-bold text-sky-700 mb-4">{{ selectedCustomer.firmaAdi }} - Detaylar</h2>
@@ -53,19 +53,6 @@
                 <p><strong>Telefon:</strong> {{ selectedCustomer.telefon }}</p>
                 <p><strong>Not:</strong> {{ selectedCustomer.notlar || '—' }}</p>
                 <p><strong>Görev Durumu:</strong> {{ selectedCustomer.marketingStatus || '—' }}</p>
-              </div>
-              <!-- Yorumlar -->
-              <div class="mt-6">
-                <h3 class="text-md font-semibold text-gray-700 mb-2">💬 Pazarlama Notları</h3>
-                <ul class="space-y-2 mb-3">
-                  <li v-for="(comment, index) in selectedCustomer.comments || []" :key="index" class="border-l-4 border-sky-400 pl-3 text-sm text-gray-700 bg-gray-50 py-2">
-                    {{ comment }}
-                  </li>
-                </ul>
-                <div class="flex gap-2">
-                  <input v-model="newComment" type="text" placeholder="Yeni yorum yaz..." class="flex-1 px-3 py-2 rounded border border-gray-300 focus:outline-none" />
-                  <button @click="addComment" class="bg-sky-600 text-white px-4 py-2 rounded shadow hover:bg-sky-700">Ekle</button>
-                </div>
               </div>
             </div>
           </div>

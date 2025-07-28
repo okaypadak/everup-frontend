@@ -29,11 +29,13 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
               <select v-model="form.role" class="input">
                 <option value="" disabled>Rol seçin</option>
-                <option value="admin">Yönetici</option>
-                <option value="director">Proje Direktörü</option>
-                <option value="developer">Geliştirici</option>
-                <option value="tester">Testçi</option>
-                <option value="lead">Takım Lideri</option>
+                <option
+                    v-for="role in roles"
+                    :key="role"
+                    :value="role"
+                >
+                  {{ roleLabels[role] }}
+                </option>
               </select>
             </div>
           </div>
@@ -52,10 +54,32 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import Navbar from '~/pages/components/bar/Navbar.vue'
 import { toast } from 'vue3-toastify'
+
+// Enum roller
+enum UserRole {
+  DEVELOPER = 'developer',
+  TESTER = 'tester',
+  DIRECTOR = 'director',
+  DEVOPS = 'devOps',
+  ADMIN = 'admin',
+  MARKETER = 'marketer',
+}
+
+// Kullanıcıya görünmesini istediğimiz etiketler
+const roleLabels: Record<UserRole, string> = {
+  [UserRole.DEVELOPER]: 'Geliştirici',
+  [UserRole.TESTER]: 'Testçi',
+  [UserRole.DIRECTOR]: 'Proje Direktörü',
+  [UserRole.DEVOPS]: 'DevOps',
+  [UserRole.ADMIN]: 'Yönetici',
+  [UserRole.MARKETER]: 'Pazarlamacı',
+}
+
+const roles = Object.values(UserRole)
 
 const form = ref({
   firstName: '',
@@ -65,7 +89,6 @@ const form = ref({
 })
 
 const createUser = async () => {
-
   try {
     const response = await $fetch('/api/users/create', {
       method: 'POST',
@@ -83,11 +106,10 @@ const createUser = async () => {
     } else {
       toast.warning(`⚠️ ${response.message}`)
     }
-  } catch (err) {
+  } catch (err: any) {
     toast.error(`🚫 Sunucu hatası: ${err?.data?.message || err.message}`)
   }
 }
-
 </script>
 
 <style scoped>

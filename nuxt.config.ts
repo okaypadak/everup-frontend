@@ -16,6 +16,6 @@ export default defineNuxtConfig({
     "@nuxt/ui",
   ],
   runtimeConfig: {
-    apiBaseUrl: process.env.API_BASE_URL || "http://backend:9120",
+    apiBaseUrl: process.env.API_BASE_URL || "http://localhost:9120",
   },
 });

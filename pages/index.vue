@@ -12,7 +12,7 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
         </svg>
       </div>
 
-      <h2 class="text-3xl font-bold text-sky-700 mb-2 tracking-tight">CycleUp</h2>
+      <h2 class="text-3xl font-bold text-sky-700 mb-2 tracking-tight">EverUp</h2>
       <p class="text-sm text-gray-500 mb-8 text-center">Projelerini kolayca yönet, sürdürülebilir başarıya ulaş.</p>
 
       <form class="w-full space-y-5" @submit.prevent="login">
