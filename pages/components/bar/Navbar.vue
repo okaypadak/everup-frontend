@@ -17,59 +17,59 @@
 
       <!-- Sprint Menüsü -->
       <div v-if="canSeeSprintMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @click="toggleSprintMenu">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showSprintMenu = true">
           Sprint Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showSprintMenu" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
-          <NuxtLink v-if="isDirector" to="/sprint/create" class="dropdown-item" @click="showSprintMenu = false">Sprint Oluştur</NuxtLink>
-          <NuxtLink v-if="isDirector" to="/sprint/task-list" class="dropdown-item" @click="showSprintMenu = false">Sprint Görev Listesi</NuxtLink>
-          <NuxtLink to="/sprint/meta" class="dropdown-item" @click="showSprintMenu = false">Sprint Meta Bilgileri</NuxtLink>
-          <NuxtLink to="/sprint/chart" class="dropdown-item" @click="showSprintMenu = false">Sprint Charts</NuxtLink>
+        <div v-if="showSprintMenu" class="dropdown-panel" @mouseleave="showSprintMenu = false">
+          <NuxtLink v-if="isDirector" to="/sprint/create" class="dropdown-item">Sprint Oluştur</NuxtLink>
+          <NuxtLink v-if="isDirector" to="/sprint/task-list" class="dropdown-item">Sprint Görev Listesi</NuxtLink>
+          <NuxtLink to="/sprint/meta" class="dropdown-item">Sprint Meta Bilgileri</NuxtLink>
+          <NuxtLink to="/sprint/chart" class="dropdown-item">Sprint Charts</NuxtLink>
         </div>
       </div>
 
       <!-- Proje Menüsü -->
       <div v-if="canSeeProjectMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @click="toggleProjectMenu">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showProjectMenu = true">
           Proje Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showProjectMenu" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
-          <NuxtLink to="/projects/create" class="dropdown-item" @click="showProjectMenu = false">Proje Oluştur</NuxtLink>
-          <NuxtLink to="/projects/members" class="dropdown-item" @click="showProjectMenu = false">Katılımcılar</NuxtLink>
+        <div v-if="showProjectMenu" class="dropdown-panel" @mouseleave="showProjectMenu = false">
+          <NuxtLink to="/projects/create" class="dropdown-item">Proje Oluştur</NuxtLink>
+          <NuxtLink to="/projects/members" class="dropdown-item">Katılımcılar</NuxtLink>
         </div>
       </div>
 
       <!-- Müşteri Menüsü -->
       <div v-if="canSeeCustomerMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @click="toggleCustomerMenu">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showCustomerMenu = true">
           Müşteri Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showCustomerMenu" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
-          <NuxtLink v-if="user.value?.role !== 'marketer'" to="/customers/create" class="dropdown-item" @click="showCustomerMenu = false">Müşteri Kaydet</NuxtLink>
-          <NuxtLink to="/customers/marketing" class="dropdown-item" @click="showCustomerMenu = false">Pazarlama Takip</NuxtLink>
-          <NuxtLink to="/customers/calendar" class="dropdown-item" @click="showCustomerMenu = false">Takvim / Randevu</NuxtLink>
+        <div v-if="showCustomerMenu" class="dropdown-panel" @mouseleave="showCustomerMenu = false">
+          <NuxtLink v-if="user.value?.role !== 'marketer'" to="/customers/create" class="dropdown-item">Müşteri Kaydet</NuxtLink>
+          <NuxtLink to="/customers/marketing" class="dropdown-item">Pazarlama Takip</NuxtLink>
         </div>
       </div>
 
       <!-- Kullanıcı Menüsü -->
       <div v-if="canSeeUserMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @click="toggleUserManagementMenu">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showUserManagementMenu = true">
           Kullanıcı Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showUserManagementMenu" class="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 w-64">
-          <NuxtLink to="/users/create" class="dropdown-item" @click="showUserManagementMenu = false">Kullanıcı Oluştur</NuxtLink>
+        <div v-if="showUserManagementMenu" class="dropdown-panel" @mouseleave="showUserManagementMenu = false">
+          <NuxtLink to="/users/create" class="dropdown-item">Kullanıcı Oluştur</NuxtLink>
+          <NuxtLink to="/users/update" class="dropdown-item">Kullanıcı rol güncelle</NuxtLink>
         </div>
       </div>
     </div>
@@ -85,14 +85,14 @@
       </button>
 
       <!-- Kullanıcı Profili -->
-      <div v-if="isLoggedIn" class="relative">
-        <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition" @click="showUserMenu = !showUserMenu">
+      <div v-if="isLoggedIn" class="relative" @mouseenter="showUserMenu = true" @mouseleave="showUserMenu = false">
+        <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
           <span class="font-semibold text-gray-700 hidden sm:inline">{{ user.name }}</span>
           <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showUserMenu" class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg py-2 z-50">
+        <div v-if="showUserMenu" class="dropdown-panel right-0">
           <button class="dropdown-item text-red-600" @click="logout">Çıkış Yap</button>
         </div>
       </div>
@@ -108,7 +108,6 @@ import { useAuth } from '~/composables/useAuth'
 const { user, isLoggedIn, isDirector } = useAuth()
 const router = useRouter()
 
-// Menü görünüm durumları
 const showSprintMenu = ref(false)
 const showProjectMenu = ref(false)
 const showUserManagementMenu = ref(false)
@@ -117,28 +116,18 @@ const showUserMenu = ref(false)
 const showNotifications = ref(false)
 const notifications = ref(3)
 
-// Yetki kontrolleri
 const canSeeSprintMenu = computed(() =>
     ['admin', 'lead', 'director', 'developer'].includes(user.value?.role ?? '')
 )
-
 const canSeeProjectMenu = computed(() =>
     ['admin', 'director'].includes(user.value?.role ?? '')
 )
-
 const canSeeUserMenu = computed(() =>
     user.value?.role === 'admin'
 )
-
 const canSeeCustomerMenu = computed(() =>
     ['admin', 'director', 'marketer'].includes(user.value?.role ?? '')
 )
-
-// Menü aç/kapat işlemleri
-const toggleSprintMenu = () => (showSprintMenu.value = !showSprintMenu.value)
-const toggleProjectMenu = () => (showProjectMenu.value = !showProjectMenu.value)
-const toggleUserManagementMenu = () => (showUserManagementMenu.value = !showUserManagementMenu.value)
-const toggleCustomerMenu = () => (showCustomerMenu.value = !showCustomerMenu.value)
 
 const logout = async () => {
   await $fetch('/api/logout', { method: 'POST' })
@@ -173,5 +162,18 @@ const logout = async () => {
 }
 .dropdown-item:hover {
   background-color: #e0f2fe;
+}
+.dropdown-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  z-index: 50;
+  width: 16rem;
 }
 </style>
