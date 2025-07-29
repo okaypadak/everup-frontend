@@ -1,10 +1,7 @@
 <template>
-
-
-
-
   <div class="min-h-screen flex flex-col bg-gray-50">
     <Navbar />
+
     <main class="flex-1">
       <div class="max-w-5xl mx-auto px-4 py-10">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
@@ -17,7 +14,8 @@
               </svg>
               <h1 class="text-2xl font-bold text-sky-700">Dökümanlar</h1>
             </div>
-            <!-- Proje seçici -->
+
+            <!-- Proje Seçici -->
             <select
                 v-model="selectedProject"
                 class="px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300 min-w-[220px]"
@@ -28,14 +26,18 @@
             </select>
           </div>
 
+          <!-- Dökümanlar -->
           <template v-if="selectedProject">
             <div class="flex items-center justify-between mb-8">
-              <span/>
+              <span />
               <button
                   class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-5 py-2 rounded-xl shadow transition"
                   @click="addRootDocument"
-              >+ Yeni Ana Döküman</button>
+              >
+                + Yeni Ana Döküman
+              </button>
             </div>
+
             <ul>
               <TreeItem
                   v-for="node in tree"
@@ -46,10 +48,12 @@
                   @delete="deleteDocument"
               />
             </ul>
+
             <div v-if="tree.length === 0" class="text-gray-400 text-center mt-8">
               Bu projede henüz döküman yok. Yeni ana döküman ekleyin.
             </div>
           </template>
+
           <div v-else class="text-gray-400 text-center mt-12">
             Proje seçiniz. Dökümanlar burada listelenecek.
           </div>
@@ -60,67 +64,121 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import Navbar from '~/pages/components/bar/Navbar.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useFetch } from '#app'
 import { useRouter } from 'vue-router'
-import { docsData } from '/dummy/document.js'
-import TreeItem from '/pages/components/editor/TreeItem.vue'
+import Navbar from '~/pages/components/bar/Navbar.vue'
+import TreeItem from '~/pages/documents/TreeItem.vue'
 
-const projects = ref([
-  { id: 'proj1', name: 'CRM Yazılımı' },
-  { id: 'proj2', name: 'E-Ticaret Platformu' },
-  { id: 'proj3', name: 'Mobil App' }
-])
-const allDocs = ref([...docsData])
-const selectedProject = ref('')
-const user = useState('user')
 const router = useRouter()
+const selectedProject = ref('')
+const projects = ref([])
+const allDocs = ref([])
 
-function loadDocs() {}
+// Projeleri çek
+onMounted(async () => {
+  console.log('[INIT] Projeler yükleniyor...')
+  const { data, error } = await useFetch('/api/projects')
 
-function buildTree(list, parentId = null) {
-  return list
-      .filter(item => item.parentId === parentId)
-      .map(item => ({
-        ...item,
-        children: buildTree(list, item.id)
-      }))
+  if (error.value) {
+    console.error('[ERROR] Projeler alınamadı:', error.value)
+    return
+  }
+
+  console.log('[SUCCESS] Gelen projeler:', data.value)
+  projects.value = data.value || []
+})
+
+// Seçili projeye ait dökümanları çek
+async function loadDocs() {
+  if (!selectedProject.value) {
+    console.warn('[SKIP] Proje seçilmedi, döküman çekilmiyor')
+    return
+  }
+
+  console.log(`[FETCH] Dökümanlar yükleniyor... Project ID: ${selectedProject.value}`)
+
+  const { data, error } = await useFetch(`/api/documents/project/${selectedProject.value}`)
+
+  if (error.value) {
+    console.error('[ERROR] Dökümanlar yüklenemedi:', error.value)
+    return
+  }
+
+  console.log('[SUCCESS] Gelen döküman verisi:', data.value)
+
+  allDocs.value = Array.isArray(data.value) ? data.value : []
+  console.log('[INFO] Dökümanlar allDocs içine aktarıldı:', allDocs.value)
 }
 
-const tree = computed(() =>
-    buildTree(allDocs.value.filter(d => d.projectId === selectedProject.value))
-)
+// Ağaç yapısını oluştur
+function buildTree(list, parentId = null, visited = new Set()) {
+  return list
+      .filter(item => item.parentId === parentId)
+      .map(item => {
+        if (visited.has(item.id)) {
+          return null
+        }
 
+        // Bu node'u işaretle
+        const newVisited = new Set(visited)
+        newVisited.add(item.id)
+
+        return {
+          ...item,
+          children: buildTree(list, item.id, newVisited)
+        }
+      })
+      .filter(Boolean)
+}
+
+const tree = computed(() => {
+  const selectedId = String(selectedProject.value)
+  const filtered = allDocs.value.filter(d => String(d.projectId) === selectedId)
+  console.log('[COMPUTED] buildTree çağrıldı. Filtrelenen dökümanlar:', filtered)
+  return buildTree(filtered)
+})
+
+// Dökümanı aç
 function openDoc(doc) {
+  console.log('[ACTION] Döküman açılıyor:', doc)
   router.push({ name: 'writer', query: { id: doc.id } })
 }
 
+// Yeni ana döküman ekle
 function addRootDocument() {
   if (!selectedProject.value) return
   const id = Date.now()
-  allDocs.value.push({
+  const newDoc = {
     id,
     parentId: null,
     projectId: selectedProject.value,
     title: 'Yeni Ana Döküman',
     desc: 'Özet girilmedi.',
     content: ''
-  })
+  }
+  console.log('[ADD] Ana döküman eklendi:', newDoc)
+  allDocs.value.push(newDoc)
 }
+
+// Yeni alt döküman ekle
 function addChildDocument(parentId) {
   if (!selectedProject.value) return
   const id = Date.now()
-  allDocs.value.push({
+  const newChild = {
     id,
     parentId,
     projectId: selectedProject.value,
     title: 'Yeni Alt Döküman',
     desc: 'Alt başlık özeti.',
     content: ''
-  })
+  }
+  console.log('[ADD] Alt döküman eklendi:', newChild)
+  allDocs.value.push(newChild)
 }
+
+// Döküman (ve çocuklarını) sil
 function deleteDocument(id) {
-  // Alt başlıkları da dahil tüm ilgili id'leri sil (recursive delete)
   function collectIds(list, idToDelete) {
     let ids = [idToDelete]
     const children = list.filter(doc => doc.parentId === idToDelete)
@@ -129,7 +187,12 @@ function deleteDocument(id) {
     }
     return ids
   }
+
   const idsToDelete = collectIds(allDocs.value, id)
+  console.log('[DELETE] Silinecek döküman ID listesi:', idsToDelete)
+
   allDocs.value = allDocs.value.filter(doc => !idsToDelete.includes(doc.id))
+  console.log('[DELETE] Güncel allDocs:', allDocs.value)
 }
+
 </script>

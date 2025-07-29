@@ -13,7 +13,7 @@
     <!-- Menü Linkleri -->
     <div class="hidden md:flex gap-6 items-center">
       <NuxtLink to="/dashboard" class="nav-link">Kontrol Paneli</NuxtLink>
-      <NuxtLink to="/documentList" class="nav-link">Döküman Yaz</NuxtLink>
+      <NuxtLink to="/documents/list" class="nav-link">Döküman Yaz</NuxtLink>
 
       <!-- Sprint Menüsü -->
       <div v-if="canSeeSprintMenu" class="relative">
