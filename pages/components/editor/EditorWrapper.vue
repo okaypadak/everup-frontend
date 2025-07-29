@@ -119,9 +119,18 @@ onBeforeUnmount(() => {
 button {
   transition: 0.2s ease;
 }
-.ProseMirror {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
+
+:deep(.ProseMirror) {
+  min-height: 500px;
+  max-height: 1200px;
+  padding: 2rem;
+  background-color: #f9fafb; /* hafif gri */
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  outline: none;
 }
 </style>

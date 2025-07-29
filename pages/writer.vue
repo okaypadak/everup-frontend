@@ -77,16 +77,18 @@ onMounted(() => {
 
 <style scoped>
 .ProseMirror-Word :deep(.ProseMirror) {
-  min-height: 650px;
+  min-height: 500px;
   max-height: 1200px;
   font-size: 1.12rem;
   padding: 2rem 3rem;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  outline: none;
-  height: 500px;
+  background-color: #f9fafb; /* açık gri */
+  border: 1px solid #e5e7eb; /* açık gri çerçeve */
+  border-radius: 0.75rem;     /* köşeleri yumuşat */
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04); /* iç gölge */
   line-height: 1.7;
   font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
+  outline: none;
 }
+
+
 </style>

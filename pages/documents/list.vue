@@ -146,19 +146,29 @@ function openDoc(doc) {
 }
 
 // Yeni ana döküman ekle
-function addRootDocument() {
+async function addRootDocument() {
   if (!selectedProject.value) return
-  const id = Date.now()
-  const newDoc = {
-    id,
-    parentId: null,
+
+  const payload = {
     projectId: selectedProject.value,
     title: 'Yeni Ana Döküman',
     desc: 'Özet girilmedi.',
     content: ''
   }
-  console.log('[ADD] Ana döküman eklendi:', newDoc)
-  allDocs.value.push(newDoc)
+
+  try {
+    const response = await $fetch('/api/documents', {
+      method: 'POST',
+      body: payload
+    })
+
+    console.log('[API] Backend döküman oluşturdu:', response)
+
+    // Backend'den dönen doküman (ID dahil) listeye ekleniyor
+    allDocs.value.push(response)
+  } catch (error) {
+    console.error('[ERROR] Döküman backend\'e eklenemedi:', error)
+  }
 }
 
 // Yeni alt döküman ekle

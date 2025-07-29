@@ -14,10 +14,12 @@ export default defineEventHandler(async (event) => {
     try {
         const response = await ofetch(`${config.apiBaseUrl}/documents`, {
             method: 'POST',
+
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json', // BU SATIR ŞART
             },
-            body
+            body: JSON.stringify(body) // DİREKT OBJE VERME, JSON.stringify KULLAN
         })
 
         return response
