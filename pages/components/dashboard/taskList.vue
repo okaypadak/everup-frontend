@@ -202,21 +202,11 @@ async function fetchProjectLabels(projectId: number) {
   }
 }
 
-async function fetchProjectUsers(projectId: number) {
-  try {
-    const users = await $fetch<User[]>(`/api/projects/${projectId}/users`, { credentials: 'include' })
-    projectUsers.value = users
-  } catch (err) {
-    console.error('Kullanıcılar alınamadı:', err)
-    projectUsers.value = []
-  }
-}
 
 function onProjectSelect() {
   if (selectedProjectId.value) {
     fetchTasksByProject(selectedProjectId.value)
     fetchProjectLabels(selectedProjectId.value)
-    fetchProjectUsers(selectedProjectId.value)
   } else {
     tasks.value = []
     projectLabels.value = []
