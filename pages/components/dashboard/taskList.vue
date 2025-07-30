@@ -1,7 +1,13 @@
 <template>
+
+
+
+
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4" style="height: 100%; max-height: 100%;">
+
     <!-- Başlık ve Filtreler -->
     <div class="flex items-center justify-between mb-2">
+
       <div class="flex items-center gap-2 text-lg font-semibold text-gray-700">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2"/>
@@ -9,24 +15,25 @@
         </svg>
         Görevler
       </div>
+
+      <!-- Proje Seçimi -->
+      <div class="mb-2 flex gap-4 flex-wrap">
+        <div>
+          <label class="text-sm font-medium text-gray-600 mr-2">Proje:</label>
+          <select v-model="selectedProjectId" @change="onProjectSelect" class="border px-2 py-1 rounded text-sm">
+            <option :value="null">Tüm projeler</option>
+            <option v-for="project in projects" :key="project.id" :value="project.id">
+              {{ project.name }}
+            </option>
+          </select>
+        </div>
+
       <div class="flex gap-2">
         <button :class="buttonClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
         <button :class="buttonClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
         <button :class="buttonClass('tum')" @click="taskFilter = 'tum'">Tümü</button>
       </div>
     </div>
-
-    <!-- Proje Seçimi -->
-    <div class="mb-2 flex gap-4 flex-wrap">
-      <div>
-        <label class="text-sm font-medium text-gray-600 mr-2">Proje:</label>
-        <select v-model="selectedProjectId" @change="onProjectSelect" class="border px-2 py-1 rounded text-sm">
-          <option :value="null">Tüm projeler</option>
-          <option v-for="project in projects" :key="project.id" :value="project.id">
-            {{ project.name }}
-          </option>
-        </select>
-      </div>
 
       <!-- Kullanıcı Seçimi -->
       <div v-if="projectUsers.length">
