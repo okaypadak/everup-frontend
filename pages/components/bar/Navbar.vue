@@ -85,7 +85,7 @@
       </button>
 
       <!-- Kullanıcı Profili -->
-      <div v-if="isLoggedIn" class="relative" @mouseenter="showUserMenu = true" @mouseleave="showUserMenu = false">
+      <div v-if="isLoggedName" class="relative" @mouseenter="showUserMenu = true" @mouseleave="showUserMenu = false">
         <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
           <span class="font-semibold text-gray-700 hidden sm:inline">{{ user.name }}</span>
           <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
 
-const { user, isLoggedIn, isDirector } = useAuth()
+const { user, isLoggedIn, isLoggedName, isDirector } = useAuth()
 const router = useRouter()
 
 const showSprintMenu = ref(false)

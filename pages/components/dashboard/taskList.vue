@@ -11,35 +11,20 @@
       </div>
       <div class="flex gap-2">
         <button
-            :class="[
-            'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
-            taskFilter === 'devam'
-              ? 'bg-blue-400 text-white border-blue-400 shadow'
-              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
-          ]"
-            @click="$emit('update:taskFilter', 'devam')"
+            :class="buttonClass('devam')"
+            @click="taskFilter = 'devam'"
         >
           Devam Edenler
         </button>
         <button
-            :class="[
-            'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
-            taskFilter === 'hazir'
-              ? 'bg-blue-400 text-white border-blue-400 shadow'
-              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
-          ]"
-            @click="$emit('update:taskFilter', 'hazir')"
+            :class="buttonClass('hazir')"
+            @click="taskFilter = 'hazir'"
         >
           Hazır Görevler
         </button>
         <button
-            :class="[
-            'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
-            taskFilter === 'tum'
-              ? 'bg-blue-400 text-white border-blue-400 shadow'
-              : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
-          ]"
-            @click="$emit('update:taskFilter', 'tum')"
+            :class="buttonClass('tum')"
+            @click="taskFilter = 'tum'"
         >
           Tümü
         </button>
@@ -54,7 +39,7 @@
             :key="task.id"
             :class="[
             'rounded-md px-3 py-4 flex flex-col shadow-sm transition-all border-l-4',
-            task.status === 'In Progress' && task.type === 'hata' ? 'bg-red-100 border-red-400' :
+            task.status === 'In Progress' && task.type === 'bug' ? 'bg-red-100 border-red-400' :
             task.status === 'In Progress' ? 'bg-yellow-100 border-yellow-400' :
             task.status === 'Waiting' ? 'border-gray-400 bg-gray-100' :
             task.status === 'Ready' ? 'border-blue-400 bg-blue-50' :
@@ -64,24 +49,19 @@
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2 flex-wrap">
-              <!-- Tür -->
               <span :class="[getTypeClass(task.type), 'text-white text-xs font-bold rounded-full px-2 py-0.5']">
                 {{ getTypeLabel(task.type) }}
               </span>
-              <!-- Seviye -->
-              <span :class="[getLevelClass(task.seviye), 'text-xs font-bold rounded-full px-2 py-0.5']">
-                {{ getLevelLabel(task.seviye) }}
+              <span :class="[getLevelClass(task.level), 'text-xs font-bold rounded-full px-2 py-0.5']">
+                {{ getLevelLabel(task.level) }}
               </span>
-              <!-- Bağlı Görev -->
-              <span v-if="task.bagliGorev" class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
-                Önce: {{ task.bagliGorevTitle || 'Bağlı görev' }}
+              <span v-if="task.dependentTaskId" class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
+                Önce: {{ task.dependentTaskTitle || 'Bağlı görev' }}
               </span>
-              <!-- Başlık -->
               <span :class="task.status === 'Completed' ? 'line-through text-gray-500' : 'text-gray-900'" class="font-medium">
                 {{ task.title }}
               </span>
             </div>
-            <!-- Durum Rozeti -->
             <span v-if="task.status === 'In Progress'" class="bg-yellow-200 text-green-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1">
               ⏳ Devam Ediyor
             </span>
@@ -96,7 +76,7 @@
             </span>
           </div>
           <div class="text-xs text-gray-400 mt-1">{{ task.time }}</div>
-          <div v-if="task.deadline" class="text-xs text-blue-500 mt-1">
+          <div v-if="task.formattedDeadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.formattedDeadline }}
           </div>
           <NuxtLink :to="`/tasks/${task.gorevKodu}`" class="text-xs text-blue-500 underline self-end mt-1 hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1">
@@ -118,28 +98,75 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted, defineExpose } from 'vue'
 
-interface RawTask {
+interface Task {
   id: number | string
   title: string
-  description: string
   status: string
   type: string
   level: string
   createdAt: string
   deadline?: string | null
   dependentTaskId?: number | string | null
+  dependentTaskTitle?: string
+  gorevKodu?: string
+  time?: string
+  formattedDeadline?: string | null
 }
 
-const { filteredTasks, taskFilter } = defineProps<{
-  filteredTasks: RawTask[]
-  taskFilter: string
-}>()
+const taskFilter = ref<'devam' | 'hazir' | 'tum'>('devam')
+const tasks = ref<Task[]>([])
+const isLoading = ref(false)
 
-defineEmits<{
-  (e: 'update:taskFilter', value: string): void
-}>()
+function formatTime(dateStr: string) {
+  const d = new Date(dateStr)
+  return d.toLocaleString('tr-TR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+async function fetchTasks() {
+  isLoading.value = true
+  try {
+    const data = await $fetch<Task[]>('/api/tasks/user', {
+      credentials: 'include'
+    })
+    tasks.value = data.map(task => ({
+      ...task,
+      gorevKodu: task.id,
+      time: formatTime(task.createdAt),
+      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
+    }))
+  } catch (err) {
+    console.error('Görev çekilemedi:', err)
+    tasks.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(fetchTasks)
+defineExpose({ fetchTasks })
+
+const filteredVisibleTasks = computed(() =>
+    tasks.value.filter(task => {
+      if (taskFilter.value === 'tum') return true
+      if (taskFilter.value === 'devam') return task.status === 'In Progress'
+      if (taskFilter.value === 'hazir') return task.status === 'Ready'
+      return false
+    })
+)
+
+function buttonClass(type: string) {
+  return [
+    'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
+    taskFilter.value === type
+        ? 'bg-blue-400 text-white border-blue-400 shadow'
+        : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
+  ]
+}
 
 function getTypeLabel(type: string) {
   switch (type) {
@@ -159,7 +186,6 @@ function getTypeClass(type: string) {
     default: return 'bg-gray-400'
   }
 }
-
 function getLevelLabel(level: string) {
   switch (level) {
     case 'critical': return 'Kritik'
@@ -176,33 +202,4 @@ function getLevelClass(level: string) {
     default: return 'bg-gray-300 text-gray-800'
   }
 }
-
-function formatTime(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleString('tr-TR', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  })
-}
-
-const tasksForView = computed(() => filteredTasks.map(task => ({
-  ...task,
-  gorevKodu: task.id,
-  time: formatTime(task.createdAt),
-  seviye: task.level,
-  bagliGorev: task.dependentTaskId,
-  bagliGorevTitle: '',
-  formattedDeadline: task.deadline ? formatTime(task.deadline) : null
-})))
-
-const filteredVisibleTasks = computed(() =>
-    tasksForView.value.filter(task => {
-      if (taskFilter === 'tum') return true
-      if (taskFilter === 'devam') return task.status === 'In Progress'
-      if (taskFilter === 'hazir') return task.status === 'Ready'
-      return false
-    })
-)
-
-
 </script>

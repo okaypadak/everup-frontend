@@ -22,17 +22,10 @@
       </div>
 
       <!-- Görev Listesi -->
-      <TaskListPanel
-          :filtered-tasks="filteredTasks"
-          :task-filter="taskFilter"
-          @update:task-filter="taskFilter = $event"
-      />
+      <TaskListPanel/>
 
       <!-- Görev Oluştur -->
-      <TaskCreatePanel
-          class="flex flex-col h-full"
-          @add-task="fetchTasks"
-      />
+      <TaskCreatePanel class="flex flex-col h-full"/>
 
     </div>
   </div>
@@ -45,74 +38,6 @@ import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
 import CommentListPanel from './components/dashboard/commentList.vue'
 import Navbar from './components/bar/Navbar.vue'
-
-// State
-const taskFilter = ref('devam')
-
-// Görev listesi
-interface Task {
-  id: number | string
-  projectId?: number | string
-  title: string
-  description?: string
-  status: string
-  type: string
-  level?: string
-  createdAt?: string
-  deadline?: string | null
-  dependencyIds?: (number | string)[]
-  dependencyTitles?: string[]
-  gorevKodu?: string
-  time?: string
-}
-
-const tasks = ref<Task[]>([])
-const isLoadingTasks = ref(true)
-
-async function fetchTasks() {
-  isLoadingTasks.value = true
-  try {
-    const data = await $fetch<Task[]>('/api/tasks', {
-      method: 'GET',
-      credentials: 'include'
-    })
-
-    tasks.value = data.map(task => ({
-      ...task,
-      gorevKodu: task.gorevKodu || `GOREV-${task.id}`,
-      time: task.createdAt
-          ? new Date(task.createdAt).toLocaleString('tr-TR', {
-            dateStyle: 'short',
-            timeStyle: 'short'
-          })
-          : '',
-      dependencyIds: task.dependencyIds || [],
-      dependencyTitles: task.dependencyTitles || []
-    }))
-  } catch (error) {
-    console.error('Görevler çekilemedi:', error)
-    tasks.value = []
-  }
-  isLoadingTasks.value = false
-}
-
-onMounted(fetchTasks)
-
-const filteredTasks = computed(() =>
-    taskFilter.value === 'devam'
-        ? tasks.value.filter(
-            t =>
-                t.status === 'In Progress' ||
-                t.status === 'Waiting' ||
-                t.status === 'Devam' ||
-                t.status === 'Beklemede'
-        )
-        : taskFilter.value === 'hazir'
-            ? tasks.value.filter(
-                t => t.status === 'Ready' || t.status === 'Hazır'
-            )
-            : tasks.value
-)
 
 // Statik yorumlar ve bildirimler
 const comments = ref([
