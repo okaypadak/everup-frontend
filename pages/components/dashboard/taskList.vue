@@ -10,25 +10,27 @@
         Görevler
       </div>
       <div class="flex gap-2">
-        <button
-            :class="buttonClass('devam')"
-            @click="taskFilter = 'devam'"
-        >
-          Devam Edenler
-        </button>
-        <button
-            :class="buttonClass('hazir')"
-            @click="taskFilter = 'hazir'"
-        >
-          Hazır Görevler
-        </button>
-        <button
-            :class="buttonClass('tum')"
-            @click="taskFilter = 'tum'"
-        >
-          Tümü
-        </button>
+        <button :class="buttonClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
+        <button :class="buttonClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
+        <button :class="buttonClass('tum')" @click="taskFilter = 'tum'">Tümü</button>
       </div>
+    </div>
+
+    <!-- Etiket Filtresi -->
+    <div v-if="projectLabels.length" class="flex flex-wrap gap-2 mb-2">
+      <button
+          v-for="label in projectLabels"
+          :key="label.id"
+          @click="toggleLabel(label.id)"
+          :class="[
+          'text-xs font-semibold px-3 py-1 rounded-full border transition-all',
+          selectedLabelIds.includes(label.id)
+            ? 'bg-green-500 text-white border-green-600'
+            : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-green-100'
+        ]"
+      >
+        {{ label.name }}
+      </button>
     </div>
 
     <!-- Görev Listesi -->
@@ -113,10 +115,18 @@ interface Task {
   gorevKodu?: string
   time?: string
   formattedDeadline?: string | null
+  labels?: { id: number, name: string }[]
+}
+
+interface TaskLabel {
+  id: number
+  name: string
 }
 
 const taskFilter = ref<'devam' | 'hazir' | 'tum'>('devam')
 const tasks = ref<Task[]>([])
+const projectLabels = ref<TaskLabel[]>([])
+const selectedLabelIds = ref<number[]>([])
 const isLoading = ref(false)
 
 function formatTime(dateStr: string) {
@@ -130,9 +140,7 @@ function formatTime(dateStr: string) {
 async function fetchTasks() {
   isLoading.value = true
   try {
-    const data = await $fetch<Task[]>('/api/tasks/user', {
-      credentials: 'include'
-    })
+    const data = await $fetch<Task[]>('/api/tasks/user', { credentials: 'include' })
     tasks.value = data.map(task => ({
       ...task,
       gorevKodu: task.id,
@@ -147,15 +155,45 @@ async function fetchTasks() {
   }
 }
 
-onMounted(fetchTasks)
+async function fetchProjectLabels(projectId: number | string) {
+  try {
+    const data = await $fetch<TaskLabel[]>(`/api/task-labels/${projectId}`, {
+      credentials: 'include'
+    })
+    projectLabels.value = data
+    console.log('Gelen etiketler:', data)
+  } catch (err) {
+    console.error('Etiketler alınamadı:', err)
+  }
+}
+
+function toggleLabel(labelId: number) {
+  if (selectedLabelIds.value.includes(labelId)) {
+    selectedLabelIds.value = selectedLabelIds.value.filter(id => id !== labelId)
+  } else {
+    selectedLabelIds.value.push(labelId)
+  }
+}
+
+onMounted(() => {
+  fetchTasks()
+  fetchProjectLabels(1)
+})
+
 defineExpose({ fetchTasks })
 
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
-      if (taskFilter.value === 'tum') return true
-      if (taskFilter.value === 'devam') return task.status === 'In Progress'
-      if (taskFilter.value === 'hazir') return task.status === 'Ready'
-      return false
+      const matchesStatus =
+          taskFilter.value === 'tum' ||
+          (taskFilter.value === 'devam' && task.status === 'In Progress') ||
+          (taskFilter.value === 'hazir' && task.status === 'Ready')
+
+      const matchesLabels =
+          selectedLabelIds.value.length === 0 ||
+          (task.labels || []).some(label => selectedLabelIds.value.includes(label.id))
+
+      return matchesStatus && matchesLabels
     })
 )
 
