@@ -16,6 +16,30 @@
       </div>
     </div>
 
+    <!-- Proje Seçimi -->
+    <div class="mb-2 flex gap-4 flex-wrap">
+      <div>
+        <label class="text-sm font-medium text-gray-600 mr-2">Proje:</label>
+        <select v-model="selectedProjectId" @change="onProjectSelect" class="border px-2 py-1 rounded text-sm">
+          <option :value="null">Tüm projeler</option>
+          <option v-for="project in projects" :key="project.id" :value="project.id">
+            {{ project.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Kullanıcı Seçimi -->
+      <div v-if="projectUsers.length">
+        <label class="text-sm font-medium text-gray-600 mr-2">Kullanıcı:</label>
+        <select v-model="selectedUserId" class="border px-2 py-1 rounded text-sm">
+          <option :value="null">Tüm kullanıcılar</option>
+          <option v-for="user in projectUsers" :key="user.id" :value="user.id">
+            {{ user.fullName }}
+          </option>
+        </select>
+      </div>
+    </div>
+
     <!-- Etiket Filtresi -->
     <div v-if="projectLabels.length" class="flex flex-wrap gap-2 mb-2">
       <button
@@ -88,11 +112,7 @@
       </template>
       <template v-else>
         <li class="text-gray-400 text-center py-6 select-none">
-          {{
-            taskFilter === 'devam' ? 'Devam eden bir görev yok.' :
-                taskFilter === 'hazir' ? 'Başlamaya hazır görev yok.' :
-                    'Henüz bir görev yok.'
-          }}
+          Hiç görev bulunamadı.
         </li>
       </template>
     </ul>
@@ -116,9 +136,21 @@ interface Task {
   time?: string
   formattedDeadline?: string | null
   labels?: { id: number, name: string }[]
+  assignedTo?: number
+  project?: { id: number; name: string }
 }
 
 interface TaskLabel {
+  id: number
+  name: string
+}
+
+interface User {
+  id: number
+  fullName: string
+}
+
+interface Project {
   id: number
   name: string
 }
@@ -127,7 +159,10 @@ const taskFilter = ref<'devam' | 'hazir' | 'tum'>('devam')
 const tasks = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
 const selectedLabelIds = ref<number[]>([])
-const isLoading = ref(false)
+const selectedUserId = ref<number | null>(null)
+const selectedProjectId = ref<number | null>(null)
+const projectUsers = ref<User[]>([])
+const projects = ref<Project[]>([])
 
 function formatTime(dateStr: string) {
   const d = new Date(dateStr)
@@ -137,10 +172,15 @@ function formatTime(dateStr: string) {
   })
 }
 
-async function fetchTasks() {
-  isLoading.value = true
+async function fetchProjects() {
+  const { data, error } = await useFetch<Project[]>('/api/projects')
+  if (error.value) return console.error('Projeler alınamadı:', error.value)
+  projects.value = data.value || []
+}
+
+async function fetchTasksByProject(projectId: number) {
   try {
-    const data = await $fetch<Task[]>('/api/tasks/user', { credentials: 'include' })
+    const data = await $fetch<Task[]>(`/api/tasks/project/${projectId}`, { credentials: 'include' })
     tasks.value = data.map(task => ({
       ...task,
       gorevKodu: task.id,
@@ -148,23 +188,42 @@ async function fetchTasks() {
       formattedDeadline: task.deadline ? formatTime(task.deadline) : null
     }))
   } catch (err) {
-    console.error('Görev çekilemedi:', err)
+    console.error('Projeye göre görevler alınamadı:', err)
     tasks.value = []
-  } finally {
-    isLoading.value = false
   }
 }
 
-async function fetchProjectLabels(projectId: number | string) {
+async function fetchProjectLabels(projectId: number) {
   try {
-    const data = await $fetch<TaskLabel[]>(`/api/task-labels/${projectId}`, {
-      credentials: 'include'
-    })
+    const data = await $fetch<TaskLabel[]>(`/api/task-labels/${projectId}`, { credentials: 'include' })
     projectLabels.value = data
-    console.log('Gelen etiketler:', data)
   } catch (err) {
     console.error('Etiketler alınamadı:', err)
   }
+}
+
+async function fetchProjectUsers(projectId: number) {
+  try {
+    const users = await $fetch<User[]>(`/api/projects/${projectId}/users`, { credentials: 'include' })
+    projectUsers.value = users
+  } catch (err) {
+    console.error('Kullanıcılar alınamadı:', err)
+    projectUsers.value = []
+  }
+}
+
+function onProjectSelect() {
+  if (selectedProjectId.value) {
+    fetchTasksByProject(selectedProjectId.value)
+    fetchProjectLabels(selectedProjectId.value)
+    fetchProjectUsers(selectedProjectId.value)
+  } else {
+    tasks.value = []
+    projectLabels.value = []
+    projectUsers.value = []
+  }
+  selectedUserId.value = null
+  selectedLabelIds.value = []
 }
 
 function toggleLabel(labelId: number) {
@@ -174,13 +233,6 @@ function toggleLabel(labelId: number) {
     selectedLabelIds.value.push(labelId)
   }
 }
-
-onMounted(() => {
-  fetchTasks()
-  fetchProjectLabels(1)
-})
-
-defineExpose({ fetchTasks })
 
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
@@ -193,7 +245,10 @@ const filteredVisibleTasks = computed(() =>
           selectedLabelIds.value.length === 0 ||
           (task.labels || []).some(label => selectedLabelIds.value.includes(label.id))
 
-      return matchesStatus && matchesLabels
+      const matchesUser =
+          !selectedUserId.value || task.assignedTo === selectedUserId.value
+
+      return matchesStatus && matchesLabels && matchesUser
     })
 )
 
@@ -215,6 +270,7 @@ function getTypeLabel(type: string) {
     default: return type
   }
 }
+
 function getTypeClass(type: string) {
   switch (type) {
     case 'task': return 'bg-blue-500'
@@ -224,6 +280,7 @@ function getTypeClass(type: string) {
     default: return 'bg-gray-400'
   }
 }
+
 function getLevelLabel(level: string) {
   switch (level) {
     case 'critical': return 'Kritik'
@@ -232,6 +289,7 @@ function getLevelLabel(level: string) {
     default: return 'Normal'
   }
 }
+
 function getLevelClass(level: string) {
   switch (level) {
     case 'critical': return 'bg-red-600 text-white'
@@ -240,4 +298,10 @@ function getLevelClass(level: string) {
     default: return 'bg-gray-300 text-gray-800'
   }
 }
+
+onMounted(() => {
+  fetchProjects()
+})
+
+defineExpose({ fetchTasksByProject })
 </script>
