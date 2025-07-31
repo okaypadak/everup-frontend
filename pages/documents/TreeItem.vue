@@ -1,7 +1,13 @@
 <template>
   <div class="ml-4 border-l pl-3 border-gray-300 space-y-1">
     <div class="flex items-center justify-between group">
-      <div class="text-gray-800 font-medium">{{ document.title }}</div>
+      <!-- Başlık kısmı yönlendirme için router-link oldu -->
+      <NuxtLink
+          :to="`writer/${document.id}`"
+          class="text-gray-800 font-medium hover:underline"
+      >
+        {{ document.title }}
+      </NuxtLink>
 
       <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
@@ -39,9 +45,11 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+
 
 const props = defineProps({
   document: Object,
