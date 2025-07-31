@@ -1,22 +1,17 @@
 <template>
   <div class="ml-4 border-l pl-3 border-gray-300 space-y-1">
-    <!-- Mevcut başlık ve aksiyonlar -->
     <div class="flex items-center justify-between group">
       <div class="text-gray-800 font-medium">{{ document.title }}</div>
 
-      <!-- Butonlar -->
       <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <!-- ➕ Alt başlık -->
         <button
             @click="showInput = !showInput"
             class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded hover:bg-green-200"
         >
           + Alt Başlık
         </button>
-
-        <!-- 🗑 Sil -->
         <button
-            @click="onDelete(document.id)"
+            @click="deleteDocument"
             class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded hover:bg-red-200"
         >
           🗑 Sil
@@ -34,45 +29,78 @@
       />
     </div>
 
-    <!-- 🔁 Alt başlıklar -->
     <TreeItem
         v-for="child in children"
         :key="child.id"
         :document="child"
         :all-documents="allDocuments"
-        @add="emit('add', $event)"
-        @delete="emit('delete', $event)"
+        @refresh="$emit('refresh')"
     />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   document: Object,
   allDocuments: Array
 })
-const emit = defineEmits(['add', 'delete'])
+const emit = defineEmits(['refresh'])
+
+const route = useRoute()
+const projectId = 1
 
 const showInput = ref(false)
 const newTitle = ref('')
 
-// Alt başlıklar
 const children = computed(() =>
     props.allDocuments.filter(doc => doc.parentId === props.document.id)
 )
 
-// ➕ Alt başlık ekleme
-function addChild() {
-  if (!newTitle.value.trim()) return
-  emit('add', { parentId: props.document.id, title: newTitle.value })
-  newTitle.value = ''
-  showInput.value = false
+async function addChild() {
+  const title = newTitle.value.trim()
+
+  console.log('🎯 Alt başlık ekleme başladı...')
+  console.log('📥 Girilen başlık:', title)
+
+  if (!title) {
+    console.warn('⚠️ Başlık boş, işlem durduruldu.')
+    return
+  }
+
+  const payload = {
+    title,
+    parentId: props.document.id,
+    projectId: 1
+  }
+
+  console.log('📦 Sunucuya gönderilecek payload:', payload)
+
+  try {
+    const result = await $fetch('/api/documents', {
+      method: 'POST',
+      body: payload
+    })
+
+    console.log('✅ Sunucudan gelen cevap:', result)
+
+    newTitle.value = ''
+    showInput.value = false
+    emit('refresh')
+
+    console.log('🔄 refresh emit edildi')
+  } catch (err) {
+    console.error('❌ Sunucuya ekleme sırasında hata oluştu:', err)
+  }
 }
 
-// 🗑 Silme
-function onDelete(id) {
-  emit('delete', id)
+
+async function deleteDocument() {
+  await $fetch(`/api/documents/${props.document.id}`, {
+    method: 'DELETE'
+  })
+  emit('refresh')
 }
 </script>

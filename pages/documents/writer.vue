@@ -59,8 +59,7 @@ import EditorWrapper from '/pages/components/editor/EditorWrapper.vue'
 import Navbar from '~/pages/components/bar/Navbar.vue'
 import Footer from '~/pages/components/bar/Footer.vue'
 
-// Ayrı JSON dosyasından veya objesinden import ediliyor gibi:
-import { docsData } from '~/dummy/document.js' // path'i senin dosya yapına göre ayarla
+import { docsData } from '~/dummy/document.js'
 
 const route = useRoute()
 const doc = ref({ id: '', title: '', desc: '', content: '' })
