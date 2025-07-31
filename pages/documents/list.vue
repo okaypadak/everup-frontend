@@ -77,38 +77,28 @@ const allDocs = ref([])
 
 // Projeleri çek
 onMounted(async () => {
-  console.log('[INIT] Projeler yükleniyor...')
   const { data, error } = await useFetch('/api/projects')
 
   if (error.value) {
-    console.error('[ERROR] Projeler alınamadı:', error.value)
     return
   }
 
-  console.log('[SUCCESS] Gelen projeler:', data.value)
   projects.value = data.value || []
 })
 
 // Seçili projeye ait dökümanları çek
 async function loadDocs() {
   if (!selectedProject.value) {
-    console.warn('[SKIP] Proje seçilmedi, döküman çekilmiyor')
     return
   }
-
-  console.log(`[FETCH] Dökümanlar yükleniyor... Project ID: ${selectedProject.value}`)
 
   const { data, error } = await useFetch(`/api/documents/project/${selectedProject.value}`)
 
   if (error.value) {
-    console.error('[ERROR] Dökümanlar yüklenemedi:', error.value)
     return
   }
 
-  console.log('[SUCCESS] Gelen döküman verisi:', data.value)
-
   allDocs.value = Array.isArray(data.value) ? data.value : []
-  console.log('[INFO] Dökümanlar allDocs içine aktarıldı:', allDocs.value)
 }
 
 // Ağaç yapısını oluştur
@@ -135,13 +125,11 @@ function buildTree(list, parentId = null, visited = new Set()) {
 const tree = computed(() => {
   const selectedId = String(selectedProject.value)
   const filtered = allDocs.value.filter(d => String(d.projectId) === selectedId)
-  console.log('[COMPUTED] buildTree çağrıldı. Filtrelenen dökümanlar:', filtered)
   return buildTree(filtered)
 })
 
 // Dökümanı aç
 function openDoc(doc) {
-  console.log('[ACTION] Döküman açılıyor:', doc)
   router.push({ name: 'writer', query: { id: doc.id } })
 }
 
@@ -162,21 +150,18 @@ async function addRootDocument() {
       body: payload
     })
 
-    console.log('[API] Backend döküman oluşturdu:', response)
-
     // Backend'den dönen doküman (ID dahil) listeye ekleniyor
     allDocs.value.push(response)
   } catch (error) {
-    console.error('[ERROR] Döküman backend\'e eklenemedi:', error)
+    // Error handling could be improved here
   }
 }
 
 // Yeni alt döküman ekle
-function addChildDocument(parentId) {
+async function addChildDocument(parentId) {
   if (!selectedProject.value) return
-  const id = Date.now()
-  const newChild = {
-    id,
+  
+  const payload = {
     parentId,
     projectId: selectedProject.value,
     title: 'Yeni Alt Döküman',
@@ -188,7 +173,7 @@ function addChildDocument(parentId) {
 }
 
 // Döküman (ve çocuklarını) sil
-function deleteDocument(id) {
+async function deleteDocument(id) {
   function collectIds(list, idToDelete) {
     let ids = [idToDelete]
     const children = list.filter(doc => doc.parentId === idToDelete)
@@ -199,8 +184,8 @@ function deleteDocument(id) {
   }
 
   const idsToDelete = collectIds(allDocs.value, id)
-  console.log('[DELETE] Silinecek döküman ID listesi:', idsToDelete)
-
+  
+  // Remove from local state
   allDocs.value = allDocs.value.filter(doc => !idsToDelete.includes(doc.id))
   console.log('[DELETE] Güncel allDocs:', allDocs.value)
 }

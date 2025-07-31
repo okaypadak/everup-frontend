@@ -1,7 +1,6 @@
 <template>
   <div class="bg-gray-50 min-h-screen">
     <Navbar />
-
     <!-- 1:3:2 oranında grid -->
     <div
         class="grid px-8 gap-6 py-6"
@@ -32,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref } from 'vue'
 import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'

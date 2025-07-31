@@ -137,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, defineExpose } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 interface Task {
   id: number | string
@@ -309,6 +309,4 @@ function getLevelClass(level: string) {
 onMounted(() => {
   fetchProjects()
 })
-
-defineExpose({ fetchTasksByProject })
 </script>
