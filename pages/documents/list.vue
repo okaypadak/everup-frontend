@@ -195,7 +195,7 @@ async function deleteDocument(id) {
 
   const idsToDelete = collectIds(allDocs.value, id)
   
-  // Remove from local state
+  // Yerel durumdan kaldır
   allDocs.value = allDocs.value.filter(doc => !idsToDelete.includes(doc.id))
 }
 

@@ -329,14 +329,14 @@ function getLevelClass(level: string) {
   }
 }
 
-// Watch for changes in selectedUserId and trigger filtering
+// Seçili kullanıcı değişikliklerini izle ve filtrelemeyi tetikle
 watch(selectedUserId, () => {
   if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
     fetchFilteredTasks()
   }
 })
 
-// Watch for changes in taskFilter and trigger filtering if labels are selected
+// Görev filtresi değişikliklerini izle ve etiketler seçiliyse filtrelemeyi tetikle
 watch(taskFilter, () => {
   if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
     fetchFilteredTasks()
