@@ -71,6 +71,26 @@
       </select>
     </label>
 
+    <!-- Etiketler -->
+    <div v-if="projectLabels.length > 0" class="block">
+      <span class="block text-gray-700 text-base font-semibold mb-1">Etiketler</span>
+      <div class="flex flex-wrap gap-2 mt-1">
+        <button
+            v-for="label in projectLabels"
+            :key="label.id"
+            @click="toggleLabel(label.id)"
+            :class="[
+              'text-xs font-semibold px-3 py-1 rounded-full border transition-all',
+              selectedLabels.includes(label.id)
+                ? 'bg-green-500 text-white border-green-600'
+                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-green-100'
+            ]"
+        >
+          {{ label.name }}
+        </button>
+      </div>
+    </div>
+
     <!-- Çoklu Bağlı Görev -->
     <label v-if="newTaskType === 'task'" class="block">
       <span class="block text-gray-700 text-base font-semibold mb-1">Bağlı Görevler</span>
@@ -133,6 +153,7 @@ const emit = defineEmits(['add-task'])
 interface Project { id: number; name: string }
 interface User { id: number; name: string }
 interface Task { id: number | string; title: string }
+interface TaskLabel { id: number; name: string }
 
 const selectedProject = ref('')
 const assignedUser = ref('')
@@ -143,10 +164,12 @@ const newTaskTitle = ref('')
 const newTaskDesc = ref('')
 const newTaskDeadline = ref('')
 const bagliGorevler = ref<(string | number)[]>([])
+const selectedLabels = ref<number[]>([])
 
 const projects = ref<Project[]>([])
 const allUsers = ref<User[]>([])
 const tumGorevler = ref<Task[]>([])
+const projectLabels = ref<TaskLabel[]>([])
 
 const isDisabled = computed(() => !newTaskTitle.value || !selectedProject.value || !assignedUser.value)
 
@@ -175,6 +198,14 @@ watch(() => selectedProject.value, async (newId) => {
   } catch (err) {
     console.error('Görevler yüklenemedi:', err)
   }
+  
+  try {
+    const labels = await $fetch<TaskLabel[]>(`/api/task-labels/${newId}`, { credentials: 'include' })
+    projectLabels.value = labels
+  } catch (err) {
+    console.error('Etiketler yüklenemedi:', err)
+    projectLabels.value = []
+  }
 })
 
 const filteredUsers = computed(() => {
@@ -183,6 +214,14 @@ const filteredUsers = computed(() => {
       u.name.toLowerCase().includes(userSearch.value.toLowerCase())
   )
 })
+
+function toggleLabel(labelId: number) {
+  if (selectedLabels.value.includes(labelId)) {
+    selectedLabels.value = selectedLabels.value.filter(id => id !== labelId)
+  } else {
+    selectedLabels.value.push(labelId)
+  }
+}
 
 function addTaskLocal() {
   const payload = {
@@ -194,6 +233,7 @@ function addTaskLocal() {
     level: newTaskLevel.value || 'NORMAL',
     deadline: newTaskDeadline.value ? new Date(newTaskDeadline.value).toISOString() : null,
     dependencyIds: bagliGorevler.value.map(id => Number(id)),
+    labelIds: selectedLabels.value,
   }
 
   $fetch('/api/tasks', {
