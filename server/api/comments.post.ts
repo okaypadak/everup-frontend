@@ -17,8 +17,6 @@ export default defineEventHandler(async (event) => {
 
     const payload = await readBody(event)
 
-    console.log('payload', payload)
-
     try {
         const response = await ofetch(`${config.apiBaseUrl}/comments`, {
             method: 'POST',

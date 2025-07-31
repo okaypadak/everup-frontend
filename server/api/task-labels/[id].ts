@@ -5,7 +5,6 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
     const token = getCookie(event, 'auth_token')
     const projectId = getRouterParam(event, 'id')
-    console.log('Project ID:', projectId)
     if (!token) {
         return { statusCode: 401, message: 'Yetkisiz erişim' }
     }
@@ -17,7 +16,6 @@ export default defineEventHandler(async (event) => {
                 Authorization: `Bearer ${token}`
             }
         })
-        console.log("aha "+response)
         return response
     } catch (err: any) {
         console.error('Etiketler alınamadı:', err)

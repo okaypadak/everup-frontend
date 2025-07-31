@@ -167,7 +167,6 @@ const canManuallyUpdateStatus = computed(() => {
 })
 
 async function updateStatus(newStatus: Task['status']) {
-  console.log('🟢 [updateStatus] çağrıldı:', newStatus)
 
   if (!task.value?.id) return
 
