@@ -17,13 +17,13 @@
 
       <!-- Sprint Menüsü -->
       <div v-if="canSeeSprintMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @mouseenter="showSprintMenu = true">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showSprintMenu = true" @mouseleave="delayedClose('sprint')">
           Sprint Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showSprintMenu" class="dropdown-panel" @mouseleave="showSprintMenu = false">
+        <div v-if="showSprintMenu" class="dropdown-panel" @mouseenter="cancelClose('sprint')" @mouseleave="delayedClose('sprint')">
           <NuxtLink v-if="isDirector" to="/sprint/create" class="dropdown-item">Sprint Oluştur</NuxtLink>
           <NuxtLink v-if="isDirector" to="/sprint/task-list" class="dropdown-item">Sprint Görev Listesi</NuxtLink>
           <NuxtLink to="/sprint/meta" class="dropdown-item">Sprint Meta Bilgileri</NuxtLink>
@@ -33,13 +33,13 @@
 
       <!-- Proje Menüsü -->
       <div v-if="canSeeProjectMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @mouseenter="showProjectMenu = true">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showProjectMenu = true" @mouseleave="delayedClose('project')">
           Proje Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showProjectMenu" class="dropdown-panel" @mouseleave="showProjectMenu = false">
+        <div v-if="showProjectMenu" class="dropdown-panel" @mouseenter="cancelClose('project')" @mouseleave="delayedClose('project')">
           <NuxtLink to="/projects/create" class="dropdown-item">Proje Oluştur</NuxtLink>
           <NuxtLink to="/projects/members" class="dropdown-item">Katılımcılar</NuxtLink>
         </div>
@@ -47,13 +47,13 @@
 
       <!-- Müşteri Menüsü -->
       <div v-if="canSeeCustomerMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @mouseenter="showCustomerMenu = true">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showCustomerMenu = true" @mouseleave="delayedClose('customer')">
           Müşteri Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showCustomerMenu" class="dropdown-panel" @mouseleave="showCustomerMenu = false">
+        <div v-if="showCustomerMenu" class="dropdown-panel" @mouseenter="cancelClose('customer')" @mouseleave="delayedClose('customer')">
           <NuxtLink v-if="user.value?.role !== 'marketer'" to="/customers/create" class="dropdown-item">Müşteri Kaydet</NuxtLink>
           <NuxtLink to="/customers/marketing" class="dropdown-item">Pazarlama Takip</NuxtLink>
         </div>
@@ -61,13 +61,13 @@
 
       <!-- Kullanıcı Menüsü -->
       <div v-if="canSeeUserMenu" class="relative">
-        <button class="nav-link flex items-center gap-1" @mouseenter="showUserManagementMenu = true">
+        <button class="nav-link flex items-center gap-1" @mouseenter="showUserManagementMenu = true" @mouseleave="delayedClose('user')">
           Kullanıcı Yönetimi
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showUserManagementMenu" class="dropdown-panel" @mouseleave="showUserManagementMenu = false">
+        <div v-if="showUserManagementMenu" class="dropdown-panel" @mouseenter="cancelClose('user')" @mouseleave="delayedClose('user')">
           <NuxtLink to="/users/create" class="dropdown-item">Kullanıcı Oluştur</NuxtLink>
           <NuxtLink to="/users/update" class="dropdown-item">Kullanıcı rol güncelle</NuxtLink>
         </div>
@@ -85,17 +85,19 @@
       </button>
 
       <!-- Kullanıcı Profili -->
-      <div v-if="isLoggedName" class="relative" @mouseenter="showUserMenu = true" @mouseleave="showUserMenu = false">
+      <div v-if="isLoggedName" class="relative" @mouseenter="showProfileMenu = true" @mouseleave="delayedClose('profile')">
         <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
           <span class="font-semibold text-gray-700 hidden sm:inline">{{ user.name }}</span>
           <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div v-if="showUserMenu" class="dropdown-panel right-0">
+        <div v-if="showProfileMenu" class="dropdown-panel right-0" @mouseenter="cancelClose('profile')" @mouseleave="delayedClose('profile')">
           <button class="dropdown-item text-red-600" @click="logout">Çıkış Yap</button>
         </div>
       </div>
+
+
     </div>
   </nav>
 </template>
@@ -112,6 +114,7 @@ const showSprintMenu = ref(false)
 const showProjectMenu = ref(false)
 const showUserManagementMenu = ref(false)
 const showCustomerMenu = ref(false)
+const showProfileMenu = ref(false)
 const showUserMenu = ref(false)
 const showNotifications = ref(false)
 const notifications = ref(3)
@@ -128,6 +131,44 @@ const canSeeUserMenu = computed(() =>
 const canSeeCustomerMenu = computed(() =>
     ['admin', 'director', 'marketer'].includes(user.value?.role ?? '')
 )
+
+let sprintTimeout: ReturnType<typeof setTimeout>
+let projectTimeout: ReturnType<typeof setTimeout>
+let userTimeout: ReturnType<typeof setTimeout>
+let customerTimeout: ReturnType<typeof setTimeout>
+let profileTimeout: ReturnType<typeof setTimeout>
+
+const delayedClose = (target: string) => {
+  const setter = {
+    sprint: () => showSprintMenu.value = false,
+    project: () => showProjectMenu.value = false,
+    user: () => showUserManagementMenu.value = false,
+    customer: () => showCustomerMenu.value = false,
+    profile: () => showProfileMenu.value = false,
+  }
+
+  const timeouts = {
+    sprint: () => sprintTimeout = setTimeout(setter.sprint, 300),
+    project: () => projectTimeout = setTimeout(setter.project, 300),
+    user: () => userTimeout = setTimeout(setter.user, 300),
+    customer: () => customerTimeout = setTimeout(setter.customer, 300),
+    profile: () => profileTimeout = setTimeout(setter.profile, 300),
+  }
+
+  timeouts[target]()
+}
+
+const cancelClose = (target: string) => {
+  const clears = {
+    sprint: () => clearTimeout(sprintTimeout),
+    project: () => clearTimeout(projectTimeout),
+    user: () => clearTimeout(userTimeout),
+    customer: () => clearTimeout(customerTimeout),
+    profile: () => clearTimeout(profileTimeout),
+  }
+
+  clears[target]()
+}
 
 const logout = async () => {
   await $fetch('/api/logout', { method: 'POST' })
@@ -148,6 +189,8 @@ const logout = async () => {
 .nav-link:hover {
   color: #059669;
   text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
 }
 .dropdown-item {
   display: block;
@@ -159,6 +202,7 @@ const logout = async () => {
   color: #374151;
   cursor: pointer;
   transition: background-color 0.2s;
+  text-decoration: none !important;
 }
 .dropdown-item:hover {
   background-color: #e0f2fe;
@@ -175,5 +219,9 @@ const logout = async () => {
   padding: 0.5rem 0;
   z-index: 50;
   width: 16rem;
+}
+.dropdown-panel.right-0 {
+  right: 0;
+  left: auto;
 }
 </style>
