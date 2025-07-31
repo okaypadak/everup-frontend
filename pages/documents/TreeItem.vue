@@ -48,17 +48,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
-
 
 const props = defineProps({
   document: Object,
   allDocuments: Array
 })
 const emit = defineEmits(['refresh'])
-
-const route = useRoute()
-const projectId = 1
 
 const showInput = ref(false)
 const newTitle = ref('')

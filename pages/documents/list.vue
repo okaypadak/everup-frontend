@@ -85,6 +85,8 @@ async function fetchDocuments() {
   if (!selectedProject.value) return
   const res = await $fetch(`/api/documents/project/${selectedProject.value}`)
   documents.value = res || []
+
+  console.log(documents.value )
 }
 
 async function addRootDocument() {
