@@ -8,23 +8,26 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
 
     if (!token) {
-        return { statusCode: 401, message: 'Giriş yapmanız gerekiyor.' }
+        return {
+            statusCode: 401,
+            message: 'Giriş yapmanız gerekiyor.'
+        }
     }
 
     try {
-        await ofetch(`${config.apiBaseUrl}/documents/${id}`, {
-            method: 'DELETE',
+        const document = await ofetch(`${config.apiBaseUrl}/documents/${id}`, {
+            method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
 
-        return { deleted: true }
+        return document
     } catch (err: any) {
-        console.error('Döküman silinemedi:', err)
+        console.error('Döküman alınamadı:', err)
         return {
             statusCode: err.response?.status || 500,
-            message: 'Silme işlemi başarısız oldu'
+            message: 'Döküman getirme işlemi başarısız oldu'
         }
     }
 })
