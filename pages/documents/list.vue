@@ -168,8 +168,18 @@ async function addChildDocument(parentId) {
     desc: 'Alt başlık özeti.',
     content: ''
   }
-  console.log('[ADD] Alt döküman eklendi:', newChild)
-  allDocs.value.push(newChild)
+  
+  try {
+    const response = await $fetch('/api/documents', {
+      method: 'POST',
+      body: payload
+    })
+    
+    // Backend'den dönen doküman (ID dahil) listeye ekleniyor
+    allDocs.value.push(response)
+  } catch (error) {
+    console.error('Alt döküman eklenirken hata oluştu:', error)
+  }
 }
 
 // Döküman (ve çocuklarını) sil
@@ -187,7 +197,6 @@ async function deleteDocument(id) {
   
   // Remove from local state
   allDocs.value = allDocs.value.filter(doc => !idsToDelete.includes(doc.id))
-  console.log('[DELETE] Güncel allDocs:', allDocs.value)
 }
 
 </script>
