@@ -41,6 +41,7 @@
         <div class="flex gap-2">
           <button :class="buttonClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
           <button :class="buttonClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
+          <button :class="buttonClass('kendim')" @click="taskFilter = 'kendim'">Kendi Açtığım Görevler</button>
           <button :class="buttonClass('tum')" @click="taskFilter = 'tum'">Tümü</button>
         </div>
       </div>
@@ -138,6 +139,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 
 interface Task {
   id: number | string
@@ -154,6 +156,7 @@ interface Task {
   formattedDeadline?: string | null
   labels?: { id: number, name: string }[]
   assignedTo?: number
+  createdBy?: number
   project?: { id: number; name: string }
 }
 
@@ -172,13 +175,14 @@ interface Project {
   name: string
 }
 
-const taskFilter = ref<'devam' | 'hazir' | 'tum'>('devam')
+const taskFilter = ref<'devam' | 'hazir' | 'tum' | 'kendim'>('devam')
 const tasks = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
 const selectedLabelIds = ref<number[]>([])
 const selectedUserId = ref<number | null>(null)
 const selectedProjectId = ref<number | null>(null)
 const projectUsers = ref<User[]>([])
+const { user } = useAuth()
 const projects = ref<Project[]>([])
 
 function formatTime(dateStr: string) {
@@ -249,7 +253,7 @@ async function fetchFilteredTasks() {
   if (!selectedProjectId.value) return
   
   try {
-    const data = await $fetch<Task[]>(`/api/tasks/project/${selectedProjectId.value}/filter`, {
+    const data = await $fetch<Task[]>(`/api/tasks/label/filter`, {
       method: 'POST',
       body: {
         labelIds: selectedLabelIds.value
@@ -270,6 +274,13 @@ async function fetchFilteredTasks() {
 
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
+      // When 'kendim' filter is active, we're already fetching only created tasks
+      // so we don't need additional filtering by creator
+      if (taskFilter.value === 'kendim') {
+        const matchesUser = !selectedUserId.value || task.assignedTo === selectedUserId.value
+        return matchesUser
+      }
+      
       const matchesStatus =
           taskFilter.value === 'tum' ||
           (taskFilter.value === 'devam' && task.status === 'In Progress') ||
@@ -336,14 +347,37 @@ watch(selectedUserId, () => {
   }
 })
 
-// Görev filtresi değişikliklerini izle ve etiketler seçiliyse filtrelemeyi tetikle
+// Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
 watch(taskFilter, () => {
-  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+  if (taskFilter.value === 'kendim') {
+    fetchCreatedTasks()
+  } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
     fetchFilteredTasks()
   }
 })
 
+// Kullanıcının oluşturduğu görevleri getir
+async function fetchCreatedTasks() {
+  try {
+    const data = await $fetch<Task[]>('/api/tasks/created', { credentials: 'include' })
+    tasks.value = data.map(task => ({
+      ...task,
+      gorevKodu: task.id,
+      time: formatTime(task.createdAt),
+      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
+    }))
+  } catch (err) {
+    console.error('Kullanıcının oluşturduğu görevler alınamadı:', err)
+    tasks.value = []
+  }
+}
+
 onMounted(() => {
   fetchProjects()
+  
+  // If the kendim filter is selected on initial load, fetch created tasks
+  if (taskFilter.value === 'kendim') {
+    fetchCreatedTasks()
+  }
 })
 </script>
