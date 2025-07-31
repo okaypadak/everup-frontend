@@ -1,38 +1,78 @@
 <template>
-  <li>
-    <div class="flex items-center gap-2 py-2 px-2 hover:bg-sky-50 rounded transition">
-      <span
-          class="font-bold text-gray-800 cursor-pointer flex-1"
-          @click="$emit('open', node)"
-      >
-        📄 {{ node.title || '[Başlık yok]' }}
-      </span>
-      <span class="text-gray-400 text-xs">{{ node.desc || '[Açıklama yok]' }}</span>
+  <div class="ml-4 border-l pl-3 border-gray-300 space-y-1">
+    <!-- Mevcut başlık ve aksiyonlar -->
+    <div class="flex items-center justify-between group">
+      <div class="text-gray-800 font-medium">{{ document.title }}</div>
 
-      <button
-          class="px-2 py-1 rounded bg-green-50 hover:bg-green-100 border border-green-200 text-green-600 text-xs font-semibold"
-          @click.stop="$emit('add-child', node.id)"
-      >+ Alt Başlık</button>
+      <!-- Butonlar -->
+      <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <!-- ➕ Alt başlık -->
+        <button
+            @click="showInput = !showInput"
+            class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded hover:bg-green-200"
+        >
+          + Alt Başlık
+        </button>
 
-      <button
-          class="px-2 py-1 rounded bg-red-50 hover:bg-red-100 border border-red-200 text-red-500 text-xs font-semibold"
-          @click.stop="$emit('delete', node.id)"
-      >X</button>
+        <!-- 🗑 Sil -->
+        <button
+            @click="onDelete(document.id)"
+            class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded hover:bg-red-200"
+        >
+          🗑 Sil
+        </button>
+      </div>
     </div>
 
-    <ul v-if="node.children?.length" class="pl-6 border-l-2 border-sky-100">
-      <TreeItem
-          v-for="child in node.children"
-          :key="child.id"
-          :node="child"
-          @open="$emit('open', $event)"
-          @add-child="$emit('add-child', $event)"
-          @delete="$emit('delete', $event)"
+    <!-- ➕ Alt başlık inputu -->
+    <div v-if="showInput" class="ml-2">
+      <input
+          v-model="newTitle"
+          @keydown.enter="addChild"
+          placeholder="Alt başlık yazın ve Enter’a basın"
+          class="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring"
       />
-    </ul>
-  </li>
+    </div>
+
+    <!-- 🔁 Alt başlıklar -->
+    <TreeItem
+        v-for="child in children"
+        :key="child.id"
+        :document="child"
+        :all-documents="allDocuments"
+        @add="emit('add', $event)"
+        @delete="emit('delete', $event)"
+    />
+  </div>
 </template>
 
 <script setup>
-defineProps({ node: Object })
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  document: Object,
+  allDocuments: Array
+})
+const emit = defineEmits(['add', 'delete'])
+
+const showInput = ref(false)
+const newTitle = ref('')
+
+// Alt başlıklar
+const children = computed(() =>
+    props.allDocuments.filter(doc => doc.parentId === props.document.id)
+)
+
+// ➕ Alt başlık ekleme
+function addChild() {
+  if (!newTitle.value.trim()) return
+  emit('add', { parentId: props.document.id, title: newTitle.value })
+  newTitle.value = ''
+  showInput.value = false
+}
+
+// 🗑 Silme
+function onDelete(id) {
+  emit('delete', id)
+}
 </script>
