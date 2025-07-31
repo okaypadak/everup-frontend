@@ -46,16 +46,6 @@
         </div>
       </div>
 
-      <!-- Kullanıcı Seçimi -->
-      <div v-if="projectUsers.length">
-        <label class="text-sm font-medium text-gray-600 mr-2">Kullanıcı:</label>
-        <select v-model="selectedUserId" class="border px-2 py-1 rounded text-sm">
-          <option :value="null">Tüm kullanıcılar</option>
-          <option v-for="user in projectUsers" :key="user.id" :value="user.id">
-            {{ user.fullName }}
-          </option>
-        </select>
-      </div>
     </div>
 
     <!-- Etiket Filtresi -->
@@ -139,7 +129,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useAuth } from '~/composables/useAuth'
 
 interface Task {
   id: number | string
@@ -179,10 +168,7 @@ const taskFilter = ref<'devam' | 'hazir' | 'tum' | 'kendim'>('devam')
 const tasks = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
 const selectedLabelIds = ref<number[]>([])
-const selectedUserId = ref<number | null>(null)
 const selectedProjectId = ref<number | null>(null)
-const projectUsers = ref<User[]>([])
-const { user } = useAuth()
 const projects = ref<Project[]>([])
 
 function formatTime(dateStr: string) {
@@ -231,9 +217,8 @@ function onProjectSelect() {
   } else {
     tasks.value = []
     projectLabels.value = []
-    projectUsers.value = []
   }
-  selectedUserId.value = null
+  // selectedUserId sıfırlama kaldırıldı
   selectedLabelIds.value = []
 }
 
@@ -274,22 +259,19 @@ async function fetchFilteredTasks() {
 
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
-      // When 'kendim' filter is active, we're already fetching only created tasks
-      // so we don't need additional filtering by creator
+      
+      // 'kendim' filtresi aktif olduğunda, zaten sadece oluşturulan görevleri getiriyoruz
       if (taskFilter.value === 'kendim') {
-        const matchesUser = !selectedUserId.value || task.assignedTo === selectedUserId.value
-        return matchesUser
+        return true
       }
       
       const matchesStatus =
           taskFilter.value === 'tum' ||
           (taskFilter.value === 'devam' && task.status === 'In Progress') ||
           (taskFilter.value === 'hazir' && task.status === 'Ready')
+      
 
-      const matchesUser =
-          !selectedUserId.value || task.assignedTo === selectedUserId.value
-
-      return matchesStatus && matchesUser
+      return matchesStatus
     })
 )
 
@@ -340,13 +322,6 @@ function getLevelClass(level: string) {
   }
 }
 
-// Seçili kullanıcı değişikliklerini izle ve filtrelemeyi tetikle
-watch(selectedUserId, () => {
-  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
-    fetchFilteredTasks()
-  }
-})
-
 // Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
 watch(taskFilter, () => {
   if (taskFilter.value === 'kendim') {
@@ -375,7 +350,7 @@ async function fetchCreatedTasks() {
 onMounted(() => {
   fetchProjects()
   
-  // If the kendim filter is selected on initial load, fetch created tasks
+  // Eğer başlangıçta 'kendim' filtresi seçiliyse, oluşturulan görevleri getir
   if (taskFilter.value === 'kendim') {
     fetchCreatedTasks()
   }
