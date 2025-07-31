@@ -17,16 +17,27 @@
       </div>
 
       <!-- Proje Seçimi -->
-      <div class="mb-2 flex gap-4 flex-wrap">
-        <div>
-          <label class="text-sm font-medium text-gray-600 mr-2">Proje:</label>
-          <select v-model="selectedProjectId" @change="onProjectSelect" class="border px-2 py-1 rounded text-sm">
-            <option :value="null">Tüm projeler</option>
+      <div class="flex flex-col">
+        <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
+        <div class="relative">
+          <select
+              v-model="selectedProjectId"
+              @change="onProjectSelect"
+              class="appearance-none w-full bg-white border border-gray-300 text-gray-700 text-sm py-2 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+          >
+            <option disabled :value="null">Proje seçiniz</option>
             <option v-for="project in projects" :key="project.id" :value="project.id">
               {{ project.name }}
             </option>
           </select>
+          <!-- aşağı ok simgesi -->
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </div>
         </div>
+      </div>
 
       <div class="flex gap-2">
         <button :class="buttonClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
