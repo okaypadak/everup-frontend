@@ -137,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 interface Task {
   id: number | string
@@ -239,6 +239,33 @@ function toggleLabel(labelId: number) {
   } else {
     selectedLabelIds.value.push(labelId)
   }
+  
+  if (selectedProjectId.value) {
+    fetchFilteredTasks()
+  }
+}
+
+async function fetchFilteredTasks() {
+  if (!selectedProjectId.value) return
+  
+  try {
+    const data = await $fetch<Task[]>(`/api/tasks/project/${selectedProjectId.value}/filter`, {
+      method: 'POST',
+      body: {
+        labelIds: selectedLabelIds.value
+      },
+      credentials: 'include'
+    })
+    
+    tasks.value = data.map(task => ({
+      ...task,
+      gorevKodu: task.id,
+      time: formatTime(task.createdAt),
+      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
+    }))
+  } catch (err) {
+    console.error('Etiket filtreleme hatası:', err)
+  }
 }
 
 const filteredVisibleTasks = computed(() =>
@@ -248,14 +275,10 @@ const filteredVisibleTasks = computed(() =>
           (taskFilter.value === 'devam' && task.status === 'In Progress') ||
           (taskFilter.value === 'hazir' && task.status === 'Ready')
 
-      const matchesLabels =
-          selectedLabelIds.value.length === 0 ||
-          (task.labels || []).some(label => selectedLabelIds.value.includes(label.id))
-
       const matchesUser =
           !selectedUserId.value || task.assignedTo === selectedUserId.value
 
-      return matchesStatus && matchesLabels && matchesUser
+      return matchesStatus && matchesUser
     })
 )
 
@@ -305,6 +328,20 @@ function getLevelClass(level: string) {
     default: return 'bg-gray-300 text-gray-800'
   }
 }
+
+// Watch for changes in selectedUserId and trigger filtering
+watch(selectedUserId, () => {
+  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+    fetchFilteredTasks()
+  }
+})
+
+// Watch for changes in taskFilter and trigger filtering if labels are selected
+watch(taskFilter, () => {
+  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+    fetchFilteredTasks()
+  }
+})
 
 onMounted(() => {
   fetchProjects()
