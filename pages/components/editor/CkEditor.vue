@@ -1,55 +1,46 @@
 <template>
   <ClientOnly>
-    <ckeditor :editor="editor" v-model="data" :config="editorConfig" @input="emitChange" />
+    <ckeditor
+        v-if="editor"
+        :editor="editor"
+        v-model="data"
+        :config="editorConfig"
+    />
   </ClientOnly>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import CKEditor from '@ckeditor/ckeditor5-vue'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
   config: { type: Object, default: () => ({}) }
 })
-
 const emit = defineEmits(['update:modelValue'])
 
-const editor = ClassicEditor
-const data = ref(props.modelValue)
+const { $ckeditorEditor } = useNuxtApp()
 
-const editorConfig = {
+const data = ref(props.modelValue)
+const editor = $ckeditorEditor
+
+const editorConfig = ref({
   toolbar: [
     'heading',
     '|',
-    'bold', 'italic', 'underline', 'strikethrough', 'code', 'subscript', 'superscript',
+    'bold', 'italic', 'underline', 'strikethrough',
     '|',
-    'link', 'imageUpload', 'insertTable', 'mediaEmbed',
+    'link', 'bulletedList', 'numberedList',
     '|',
-    'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
-    '|',
-    'alignment', 'blockQuote', 'codeBlock',
-    '|',
-    'undo', 'redo', 'removeFormat'
+    'blockQuote', 'undo', 'redo'
   ],
   ...props.config
-}
+})
 
 watch(() => props.modelValue, (val) => {
   if (val !== data.value) data.value = val
 })
 
-function emitChange(evt, editorInstance) {
-  const html = editorInstance.getData()
-  emit('update:modelValue', html)
-}
-</script>
-
-<script>
-export default {
-  components: {
-    ckeditor: CKEditor.component
-  }
-}
+watch(data, (val) => {
+  emit('update:modelValue', val)
+})
 </script>
