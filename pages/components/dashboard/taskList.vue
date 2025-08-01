@@ -355,7 +355,7 @@ function getLevelClass(level: string) {
 // Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
 watch(taskFilter, () => {
 
-  //tasks.value = []
+  tasks.value = []
 
   if (taskFilter.value === 'kendim') {
     fetchCreatedTasks()
