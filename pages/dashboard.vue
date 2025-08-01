@@ -31,21 +31,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
 import CommentListPanel from './components/dashboard/commentList.vue'
 import Navbar from './components/bar/Navbar.vue'
+import { useFetch } from '#app'
 
-// Statik yorumlar ve bildirimler
-const comments = ref([
-  { id: 1, author: 'Ahmet', text: 'Yeni görevleri gördüm, eline sağlık!', time: '5 dk önce' },
-  { id: 2, author: 'Merve', text: 'Bildirimler çok iyi çalışıyor.', time: '1 saat önce' }
-])
+const comments = ref([])
 
 const notifications = ref([
   { id: 1, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1001', time: '3 dk önce' },
   { id: 2, type: 'yorum', kisi: 'Merve', gorevKodu: 'GOREV-1003', time: '1 saat önce' }
 ])
+
+onMounted(async () => {
+  try {
+    const { data, error } = await useFetch('/api/comments/me')
+
+    if (error.value) {
+      console.error('Yorumlar alınırken hata:', error.value)
+    } else {
+      comments.value = data.value || []
+    }
+  } catch (err) {
+    console.error('Beklenmeyen yorum yükleme hatası:', err)
+  }
+})
 </script>
+
