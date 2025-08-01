@@ -1,6 +1,5 @@
 <template>
-
-  <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4" style="height: 100%; max-height: 100%;">
+  <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4 h-full overflow-y-auto min-h-0">
 
     <!-- Başlık ve Filtreler -->
     <div class="flex items-center justify-between mb-2">
@@ -13,15 +12,13 @@
         Görevler
       </div>
 
-
       <div class="mb-2 flex gap-4 flex-wrap">
 
-
-
         <!-- Filtre Tabs -->
-        <div class="w-full  border-gray-200 flex gap-2 mb-4">
+        <div class="w-full border-gray-200 flex gap-2 mb-4">
 
           <div class="flex flex-col pr-9">
+
             <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
             <div class="relative">
               <select
