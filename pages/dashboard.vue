@@ -40,23 +40,27 @@ import Navbar from './components/bar/Navbar.vue'
 import { useFetch } from '#app'
 
 const comments = ref([])
-
-const notifications = ref([
-  { id: 1, type: 'gorev', kisi: 'Ahmet', gorevKodu: 'GOREV-1001', time: '3 dk önce' },
-  { id: 2, type: 'yorum', kisi: 'Merve', gorevKodu: 'GOREV-1003', time: '1 saat önce' }
-])
+const notifications = ref([])
 
 onMounted(async () => {
   try {
-    const { data, error } = await useFetch('/api/comments/me')
-
-    if (error.value) {
-      console.error('Yorumlar alınırken hata:', error.value)
+    // Yorumları çek
+    const { data: commentData, error: commentError } = await useFetch('/api/comments/mine')
+    if (commentError.value) {
+      console.error('Yorumlar alınırken hata:', commentError.value)
     } else {
-      comments.value = data.value || []
+      comments.value = commentData.value || []
+    }
+
+    // Bildirimleri çek
+    const { data: notifData, error: notifError } = await useFetch('/api/notifications/mine')
+    if (notifError.value) {
+      console.error('Bildirimler alınırken hata:', notifError.value)
+    } else {
+      notifications.value = notifData.value || []
     }
   } catch (err) {
-    console.error('Beklenmeyen yorum yükleme hatası:', err)
+    console.error('Veriler alınırken beklenmeyen hata:', err)
   }
 })
 </script>
