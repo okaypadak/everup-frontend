@@ -152,7 +152,7 @@ const emit = defineEmits(['add-task'])
 
 interface Project { id: number; name: string }
 interface User { id: number; name: string }
-interface Task { id: number | string; title: string }
+interface Task { id: number | string; title: string; status: string; type: string; level: string; assignedTo: number; project: number; deadline: string | null; dependencyIds: number[]; labelIds: number[]; description: string; }
 interface TaskLabel { id: number; name: string }
 
 const selectedProject = ref('')
@@ -194,7 +194,7 @@ watch(() => selectedProject.value, async (newId) => {
 
   try {
     const taskList = await $fetch<Task[]>(`/api/tasks/project/${newId}`)
-    tumGorevler.value = taskList
+    tumGorevler.value = taskList.filter(task => task.status !== 'completed'
   } catch (err) {
     console.error('Görevler yüklenemedi:', err)
   }
