@@ -194,7 +194,7 @@ watch(() => selectedProject.value, async (newId) => {
 
   try {
     const taskList = await $fetch<Task[]>(`/api/tasks/project/${newId}`)
-    tumGorevler.value = taskList.filter(task => task.status !== 'completed'
+    tumGorevler.value = taskList.filter(task => task.status !== 'completed')
   } catch (err) {
     console.error('Görevler yüklenemedi:', err)
   }

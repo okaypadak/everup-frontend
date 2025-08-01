@@ -2,9 +2,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useFetch } from '#app'
-import EditorWrapper from '/pages/components/editor/EditorWrapper.vue'
+import TipTap from '/pages/components/editor/TipTap.vue'
 import Navbar from '~/pages/components/bar/Navbar.vue'
 import Footer from '~/pages/components/bar/Footer.vue'
+import CkEditor from "~/pages/components/editor/CkEditor.vue";
 
 const route = useRoute()
 const doc = ref({ id: '', title: '', desc: '', content: '' })
@@ -84,7 +85,7 @@ async function updateDocument() {
 
           <input v-model="doc.title" type="text" placeholder="Başlık..." class="w-full text-3xl font-extrabold border-0 border-b-2 border-sky-100 focus:border-sky-500 bg-transparent px-1 mb-3 py-3 outline-none transition">
           <input v-model="doc.desc" type="text" placeholder="Özet (isteğe bağlı)..." class="w-full text-lg font-medium border-0 border-b border-gray-100 focus:border-sky-500 bg-transparent px-1 mb-8 py-2 outline-none transition text-gray-500">
-          <EditorWrapper v-model="doc.content" class="ProseMirror-Word" />
+          <CkEditor v-model="doc.content" class="ProseMirror-Word" />
 
           <p v-if="successMessage" class="text-green-600 mt-4">{{ successMessage }}</p>
           <p v-if="errorMessage" class="text-red-600 mt-4">{{ errorMessage }}</p>
