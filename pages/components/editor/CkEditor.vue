@@ -21,9 +21,17 @@ const data = ref(props.modelValue)
 
 const editorConfig = {
   toolbar: [
-    'heading', '|', 'bold', 'italic', 'underline', 'strikethrough',
-    '|', 'link', 'bulletedList', 'numberedList',
-    '|', 'blockQuote', 'undo', 'redo'
+    'heading',
+    '|',
+    'bold', 'italic', 'underline', 'strikethrough', 'code', 'subscript', 'superscript',
+    '|',
+    'link', 'imageUpload', 'insertTable', 'mediaEmbed',
+    '|',
+    'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
+    '|',
+    'alignment', 'blockQuote', 'codeBlock',
+    '|',
+    'undo', 'redo', 'removeFormat'
   ],
   ...props.config
 }
