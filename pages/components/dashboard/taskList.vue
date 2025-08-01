@@ -357,10 +357,15 @@ function getLevelClass(level: string) {
 
 // Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
 watch(taskFilter, () => {
+
+  //tasks.value = []
+
   if (taskFilter.value === 'kendim') {
     fetchCreatedTasks()
   } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
     fetchFilteredTasks()
+  } else if (selectedProjectId.value) {
+    fetchTasksByProject(selectedProjectId.value)
   }
 })
 
@@ -382,10 +387,5 @@ async function fetchCreatedTasks() {
 
 onMounted(() => {
   fetchProjects()
-
-  // Eğer başlangıçta 'kendim' filtresi seçiliyse, oluşturulan görevleri getir
-  if (taskFilter.value === 'kendim') {
-    fetchCreatedTasks()
-  }
 })
 </script>
