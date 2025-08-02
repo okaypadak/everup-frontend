@@ -354,9 +354,6 @@ function getLevelClass(level: string) {
 
 // Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
 watch(taskFilter, () => {
-
-  tasks.value = []
-
   if (taskFilter.value === 'kendim') {
     fetchCreatedTasks()
   } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
@@ -369,6 +366,7 @@ watch(taskFilter, () => {
 // Kullanıcının oluşturduğu görevleri getir
 async function fetchCreatedTasks() {
   try {
+    tasks.value = []
     const data = await $fetch<Task[]>('/api/tasks/created', { credentials: 'include' })
     tasks.value = data.map(task => ({
       ...task,

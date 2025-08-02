@@ -29,9 +29,17 @@ const editorConfig = ref({
     '|',
     'bold', 'italic', 'underline', 'strikethrough',
     '|',
-    'link', 'bulletedList', 'numberedList',
+    'link', 'imageUpload', 'insertTable',
     '|',
-    'blockQuote', 'undo', 'redo'
+    'bulletedList', 'numberedList', 'todoList',
+    '|',
+    'blockQuote', 'codeBlock',
+    '|',
+    'alignment', 'outdent', 'indent',
+    '|',
+    'undo', 'redo',
+    '|',
+    'removeFormat'
   ],
   ...props.config
 })
