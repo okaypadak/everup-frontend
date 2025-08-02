@@ -261,11 +261,12 @@ function toggleLabel(labelId: number) {
     selectedLabelIds.value = [...current, labelId]
   }
 
-  console.log('Seçili label ID listesi:', selectedLabelIds.value)
-
-  // Eğer proje seçiliyse ve en az 1 etiket varsa filtrele
-  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
-    fetchFilteredTasks(selectedProjectId.value)
+  if (selectedProjectId.value) {
+    if (selectedLabelIds.value.length > 0) {
+      fetchFilteredTasks(selectedProjectId.value)
+    } else {
+      fetchTasksByProject(selectedProjectId.value)
+    }
   }
 }
 
