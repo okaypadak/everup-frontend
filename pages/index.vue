@@ -46,6 +46,7 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
+import {useAuthStore} from "~/stores/authStore";
 
 const { user } = useAuth()
 const router = useRouter()
@@ -66,7 +67,7 @@ async function login(): Promise<void> {
     if (res.statusCode === 200) {
       // Token set edildikten sonra güncel kullanıcı bilgisi çek
       const me = await $fetch('/api/me')
-      user.value = me.user
+      useAuthStore().setUser(me)
 
       router.push('/dashboard')
     } else {

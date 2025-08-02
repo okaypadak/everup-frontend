@@ -4,8 +4,8 @@
     <div class="flex items-center justify-between mb-2">
       <div class="flex items-center gap-2 text-lg font-semibold text-gray-700">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2"/>
-          <path d="M16 3v4M8 3v4" stroke-width="2" stroke-linecap="round"/>
+          <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2" />
+          <path d="M16 3v4M8 3v4" stroke-width="2" stroke-linecap="round" />
         </svg>
         Görevler
       </div>
@@ -19,7 +19,6 @@
         <button :class="tabClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
         <button :class="tabClass('tamam')" @click="taskFilter = 'tamam'">Tamamlananlar</button>
         <button :class="tabClass('bekleyen')" @click="taskFilter = 'bekleyen'">Bekleyenler</button>
-        <button :class="tabClass('kendim')" @click="taskFilter = 'kendim'">Kendi Açtığım</button>
       </div>
 
       <!-- Proje dropdown -->
@@ -38,7 +37,11 @@
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+              <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd"
+              />
             </svg>
           </div>
         </div>
@@ -63,7 +66,7 @@
     </div>
 
     <!-- Görev Listesi -->
-    <ul class="space-y-2 flex-1 overflow-y-auto min-h-0 pr-1" style="max-height: 100%;">
+    <ul class="space-y-2 flex-1 overflow-y-auto min-h-0 pr-1">
       <template v-if="filteredVisibleTasks.length > 0">
         <li
             v-for="task in filteredVisibleTasks"
@@ -126,9 +129,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useProjectStore } from '@/stores/projectStore' // ✅ Pinia Store
+const projectStore = useProjectStore() // ✅ store instance
 
 interface Task {
-  id: number | string
+  id: number
   title: string
   status: string
   type: string
@@ -141,9 +146,6 @@ interface Task {
   time?: string
   formattedDeadline?: string | null
   labels?: { id: number, name: string }[]
-  assignedTo?: number
-  createdBy?: number
-  project?: { id: number; name: string }
 }
 
 interface TaskLabel {
@@ -156,12 +158,15 @@ interface Project {
   name: string
 }
 
-const taskFilter = ref<'devam' | 'hazir' | 'tamam' | 'bekleyen' | 'kendim'>('devam')
+const taskFilter = ref<'devam' | 'hazir' | 'tamam' | 'bekleyen'>('devam')
 const tasks = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
 const selectedLabelIds = ref<number[]>([])
 const selectedProjectId = ref<number | null>(null)
 const projects = ref<Project[]>([])
+
+import { useTaskStore } from '@/stores/taskStore'
+const taskStore = useTaskStore()
 
 function tabClass(type: string) {
   return [
@@ -185,7 +190,6 @@ async function fetchProjects() {
   if (error.value) return console.error('Projeler alınamadı:', error.value)
   projects.value = data.value || []
 
-  // ✅ Otomatik seçim
   if (projects.value.length === 1) {
     selectedProjectId.value = projects.value[0].id
     onProjectSelect()
@@ -208,22 +212,37 @@ async function fetchTasksByProject(projectId: number) {
 }
 
 async function fetchProjectLabels(projectId: number) {
+  if (projectStore.projectLabels.length > 0) {
+    projectLabels.value = projectStore.projectLabels
+    return
+  }
+
   try {
     const data = await $fetch<TaskLabel[]>(`/api/task-labels/${projectId}`, { credentials: 'include' })
     projectLabels.value = data
+    projectStore.setLabels(data)
   } catch (err) {
     console.error('Etiketler alınamadı:', err)
   }
 }
 
+// ✅ Güncellenmiş proje seçimi fonksiyonu
 function onProjectSelect() {
   if (selectedProjectId.value) {
+    const selected = projects.value.find(p => p.id === selectedProjectId.value)
+
+    if (selected) {
+      projectStore.setProject(selected.id, selected.name)
+    }
+
     fetchTasksByProject(selectedProjectId.value)
     fetchProjectLabels(selectedProjectId.value)
   } else {
     tasks.value = []
     projectLabels.value = []
+    projectStore.clearProject() // ✅ store sıfırla
   }
+
   selectedLabelIds.value = []
 }
 
@@ -263,24 +282,8 @@ async function fetchFilteredTasks(projectId: number) {
   }
 }
 
-async function fetchCreatedTasks() {
-  try {
-    const data = await $fetch<Task[]>('/api/tasks/created', { credentials: 'include' })
-    tasks.value = data.map(task => ({
-      ...task,
-      gorevKodu: task.id,
-      time: formatTime(task.createdAt),
-      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
-    }))
-  } catch (err) {
-    console.error('Kullanıcının oluşturduğu görevler alınamadı:', err)
-    tasks.value = []
-  }
-}
-
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
-      if (taskFilter.value === 'kendim') return true
       return (
           (taskFilter.value === 'devam' && task.status === 'In Progress') ||
           (taskFilter.value === 'hazir' && task.status === 'Ready') ||
@@ -291,9 +294,7 @@ const filteredVisibleTasks = computed(() =>
 )
 
 watch(taskFilter, () => {
-  if (taskFilter.value === 'kendim') {
-    fetchCreatedTasks()
-  } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
     fetchFilteredTasks(selectedProjectId.value)
   } else if (selectedProjectId.value) {
     fetchTasksByProject(selectedProjectId.value)
@@ -338,7 +339,20 @@ function getLevelClass(level: string) {
   }
 }
 
-onMounted(() => {
-  fetchProjects()
+watch(() => taskStore.shouldRefresh, (val) => {
+  if (val && selectedProjectId.value) {
+    fetchTasksByProject(selectedProjectId.value)
+    taskStore.acknowledgeRefresh()
+  }
+})
+
+onMounted(async () => {
+  await fetchProjects()
+
+  // Eğer pinia'da proje seçilmişse onu active et
+  if (projectStore.selectedProjectId) {
+    selectedProjectId.value = projectStore.selectedProjectId
+    onProjectSelect()
+  }
 })
 </script>

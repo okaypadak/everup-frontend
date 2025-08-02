@@ -1,21 +1,18 @@
-type UserInfo = {
-    id: number
-    name: string
-    role?: string
-}
+// composables/useAuth.ts
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/authStore'
 
 export const useAuth = () => {
-    const user = useState<UserInfo>('user')
-    const isLoggedIn = computed(() => !!user.value?.id)
-    const isLoggedName = computed(() => !!user.value?.name)
-    const isAdmin = computed(() => user.value?.role === 'admin')
-    const isDirector = computed(() => ['admin', 'director'].includes(user.value?.role ?? ''))
+    const authStore = useAuthStore()
+    const { user, isAdmin, isDirector, isLoggedIn, isLoggedName } = storeToRefs(authStore)
 
     return {
         user,
+        isAdmin,
+        isDirector,
         isLoggedIn,
         isLoggedName,
-        isAdmin,
-        isDirector
+        setUser: authStore.setUser,
+        clearUser: authStore.clearUser,
     }
 }
