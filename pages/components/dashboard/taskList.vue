@@ -249,27 +249,31 @@ function onProjectSelect() {
     tasks.value = []
     projectLabels.value = []
   }
-  // selectedUserId sıfırlama kaldırıldı
   selectedLabelIds.value = []
 }
 
 function toggleLabel(labelId: number) {
-  if (selectedLabelIds.value.includes(labelId)) {
-    selectedLabelIds.value = selectedLabelIds.value.filter(id => id !== labelId)
+  const current = selectedLabelIds.value
+
+  if (current.includes(labelId)) {
+    selectedLabelIds.value = current.filter(id => id !== labelId)
   } else {
-    selectedLabelIds.value.push(labelId)
+    selectedLabelIds.value = [...current, labelId]
   }
 
-  if (selectedProjectId.value) {
-    fetchFilteredTasks()
+  console.log('Seçili label ID listesi:', selectedLabelIds.value)
+
+  // Eğer proje seçiliyse ve en az 1 etiket varsa filtrele
+  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+    fetchFilteredTasks(selectedProjectId.value)
   }
 }
 
-async function fetchFilteredTasks() {
+async function fetchFilteredTasks(projectId: number) {
   if (!selectedProjectId.value) return
 
   try {
-    const data = await $fetch<Task[]>(`/api/tasks/label/filter`, {
+    const data = await $fetch<Task[]>(`/api/tasks/project/${projectId}/filter`, {
       method: 'POST',
       body: {
         labelIds: selectedLabelIds.value
@@ -357,7 +361,7 @@ watch(taskFilter, () => {
   if (taskFilter.value === 'kendim') {
     fetchCreatedTasks()
   } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
-    fetchFilteredTasks()
+    fetchFilteredTasks(selectedProjectId.value)
   } else if (selectedProjectId.value) {
     fetchTasksByProject(selectedProjectId.value)
   }
