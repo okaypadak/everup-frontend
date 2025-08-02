@@ -1,9 +1,7 @@
 <template>
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4 h-full overflow-y-auto min-h-0">
-
-    <!-- Başlık ve Filtreler -->
+    <!-- Başlık -->
     <div class="flex items-center justify-between mb-2">
-
       <div class="flex items-center gap-2 text-lg font-semibold text-gray-700">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2"/>
@@ -11,63 +9,40 @@
         </svg>
         Görevler
       </div>
+    </div>
 
-      <div class="mb-2 flex gap-4 flex-wrap">
-
-        <!-- Filtre Tabs -->
-        <div class="w-full border-gray-200 flex gap-2 mb-4">
-
-          <div class="flex flex-col pr-9">
-
-            <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
-            <div class="relative">
-              <select
-                  v-model="selectedProjectId"
-                  @change="onProjectSelect"
-                  class="appearance-none w-full bg-white border border-gray-300 text-gray-700 text-sm py-2 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
-              >
-                <option disabled :value="null">Proje seçiniz</option>
-                <option v-for="project in projects" :key="project.id" :value="project.id">
-                  {{ project.name }}
-                </option>
-              </select>
-              <!-- aşağı ok simgesi -->
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <button
-              :class="tabClass('devam')"
-              @click="taskFilter = 'devam'"
-          >
-            Devam Edenler
-          </button>
-          <button
-              :class="tabClass('hazir')"
-              @click="taskFilter = 'hazir'"
-          >
-            Hazır Görevler
-          </button>
-          <button
-              :class="tabClass('kendim')"
-              @click="taskFilter = 'kendim'"
-          >
-            Kendi Açtığım
-          </button>
-          <button
-              :class="tabClass('tum')"
-              @click="taskFilter = 'tum'"
-          >
-            Tümü
-          </button>
-        </div>
-
+    <!-- Filtreler ve Proje seçici -->
+    <div class="mb-2 flex flex-wrap justify-between items-end gap-4">
+      <!-- Sekmeler -->
+      <div class="flex gap-2 flex-wrap">
+        <button :class="tabClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
+        <button :class="tabClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
+        <button :class="tabClass('tamam')" @click="taskFilter = 'tamam'">Tamamlananlar</button>
+        <button :class="tabClass('bekleyen')" @click="taskFilter = 'bekleyen'">Bekleyenler</button>
+        <button :class="tabClass('kendim')" @click="taskFilter = 'kendim'">Kendi Açtığım</button>
       </div>
 
+      <!-- Proje dropdown -->
+      <div class="flex flex-col min-w-[220px]">
+        <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
+        <div class="relative">
+          <select
+              v-model="selectedProjectId"
+              @change="onProjectSelect"
+              class="appearance-none w-full bg-white border border-gray-300 text-gray-700 text-sm py-2 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+          >
+            <option disabled :value="null">Proje seçiniz</option>
+            <option v-for="project in projects" :key="project.id" :value="project.id">
+              {{ project.name }}
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Etiket Filtresi -->
@@ -99,7 +74,7 @@
             task.status === 'In Progress' ? 'bg-yellow-100 border-yellow-400' :
             task.status === 'Waiting' ? 'border-gray-400 bg-gray-100' :
             task.status === 'Ready' ? 'border-blue-400 bg-blue-50' :
-            task.status === 'Completed' ? 'border-green-300 bg-white text-gray-500' :
+            task.status === 'Completed' ? 'border-green-500 bg-green-100 text-green-800' :
             'bg-white border-gray-200'
           ]"
         >
@@ -114,7 +89,7 @@
               <span v-if="task.dependentTaskId" class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
                 Önce: {{ task.dependentTaskTitle || 'Bağlı görev' }}
               </span>
-              <span :class="task.status === 'Completed' ? 'line-through text-gray-500' : 'text-gray-900'" class="font-medium">
+              <span :class="task.status === 'Completed' ? 'line-through text-green-800' : 'text-gray-900'" class="font-medium">
                 {{ task.title }}
               </span>
             </div>
@@ -176,15 +151,17 @@ interface TaskLabel {
   name: string
 }
 
-interface User {
-  id: number
-  fullName: string
-}
-
 interface Project {
   id: number
   name: string
 }
+
+const taskFilter = ref<'devam' | 'hazir' | 'tamam' | 'bekleyen' | 'kendim'>('devam')
+const tasks = ref<Task[]>([])
+const projectLabels = ref<TaskLabel[]>([])
+const selectedLabelIds = ref<number[]>([])
+const selectedProjectId = ref<number | null>(null)
+const projects = ref<Project[]>([])
 
 function tabClass(type: string) {
   return [
@@ -194,13 +171,6 @@ function tabClass(type: string) {
         : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
   ]
 }
-
-const taskFilter = ref<'devam' | 'hazir' | 'tum' | 'kendim'>('devam')
-const tasks = ref<Task[]>([])
-const projectLabels = ref<TaskLabel[]>([])
-const selectedLabelIds = ref<number[]>([])
-const selectedProjectId = ref<number | null>(null)
-const projects = ref<Project[]>([])
 
 function formatTime(dateStr: string) {
   const d = new Date(dateStr)
@@ -214,6 +184,12 @@ async function fetchProjects() {
   const { data, error } = await useFetch<Project[]>('/api/projects')
   if (error.value) return console.error('Projeler alınamadı:', error.value)
   projects.value = data.value || []
+
+  // ✅ Otomatik seçim
+  if (projects.value.length === 1) {
+    selectedProjectId.value = projects.value[0].id
+    onProjectSelect()
+  }
 }
 
 async function fetchTasksByProject(projectId: number) {
@@ -240,7 +216,6 @@ async function fetchProjectLabels(projectId: number) {
   }
 }
 
-
 function onProjectSelect() {
   if (selectedProjectId.value) {
     fetchTasksByProject(selectedProjectId.value)
@@ -254,7 +229,6 @@ function onProjectSelect() {
 
 function toggleLabel(labelId: number) {
   const current = selectedLabelIds.value
-
   if (current.includes(labelId)) {
     selectedLabelIds.value = current.filter(id => id !== labelId)
   } else {
@@ -272,16 +246,12 @@ function toggleLabel(labelId: number) {
 
 async function fetchFilteredTasks(projectId: number) {
   if (!selectedProjectId.value) return
-
   try {
     const data = await $fetch<Task[]>(`/api/tasks/project/${projectId}/filter`, {
       method: 'POST',
-      body: {
-        labelIds: selectedLabelIds.value
-      },
+      body: { labelIds: selectedLabelIds.value },
       credentials: 'include'
     })
-
     tasks.value = data.map(task => ({
       ...task,
       gorevKodu: task.id,
@@ -293,31 +263,42 @@ async function fetchFilteredTasks(projectId: number) {
   }
 }
 
+async function fetchCreatedTasks() {
+  try {
+    const data = await $fetch<Task[]>('/api/tasks/created', { credentials: 'include' })
+    tasks.value = data.map(task => ({
+      ...task,
+      gorevKodu: task.id,
+      time: formatTime(task.createdAt),
+      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
+    }))
+  } catch (err) {
+    console.error('Kullanıcının oluşturduğu görevler alınamadı:', err)
+    tasks.value = []
+  }
+}
+
 const filteredVisibleTasks = computed(() =>
     tasks.value.filter(task => {
-
-      // 'kendim' filtresi aktif olduğunda, zaten sadece oluşturulan görevleri getiriyoruz
-      if (taskFilter.value === 'kendim') {
-        return true
-      }
-
-      const matchesStatus =
-          taskFilter.value === 'tum' ||
+      if (taskFilter.value === 'kendim') return true
+      return (
           (taskFilter.value === 'devam' && task.status === 'In Progress') ||
           (taskFilter.value === 'hazir' && task.status === 'Ready') ||
-          (taskFilter.value === 'tamam' && task.status === 'Completed')
-      return matchesStatus
+          (taskFilter.value === 'tamam' && task.status === 'Completed') ||
+          (taskFilter.value === 'bekleyen' && task.status === 'Waiting')
+      )
     })
 )
 
-function buttonClass(type: string) {
-  return [
-    'px-3 py-1 rounded-lg font-medium text-sm border transition-all',
-    taskFilter.value === type
-        ? 'bg-blue-400 text-white border-blue-400 shadow'
-        : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-blue-100 hover:shadow'
-  ]
-}
+watch(taskFilter, () => {
+  if (taskFilter.value === 'kendim') {
+    fetchCreatedTasks()
+  } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
+    fetchFilteredTasks(selectedProjectId.value)
+  } else if (selectedProjectId.value) {
+    fetchTasksByProject(selectedProjectId.value)
+  }
+})
 
 function getTypeLabel(type: string) {
   switch (type) {
@@ -354,34 +335,6 @@ function getLevelClass(level: string) {
     case 'urgent': return 'bg-orange-500 text-white'
     case 'priority': return 'bg-yellow-500 text-white'
     default: return 'bg-gray-300 text-gray-800'
-  }
-}
-
-// Görev filtresi değişikliklerini izle ve filtrelemeyi tetikle
-watch(taskFilter, () => {
-  if (taskFilter.value === 'kendim') {
-    fetchCreatedTasks()
-  } else if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
-    fetchFilteredTasks(selectedProjectId.value)
-  } else if (selectedProjectId.value) {
-    fetchTasksByProject(selectedProjectId.value)
-  }
-})
-
-// Kullanıcının oluşturduğu görevleri getir
-async function fetchCreatedTasks() {
-  try {
-    tasks.value = []
-    const data = await $fetch<Task[]>('/api/tasks/created', { credentials: 'include' })
-    tasks.value = data.map(task => ({
-      ...task,
-      gorevKodu: task.id,
-      time: formatTime(task.createdAt),
-      formattedDeadline: task.deadline ? formatTime(task.deadline) : null
-    }))
-  } catch (err) {
-    console.error('Kullanıcının oluşturduğu görevler alınamadı:', err)
-    tasks.value = []
   }
 }
 
