@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/scripts",
     "@nuxt/ui",
+    "@pinia/nuxt"
   ],
   runtimeConfig: {
     apiBaseUrl: process.env.API_BASE_URL || "http://backend:9120",
