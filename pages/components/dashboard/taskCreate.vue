@@ -171,6 +171,9 @@ const allUsers = ref<User[]>([])
 const tumGorevler = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
 
+import { useTaskStore } from '@/stores/taskStore'
+const taskStore = useTaskStore()
+
 const isDisabled = computed(() => !newTaskTitle.value || !selectedProject.value || !assignedUser.value)
 
 onMounted(async () => {
@@ -243,7 +246,7 @@ function addTaskLocal() {
   })
       .then(() => {
         toast.success('🎉 Görev başarıyla oluşturuldu!')
-        emit('add-task')
+        taskStore.triggerRefresh()
       })
       .catch(err => {
         console.error('Görev eklenemedi:', err)

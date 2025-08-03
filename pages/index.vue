@@ -46,12 +46,14 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
+import {useAuthStore} from "~/stores/authStore";
 
 const { user } = useAuth()
 const router = useRouter()
 const error = ref('')
 const email = ref('')
 const password = ref('')
+const authStore = useAuthStore()
 
 async function login(): Promise<void> {
   try {
@@ -64,10 +66,22 @@ async function login(): Promise<void> {
     })
 
     if (res.statusCode === 200) {
-      // Token set edildikten sonra güncel kullanıcı bilgisi çek
-      const me = await $fetch('/api/me')
-      user.value = me.user
+      // 1. Token varsa sakla
+      if (res.token) {
+        localStorage.setItem('token', res.token)
+      }
 
+      // 2. Kullanıcı bilgisi al ve store'a set et
+      const response = await $fetch('/api/me') // -> { name: 'Okay Padak', role: 'admin' }
+
+      console.log(response)
+
+      authStore.setUser({
+        name: response.user.name,
+        role: response.user.role
+      })
+
+      // 3. Yönlendirme
       router.push('/dashboard')
     } else {
       error.value = res.message || 'Kullanıcı adı veya şifre hatalı'
@@ -78,6 +92,7 @@ async function login(): Promise<void> {
     error.value = 'Sunucuya erişilemiyor. Lütfen daha sonra tekrar deneyin.'
   }
 }
+
 </script>
 
 <style scoped>
