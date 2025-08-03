@@ -95,7 +95,7 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const user = computed(() => auth.user)
-const isLoggedName = computed(() => auth.isLoggedName)
+const isLoggedName = computed(() => auth.userName)
 const hasRole = auth.hasRole
 const hasAnyRole = auth.hasAnyRole
 

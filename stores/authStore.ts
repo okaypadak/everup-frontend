@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', {
         user: null,
     }),
     getters: {
+        userName: (state) => state.user?.name ?? '',
         hasRole: (state) => (role: string) => state.user?.role === role,
         hasAnyRole: (state) => (roles: string[]) => roles.includes(state.user?.role ?? ''),
     },
