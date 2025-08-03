@@ -60,7 +60,6 @@ const showInput = ref(false)
 const newTitle = ref('')
 
 const projectStore = useProjectStore()
-const currentProject = computed(() => projectStore.selectedProject)
 
 const children = computed(() =>
     props.allDocuments.filter(doc => doc.parentId === props.document.id)
@@ -74,7 +73,7 @@ async function addChild() {
   const payload = {
     title,
     parentId: props.document.id,
-    projectId: currentProject.value.id,
+    projectId: projectStore.selectedProjectId,
   }
 
   try {
