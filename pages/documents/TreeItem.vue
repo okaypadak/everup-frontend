@@ -48,6 +48,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useProjectStore } from '@/stores/projectStore'
 
 const props = defineProps({
   document: Object,
@@ -58,6 +59,9 @@ const emit = defineEmits(['refresh'])
 const showInput = ref(false)
 const newTitle = ref('')
 
+const projectStore = useProjectStore()
+const currentProject = computed(() => projectStore.selectedProject)
+
 const children = computed(() =>
     props.allDocuments.filter(doc => doc.parentId === props.document.id)
 )
@@ -65,45 +69,35 @@ const children = computed(() =>
 async function addChild() {
   const title = newTitle.value.trim()
 
-  console.log('🎯 Alt başlık ekleme başladı...')
-  console.log('📥 Girilen başlık:', title)
-
-  if (!title) {
-    console.warn('⚠️ Başlık boş, işlem durduruldu.')
-    return
-  }
+  if (!title) return
 
   const payload = {
     title,
     parentId: props.document.id,
-    projectId: 1
+    projectId: currentProject.value.id,
   }
 
-  console.log('📦 Sunucuya gönderilecek payload:', payload)
-
   try {
-    const result = await $fetch('/api/documents', {
+    await $fetch('/api/documents', {
       method: 'POST',
-      body: payload
+      body: payload,
     })
-
-    console.log('✅ Sunucudan gelen cevap:', result)
-
     newTitle.value = ''
     showInput.value = false
     emit('refresh')
-
-    console.log('🔄 refresh emit edildi')
   } catch (err) {
-    console.error('❌ Sunucuya ekleme sırasında hata oluştu:', err)
+    console.error('❌ Alt başlık eklenemedi:', err)
   }
 }
 
-
 async function deleteDocument() {
-  await $fetch(`/api/documents/${props.document.id}`, {
-    method: 'DELETE'
-  })
-  emit('refresh')
+  try {
+    await $fetch(`/api/documents/${props.document.id}`, {
+      method: 'DELETE',
+    })
+    emit('refresh')
+  } catch (err) {
+    console.error('❌ Döküman silinemedi:', err)
+  }
 }
 </script>

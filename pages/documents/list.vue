@@ -10,8 +10,8 @@
           <div class="flex flex-col sm:flex-row sm:items-center gap-4">
             <div class="flex items-center gap-2 flex-1">
               <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2"/>
-                <path d="M16 3v4M8 3v4" stroke-width="2" stroke-linecap="round"/>
+                <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2" />
+                <path d="M16 3v4M8 3v4" stroke-width="2" stroke-linecap="round" />
               </svg>
               <h1 class="text-2xl font-bold text-sky-700">Dökümanlar</h1>
             </div>
@@ -19,10 +19,15 @@
             <select
                 v-model="selectedProject"
                 class="px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300 min-w-[220px]"
-                @change="fetchDocuments"
             >
               <option value="" disabled>Proje Seçiniz</option>
-              <option v-for="proj in projects" :key="proj.id" :value="proj.id">{{ proj.name }}</option>
+              <option
+                  v-for="proj in projects"
+                  :key="proj.id"
+                  :value="proj.id.toString()"
+              >
+                {{ proj.name }}
+              </option>
             </select>
           </div>
 
@@ -48,7 +53,7 @@
                 :key="doc.id"
                 :document="doc"
                 :all-documents="documents"
-                :project-id="selectedProject"
+                :project-id="Number(selectedProject)"
                 @refresh="fetchDocuments"
             />
 
@@ -68,9 +73,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
-import Navbar from '/pages/components/bar/Navbar.vue' // varsa bu satırı tut
+import Navbar from '/pages/components/bar/Navbar.vue'
+import { useProjectStore } from '@/stores/projectStore'
+
+const projectStore = useProjectStore()
 
 const selectedProject = ref('')
 const projects = ref([])
@@ -85,8 +93,7 @@ async function fetchDocuments() {
   if (!selectedProject.value) return
   const res = await $fetch(`/api/documents/project/${selectedProject.value}`)
   documents.value = res || []
-
-  console.log(documents.value )
+  console.log(documents.value)
 }
 
 async function addRootDocument() {
@@ -111,6 +118,20 @@ onMounted(async () => {
 
   if (!error.value) {
     projects.value = data.value || []
+
+    // Pinia store'da proje seçiliyse, otomatik set et
+    if (projectStore.selectedProjectId) {
+      selectedProject.value = projectStore.selectedProjectId.toString()
+      await fetchDocuments()
+    }
+  }
+})
+
+// Select değişince Pinia store'a yaz
+watch(selectedProject, (newVal) => {
+  const selected = projects.value.find(p => p.id === Number(newVal))
+  if (selected) {
+    projectStore.setProject(selected.id, selected.name)
   }
 })
 </script>
