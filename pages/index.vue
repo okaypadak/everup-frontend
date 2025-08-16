@@ -36,7 +36,7 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
       </form>
 
       <div class="mt-8 text-xs text-gray-400 text-center">
-        <span>© 2025 CycleUp • Sürdürülebilir Proje Asistanı</span>
+        <span>© 2025 EverUp • Sürdürülebilir Proje Asistanı</span>
       </div>
     </div>
   </div>

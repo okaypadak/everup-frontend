@@ -8,7 +8,7 @@
           <ellipse cx="32" cy="32" rx="10" ry="4" stroke="#3CB371" stroke-width="2" />
           <ellipse cx="32" cy="32" rx="4" ry="10" stroke="#38BDF8" stroke-width="2" />
         </svg>
-        <span>© 2025 CycleUp Takip Sistemi</span>
+        <span>© 2025 EverUp Takip Sistemi</span>
       </div>
 
       <!-- Sağ kısım -->
