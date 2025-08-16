@@ -1,14 +1,19 @@
-<!-- SprintBurndownChart.vue -->
 <template>
   <div class="bg-white p-6 rounded-xl shadow space-y-4">
     <h2 class="text-lg font-semibold text-sky-700">📉 Sprint Burndown Grafiği</h2>
-    <div class="w-full" style="height: 320px;">
+
+    <div v-if="hasData" class="w-full" style="height: 320px;">
       <Line :data="chartData" :options="chartOptions" class="w-full h-full" />
+    </div>
+
+    <div v-else class="text-gray-400 text-sm py-8 text-center">
+      Gösterilecek veri bulunamadı.
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -18,12 +23,44 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
 
-const chartData = {
-  labels: ['1.Gün', '2.Gün', '3.Gün', '4.Gün', '5.Gün', '6.Gün', '7.Gün'],
+/**
+ * Beklenen prop yapısı (backend summary):
+ * charts = {
+ *   dates: string[]            // 'YYYY-MM-DD'
+ *   ideal: number[]            // ideal kalan iş
+ *   actualRemaining: number[]  // gerçek kalan iş
+ * }
+ */
+const props = defineProps({
+  charts: {
+    type: Object,
+    required: false,
+    default: () => ({ dates: [], ideal: [], actualRemaining: [] })
+  }
+})
+
+const labels = computed(() =>
+    (props.charts?.dates ?? []).map(d =>
+        new Date(d + 'T00:00:00').toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })
+    )
+)
+
+const len = computed(() =>
+    Math.min(
+        props.charts?.dates?.length ?? 0,
+        props.charts?.ideal?.length ?? 0,
+        props.charts?.actualRemaining?.length ?? 0
+    )
+)
+
+const hasData = computed(() => len.value > 0)
+
+const chartData = computed(() => ({
+  labels: labels.value.slice(0, len.value),
   datasets: [
     {
       label: 'Beklenen Kalan Görev',
-      data: [10, 8, 6, 4, 2, 1, 0],
+      data: (props.charts?.ideal ?? []).slice(0, len.value),
       borderColor: '#38BDF8',
       backgroundColor: 'rgba(56, 189, 248, 0.15)',
       borderWidth: 2,
@@ -33,7 +70,7 @@ const chartData = {
     },
     {
       label: 'Gerçek Kalan Görev',
-      data: [10, 9, 8, 7, 5, 3, 1],
+      data: (props.charts?.actualRemaining ?? []).slice(0, len.value),
       borderColor: '#3CB371',
       backgroundColor: 'rgba(60, 179, 113, 0.15)',
       borderWidth: 2,
@@ -42,7 +79,7 @@ const chartData = {
       pointHoverRadius: 6
     }
   ]
-}
+}))
 
 const chartOptions = {
   responsive: true,
@@ -52,13 +89,12 @@ const chartOptions = {
       position: 'bottom',
       labels: {
         color: '#374151',
-        font: {
-          size: 13,
-          weight: '500'
-        }
+        font: { size: 13, weight: '500' }
       }
-    }
+    },
+    tooltip: { mode: 'index', intersect: false }
   },
+  interaction: { mode: 'index', intersect: false },
   scales: {
     y: {
       beginAtZero: true,
@@ -68,11 +104,8 @@ const chartOptions = {
         color: '#4B5563',
         font: { weight: '600' }
       },
-      ticks: { color: '#6B7280' },
-      grid: {
-        color: '#E5E7EB',
-        borderDash: [4, 4]
-      }
+      ticks: { color: '#6B7280', precision: 0 },
+      grid: { color: '#E5E7EB', borderDash: [4, 4] }
     },
     x: {
       title: {
@@ -82,10 +115,7 @@ const chartOptions = {
         font: { weight: '600' }
       },
       ticks: { color: '#6B7280' },
-      grid: {
-        color: '#F3F4F6',
-        borderDash: [4, 4]
-      }
+      grid: { color: '#F3F4F6', borderDash: [4, 4] }
     }
   }
 }
