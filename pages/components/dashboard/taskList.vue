@@ -11,9 +11,8 @@
       </div>
     </div>
 
-    <!-- Filtreler ve Proje seçici -->
+    <!-- Sekmeler + Proje seçici -->
     <div class="mb-2 flex flex-wrap justify-between items-end gap-4">
-      <!-- Sekmeler -->
       <div class="flex gap-2 flex-wrap">
         <button :class="tabClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
         <button :class="tabClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
@@ -21,7 +20,6 @@
         <button :class="tabClass('bekleyen')" @click="taskFilter = 'bekleyen'">Bekleyenler</button>
       </div>
 
-      <!-- Proje dropdown -->
       <div class="flex flex-col min-w-[220px]">
         <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
         <div class="relative">
@@ -37,11 +35,7 @@
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                  fill-rule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z"
-                  clip-rule="evenodd"
-              />
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
             </svg>
           </div>
         </div>
@@ -109,13 +103,32 @@
               ✅ Tamamlandı
             </span>
           </div>
+
           <div class="text-xs text-gray-400 mt-1">{{ task.time }}</div>
           <div v-if="task.formattedDeadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.formattedDeadline }}
           </div>
-          <NuxtLink :to="`/tasks/${task.gorevKodu}`" class="text-xs text-blue-500 underline self-end mt-1 hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1">
-            🔍 Ayrıntı
-          </NuxtLink>
+
+          <!-- Alt aksiyonlar: Sil (sol) + Ayrıntı (sağ) -->
+          <div class="flex items-center mt-2">
+            <button
+                v-if="taskFilter === 'hazir'"
+                @click="askDelete(task)"
+                :disabled="deletingId === task.id"
+                class="text-xs px-2 py-1 rounded-md border bg-white/80 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition disabled:opacity-50"
+                :aria-label="`Görevi sil: ${task.title}`"
+                title="Sil"
+            >
+              {{ deletingId === task.id ? '...' : '✕ Sil' }}
+            </button>
+
+            <NuxtLink
+                :to="`/tasks/${task.gorevKodu}`"
+                class="ml-auto text-xs text-blue-500 underline hover:text-blue-700 hover:scale-110 transition-all flex items-center gap-1"
+            >
+              🔍 Ayrıntı
+            </NuxtLink>
+          </div>
         </li>
       </template>
       <template v-else>
@@ -124,20 +137,52 @@
         </li>
       </template>
     </ul>
+
+    <!-- Confirm Modal -->
+    <div v-if="showConfirm" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl shadow-xl w-80 p-6 text-center">
+        <h2 class="text-lg font-semibold text-gray-700 mb-3">Görev Silinsin mi?</h2>
+        <p class="text-sm text-gray-500 mb-5">
+          "{{ taskToDelete?.title }}" görevini silmek istediğine emin misin?
+        </p>
+        <div class="flex justify-center gap-4">
+          <button
+              @click="confirmDelete"
+              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-60"
+              :disabled="deletingId !== null"
+          >
+            Evet, Sil
+          </button>
+          <button
+              @click="closeConfirm"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          >
+            Hayır
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useProjectStore } from '@/stores/projectStore' // ✅ Pinia Store
-const projectStore = useProjectStore() // ✅ store instance
+import { useProjectStore } from '@/stores/projectStore'
+import { useTaskStore } from '@/stores/taskStore'
+
+const projectStore = useProjectStore()
+const taskStore = useTaskStore()
+
+type TaskStatus = 'In Progress' | 'Ready' | 'Completed' | 'Waiting'
+type TaskType = 'task' | 'test' | 'approval' | 'bug' | string
+type TaskLevel = 'critical' | 'urgent' | 'priority' | 'normal' | string
 
 interface Task {
   id: number
   title: string
-  status: string
-  type: string
-  level: string
+  status: TaskStatus
+  type: TaskType
+  level: TaskLevel
   createdAt: string
   deadline?: string | null
   dependentTaskId?: number | string | null
@@ -148,15 +193,8 @@ interface Task {
   labels?: { id: number, name: string }[]
 }
 
-interface TaskLabel {
-  id: number
-  name: string
-}
-
-interface Project {
-  id: number
-  name: string
-}
+interface TaskLabel { id: number; name: string }
+interface Project { id: number; name: string }
 
 const taskFilter = ref<'devam' | 'hazir' | 'tamam' | 'bekleyen'>('devam')
 const tasks = ref<Task[]>([])
@@ -165,8 +203,9 @@ const selectedLabelIds = ref<number[]>([])
 const selectedProjectId = ref<number | null>(null)
 const projects = ref<Project[]>([])
 
-import { useTaskStore } from '@/stores/taskStore'
-const taskStore = useTaskStore()
+const deletingId = ref<number | null>(null)
+const showConfirm = ref(false)
+const taskToDelete = ref<Task | null>(null)
 
 function tabClass(type: string) {
   return [
@@ -187,9 +226,11 @@ function formatTime(dateStr: string) {
 
 async function fetchProjects() {
   const { data, error } = await useFetch<Project[]>('/api/projects')
-  if (error.value) return console.error('Projeler alınamadı:', error.value)
+  if (error.value) {
+    console.error('Projeler alınamadı:', error.value)
+    return
+  }
   projects.value = data.value || []
-
   if (projects.value.length === 1) {
     selectedProjectId.value = projects.value[0].id
     onProjectSelect()
@@ -216,7 +257,6 @@ async function fetchProjectLabels(projectId: number) {
     projectLabels.value = projectStore.projectLabels
     return
   }
-
   try {
     const data = await $fetch<TaskLabel[]>(`/api/task-labels/${projectId}`, { credentials: 'include' })
     projectLabels.value = data
@@ -226,40 +266,31 @@ async function fetchProjectLabels(projectId: number) {
   }
 }
 
-// ✅ Güncellenmiş proje seçimi fonksiyonu
+// Proje seçimi
 function onProjectSelect() {
   if (selectedProjectId.value) {
     const selected = projects.value.find(p => p.id === selectedProjectId.value)
-
-    if (selected) {
-      projectStore.setProject(selected.id, selected.name)
-    }
-
+    if (selected) projectStore.setProject(selected.id, selected.name)
     fetchTasksByProject(selectedProjectId.value)
     fetchProjectLabels(selectedProjectId.value)
   } else {
     tasks.value = []
     projectLabels.value = []
-    projectStore.clearProject() // ✅ store sıfırla
+    projectStore.clearProject()
   }
-
   selectedLabelIds.value = []
 }
 
+// Etiket toggle + filtre
 function toggleLabel(labelId: number) {
   const current = selectedLabelIds.value
-  if (current.includes(labelId)) {
-    selectedLabelIds.value = current.filter(id => id !== labelId)
-  } else {
-    selectedLabelIds.value = [...current, labelId]
-  }
+  selectedLabelIds.value = current.includes(labelId)
+      ? current.filter(id => id !== labelId)
+      : [...current, labelId]
 
   if (selectedProjectId.value) {
-    if (selectedLabelIds.value.length > 0) {
-      fetchFilteredTasks(selectedProjectId.value)
-    } else {
-      fetchTasksByProject(selectedProjectId.value)
-    }
+    if (selectedLabelIds.value.length > 0) fetchFilteredTasks(selectedProjectId.value)
+    else fetchTasksByProject(selectedProjectId.value)
   }
 }
 
@@ -283,23 +314,42 @@ async function fetchFilteredTasks(projectId: number) {
 }
 
 const filteredVisibleTasks = computed(() =>
-    tasks.value.filter(task => {
-      return (
-          (taskFilter.value === 'devam' && task.status === 'In Progress') ||
-          (taskFilter.value === 'hazir' && task.status === 'Ready') ||
-          (taskFilter.value === 'tamam' && task.status === 'Completed') ||
-          (taskFilter.value === 'bekleyen' && task.status === 'Waiting')
-      )
-    })
+    tasks.value.filter(task =>
+        (taskFilter.value === 'devam' && task.status === 'In Progress') ||
+        (taskFilter.value === 'hazir' && task.status === 'Ready') ||
+        (taskFilter.value === 'tamam' && task.status === 'Completed') ||
+        (taskFilter.value === 'bekleyen' && task.status === 'Waiting')
+    )
 )
 
-watch(taskFilter, () => {
-  if (selectedProjectId.value && selectedLabelIds.value.length > 0) {
-    fetchFilteredTasks(selectedProjectId.value)
-  } else if (selectedProjectId.value) {
-    fetchTasksByProject(selectedProjectId.value)
+// ------ Silme Akışı (Vue confirm modal) ------
+function askDelete(task: Task) {
+  taskToDelete.value = task
+  showConfirm.value = true
+}
+function closeConfirm() {
+  if (deletingId.value !== null) return
+  showConfirm.value = false
+  taskToDelete.value = null
+}
+async function confirmDelete() {
+  if (!taskToDelete.value) return
+  try {
+    deletingId.value = taskToDelete.value.id
+    await $fetch(`/api/tasks/${taskToDelete.value.id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    tasks.value = tasks.value.filter(t => t.id !== taskToDelete.value?.id)
+  } catch (err) {
+    console.error('Görev silinemedi:', err)
+    alert('Görev silinirken hata oluştu.')
+  } finally {
+    deletingId.value = null
+    closeConfirm()
   }
-})
+}
+// ---------------------------------------------
 
 function getTypeLabel(type: string) {
   switch (type) {
@@ -310,7 +360,6 @@ function getTypeLabel(type: string) {
     default: return type
   }
 }
-
 function getTypeClass(type: string) {
   switch (type) {
     case 'task': return 'bg-blue-500'
@@ -320,7 +369,6 @@ function getTypeClass(type: string) {
     default: return 'bg-gray-400'
   }
 }
-
 function getLevelLabel(level: string) {
   switch (level) {
     case 'critical': return 'Kritik'
@@ -329,7 +377,6 @@ function getLevelLabel(level: string) {
     default: return 'Normal'
   }
 }
-
 function getLevelClass(level: string) {
   switch (level) {
     case 'critical': return 'bg-red-600 text-white'
@@ -348,8 +395,6 @@ watch(() => taskStore.shouldRefresh, (val) => {
 
 onMounted(async () => {
   await fetchProjects()
-
-  // Eğer pinia'da proje seçilmişse onu active et
   if (projectStore.selectedProjectId) {
     selectedProjectId.value = projectStore.selectedProjectId
     onProjectSelect()
