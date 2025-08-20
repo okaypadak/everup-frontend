@@ -13,8 +13,7 @@
             <div class="mt-2 flex flex-wrap items-center gap-2">
               <span class="text-xs text-gray-500">Görev Kodu:</span>
               <code
-                  class="text-xs font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded border border-gray-200"
-              >
+              class="text-xs font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded border border-gray-200">
                 {{ task.uniqueCode || '—' }}
               </code>
               <button
@@ -23,8 +22,7 @@
                   @click="copyUniqueCode"
                   class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 active:scale-[0.99] transition"
                   aria-label="Görev kodunu kopyala"
-                  :title="copied ? 'Kopyalandı!' : 'Kodu kopyala'"
-              >
+                  :title="copied ? 'Kopyalandı!' : 'Kodu kopyala'">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -40,17 +38,17 @@
 
           <div class="flex gap-2 flex-wrap mt-2 sm:mt-0">
             <button
-                v-for="statusOption in statusOptions"
-                :key="statusOption.value"
-                :disabled="!canManuallyUpdateStatus"
-                :class="[
+              v-for="statusOption in statusOptions"
+              :key="statusOption.value"
+              :disabled="!canManuallyUpdateStatus"
+              :class="[
                 'px-3 py-1 text-sm rounded-lg font-medium border shadow-sm transition-all',
                 task.status === statusOption.value
                   ? statusOption.activeClass
                   : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100',
                 !canManuallyUpdateStatus ? 'opacity-50 cursor-not-allowed' : ''
               ]"
-                @click="updateStatus(statusOption.value)"
+              @click="updateStatus(statusOption.value)"
             >
               {{ statusOption.label }}
             </button>
@@ -70,9 +68,9 @@
           <h2 class="text-lg font-semibold text-gray-700 mb-4">🔗 Bağlı Görevler</h2>
           <ul class="grid sm:grid-cols-2 gap-4">
             <li
-                v-for="dep in task.dependencies"
-                :key="dep.id"
-                class="flex justify-between items-center p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
+              v-for="dep in task.dependencies"
+              :key="dep.id"
+              class="flex justify-between items-center p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
             >
               <span class="text-gray-800 font-medium">{{ dep.title }}</span>
               <span
@@ -96,10 +94,10 @@
 
           <div v-if="commentTree.length" class="space-y-3 max-h-96 overflow-y-auto pr-1">
             <CommentItem
-                v-for="comment in commentTree"
-                :key="comment.id"
-                :comment="comment"
-                @reply-toggle="toggleReply"
+              v-for="comment in commentTree"
+              :key="comment.id"
+              :comment="comment"
+              @reply-toggle="toggleReply"
             />
           </div>
           <p v-else class="text-gray-400 italic">Henüz yorum yapılmamış.</p>
@@ -109,22 +107,22 @@
             <div v-if="selectedParentAuthor" class="text-xs text-gray-500 italic">
               {{ selectedParentAuthor }} adlı yoruma yanıt yazıyorsunuz.
               <button
-                  type="button"
-                  class="ml-2 text-blue-500 hover:underline"
-                  @click="selectedParentId = null"
+                type="button"
+                class="ml-2 text-blue-500 hover:underline"
+                @click="selectedParentId = null"
               >
                 İptal
               </button>
             </div>
             <textarea
-                v-model="newComment"
-                rows="4"
-                class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-200"
-                placeholder="Yorumunuzu yazın..."
+              v-model="newComment"
+              rows="4"
+              class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-200"
+              placeholder="Yorumunuzu yazın..."
             />
             <button
-                type="submit"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition"
+              type="submit"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition"
             >
               Yorum Ekle
             </button>
@@ -259,7 +257,7 @@ function buildCommentTree(comments: Comment[]) {
 }
 
 const commentTree = computed(() =>
-    task.value?.comments ? buildCommentTree(task.value.comments) : []
+  task.value?.comments ? buildCommentTree(task.value.comments) : []
 )
 
 function formatDate(dateStr: string) {
