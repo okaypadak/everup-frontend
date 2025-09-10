@@ -14,10 +14,22 @@
     <!-- Sekmeler + Proje seçici -->
     <div class="mb-2 flex flex-wrap justify-between items-end gap-4">
       <div class="flex gap-2 flex-wrap">
-        <button :class="tabClass('devam')" @click="taskFilter = 'devam'">Devam Edenler</button>
-        <button :class="tabClass('hazir')" @click="taskFilter = 'hazir'">Hazır Görevler</button>
-        <button :class="tabClass('tamam')" @click="taskFilter = 'tamam'">Tamamlananlar</button>
-        <button :class="tabClass('bekleyen')" @click="taskFilter = 'bekleyen'">Bekleyenler</button>
+        <button :class="[tabClass('devam'), 'flex items-center gap-1']" @click="taskFilter = 'devam'">
+          <span class="sm:hidden">⏳</span>
+          <span class="hidden sm:inline">Devam Edenler</span>
+        </button>
+        <button :class="[tabClass('hazir'), 'flex items-center gap-1']" @click="taskFilter = 'hazir'">
+          <span class="sm:hidden">🔔</span>
+          <span class="hidden sm:inline">Hazır Görevler</span>
+        </button>
+        <button :class="[tabClass('tamam'), 'flex items-center gap-1']" @click="taskFilter = 'tamam'">
+          <span class="sm:hidden">✅</span>
+          <span class="hidden sm:inline">Tamamlananlar</span>
+        </button>
+        <button :class="[tabClass('bekleyen'), 'flex items-center gap-1']" @click="taskFilter = 'bekleyen'">
+          <span class="sm:hidden">⏱</span>
+          <span class="hidden sm:inline">Bekleyenler</span>
+        </button>
       </div>
 
       <div class="flex flex-col min-w-[220px]">
