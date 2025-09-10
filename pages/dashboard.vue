@@ -1,9 +1,31 @@
 <template>
   <div class="bg-gray-50 min-h-screen">
     <Navbar />
-    <!-- 1:3:2 oranında grid -->
+
+    <!-- Mobil görünüm -->
+    <div class="md:hidden p-4">
+      <div class="flex items-center justify-between mb-4">
+        <button class="p-2 rounded-md bg-white shadow" @click="menuOpen = !menuOpen">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <div v-if="menuOpen" class="mb-4 flex flex-col gap-2">
+        <button @click="openDrawer('notifications')" class="px-4 py-2 rounded bg-blue-500 text-white">
+          Bildirimler
+        </button>
+        <button @click="openDrawer('taskCreate')" class="px-4 py-2 rounded bg-green-500 text-white">
+          Görev Oluştur
+        </button>
+      </div>
+
+      <TaskListPanel />
+    </div>
+
+    <!-- Masaüstü görünüm: 1:3:2 oranında grid -->
     <div
-        class="grid px-8 gap-6 py-6"
+        class="hidden md:grid px-8 gap-6 py-6"
         style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr;"
     >
       <!-- Bildirimler + Yorumlar -->
@@ -25,8 +47,14 @@
 
       <!-- Görev Oluştur -->
       <TaskCreatePanel class="flex flex-col h-full"/>
-
     </div>
+
+    <DashboardDrawer
+        v-if="drawerType"
+        :type="drawerType"
+        :notifications="notifications"
+        @close="drawerType = null"
+    />
   </div>
 </template>
 
@@ -37,10 +65,17 @@ import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
 import CommentListPanel from './components/dashboard/commentList.vue'
 import Navbar from './components/bar/Navbar.vue'
+import DashboardDrawer from './components/dashboard/DashboardDrawer.vue'
 import { useFetch } from '#app'
 
 const comments = ref([])
 const notifications = ref([])
+const drawerType = ref<null | 'notifications' | 'taskCreate'>(null)
+const menuOpen = ref(false)
+
+const openDrawer = (type: 'notifications' | 'taskCreate') => {
+  drawerType.value = type
+}
 
 onMounted(async () => {
   try {
