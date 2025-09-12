@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between group">
       <!-- Başlık kısmı yönlendirme için router-link oldu -->
       <NuxtLink
-          :to="`writer/${document.id}`"
+          :to="`/documents/writer/${document.id}`"
           class="text-gray-800 font-medium hover:underline"
       >
         {{ document.title }}
