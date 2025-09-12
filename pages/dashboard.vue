@@ -1,25 +1,17 @@
 <template>
   <div class="bg-gray-50 min-h-screen">
-    <Navbar />
-
-    <!-- Mobil görünüm -->
-    <div class="md:hidden p-4">
-      <div class="flex items-center justify-between mb-4">
-        <button class="p-2 rounded-md bg-white shadow" @click="menuOpen = !menuOpen">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-      <div v-if="menuOpen" class="mb-4 flex flex-col gap-2">
-        <button @click="openDrawer('notifications')" class="px-4 py-2 rounded bg-blue-500 text-white">
+    <Navbar>
+      <template #mobile-menu>
+        <button @click="openDrawer('notifications')" class="px-4 py-2 rounded bg-blue-500 text-white mb-2 w-full text-left">
           Bildirimler
         </button>
-        <button @click="openDrawer('taskCreate')" class="px-4 py-2 rounded bg-green-500 text-white">
+        <button @click="openDrawer('taskCreate')" class="px-4 py-2 rounded bg-green-500 text-white w-full text-left">
           Görev Oluştur
         </button>
-      </div>
+      </template>
+    </Navbar>
 
+    <div class="md:hidden p-4">
       <TaskListPanel />
     </div>
 
@@ -71,7 +63,6 @@ import { useFetch } from '#app'
 const comments = ref([])
 const notifications = ref([])
 const drawerType = ref<null | 'notifications' | 'taskCreate'>(null)
-const menuOpen = ref(false)
 
 const openDrawer = (type: 'notifications' | 'taskCreate') => {
   drawerType.value = type

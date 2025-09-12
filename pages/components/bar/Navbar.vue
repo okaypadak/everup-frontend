@@ -64,6 +64,16 @@
 
     <!-- Sağ Kısım -->
     <div class="flex items-center gap-4">
+      <!-- Hamburger Button -->
+      <button
+          class="md:hidden p-2 rounded-lg hover:bg-sky-100 transition"
+          @click="mobileMenuOpen = true"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
       <!-- Bildirim -->
       <button class="relative p-2 rounded-full hover:bg-sky-100 transition" @click="showNotifications = !showNotifications">
         <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -84,6 +94,62 @@
       </div>
     </div>
   </nav>
+
+  <!-- Mobile Menu Drawer -->
+  <div v-if="mobileMenuOpen" class="md:hidden fixed inset-0 z-50 bg-white p-4 overflow-y-auto">
+    <div class="flex justify-end mb-4">
+      <button class="p-2" @click="mobileMenuOpen = false">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <NuxtLink to="/dashboard" class="block py-2 nav-link">Kontrol Paneli</NuxtLink>
+    <NuxtLink to="/documents/list" class="block py-2 nav-link">Döküman Yaz</NuxtLink>
+
+    <div v-if="canSeeSprintMenu" class="mt-4">
+      <p class="font-semibold text-gray-700 mb-2">Sprint Yönetimi</p>
+      <NuxtLink
+          v-if="hasAnyRole(['admin', 'director'])"
+          to="/sprint/create"
+          class="block py-1 pl-4 nav-link"
+      >Sprint Oluştur</NuxtLink>
+      <NuxtLink
+          v-if="hasAnyRole(['admin', 'director'])"
+          to="/sprint/task-list"
+          class="block py-1 pl-4 nav-link"
+      >Sprint Görev Listesi</NuxtLink>
+      <NuxtLink to="/sprint/meta" class="block py-1 pl-4 nav-link">Sprint Meta Bilgileri</NuxtLink>
+      <NuxtLink to="/sprint/chart" class="block py-1 pl-4 nav-link">Sprint Charts</NuxtLink>
+    </div>
+
+    <div v-if="canSeeProjectMenu" class="mt-4">
+      <p class="font-semibold text-gray-700 mb-2">Proje Yönetimi</p>
+      <NuxtLink to="/projects/create" class="block py-1 pl-4 nav-link">Proje Oluştur</NuxtLink>
+      <NuxtLink to="/projects/members" class="block py-1 pl-4 nav-link">Katılımcılar</NuxtLink>
+    </div>
+
+    <div v-if="canSeeCustomerMenu" class="mt-4">
+      <p class="font-semibold text-gray-700 mb-2">Müşteri Yönetimi</p>
+      <NuxtLink
+          v-if="user?.role !== 'marketer'"
+          to="/customers/create"
+          class="block py-1 pl-4 nav-link"
+      >Müşteri Kaydet</NuxtLink>
+      <NuxtLink to="/customers/marketing" class="block py-1 pl-4 nav-link">Pazarlama Takip</NuxtLink>
+    </div>
+
+    <div v-if="canSeeUserMenu" class="mt-4">
+      <p class="font-semibold text-gray-700 mb-2">Kullanıcı Yönetimi</p>
+      <NuxtLink to="/users/create" class="block py-1 pl-4 nav-link">Kullanıcı Oluştur</NuxtLink>
+      <NuxtLink to="/users/update" class="block py-1 pl-4 nav-link">Kullanıcı rol güncelle</NuxtLink>
+    </div>
+
+    <div class="mt-4">
+      <slot name="mobile-menu" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -110,6 +176,7 @@ const showUserManagementMenu = ref(false)
 const showCustomerMenu = ref(false)
 const showProfileMenu = ref(false)
 const showNotifications = ref(false)
+const mobileMenuOpen = ref(false)
 
 let sprintTimeout: ReturnType<typeof setTimeout>
 let projectTimeout: ReturnType<typeof setTimeout>
