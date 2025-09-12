@@ -15,21 +15,13 @@
               </div>
 
               <div class="flex items-center gap-3">
-                <select
-                    v-model="user.role"
-                    class="px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-300"
-                >
+                <UiSelect v-model="user.role">
                   <option v-for="role in roles" :key="role" :value="role">
                     {{ role }}
                   </option>
-                </select>
+                </UiSelect>
 
-                <button
-                    @click="updateRole(user)"
-                    class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-4 py-2 rounded-xl transition"
-                >
-                  Kaydet
-                </button>
+                <UiButton @click="updateRole(user)">Kaydet</UiButton>
               </div>
             </div>
           </div>

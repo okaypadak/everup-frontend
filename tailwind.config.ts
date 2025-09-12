@@ -1,14 +1,24 @@
 import type { Config } from 'tailwindcss'
 
 export default {
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        primary: '#a5b4fc',
-        secondary: '#fbcfe8',
-        accent: '#fef9c3',
-        background: '#f8fafc',
-        text: '#374151'
+        primary: 'rgb(var(--color-primary) / <alpha-value>)',
+        secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent) / <alpha-value>)',
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        text: 'rgb(var(--color-text) / <alpha-value>)'
+      },
+      borderRadius: {
+        DEFAULT: 'var(--radius)',
+        md: 'var(--radius)',
+        lg: 'calc(var(--radius) * 1.5)'
+      },
+      fontFamily: {
+        sans: 'var(--font-sans)',
+        mono: 'var(--font-mono, monospace)'
       }
     }
   },
