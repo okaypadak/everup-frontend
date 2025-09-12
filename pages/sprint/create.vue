@@ -7,13 +7,12 @@
         <div class="bg-white p-6 rounded-xl shadow-lg">
           <h2 class="text-2xl font-bold text-sky-700 mb-6">🌀 Yeni Sprint Oluştur</h2>
 
-          <form class="space-y-6" @submit.prevent="submitSprint">
+          <UiForm class="space-y-6" @submit="submitSprint">
             <!-- Proje Seçimi -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
-              <select
+              <UiLabel>Proje Seç</UiLabel>
+              <UiSelect
                   v-model="form.projectId"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                   :disabled="loading || submitting"
                   required
               >
@@ -37,69 +36,62 @@
                 >
                   {{ project.name }}
                 </option>
-              </select>
+              </UiSelect>
             </div>
 
             <!-- Sprint Adı -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Adı</label>
-              <input
+              <UiLabel>Sprint Adı</UiLabel>
+              <UiInput
                   v-model="form.name"
                   type="text"
                   placeholder="Örn: Sprint 14 - Haziran"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                   :disabled="submitting"
                   required
-              >
+              />
             </div>
 
             <!-- Tarihler -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Başlangıç Tarihi</label>
-                <input
+                <UiLabel>Başlangıç Tarihi</UiLabel>
+                <UiInput
                     v-model="form.startDate"
                     type="date"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                     :disabled="submitting"
                     required
-                >
+                />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi</label>
-                <input
+                <UiLabel>Bitiş Tarihi</UiLabel>
+                <UiInput
                     v-model="form.endDate"
                     type="date"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
                     :disabled="submitting"
                     required
-                >
+                />
               </div>
             </div>
 
             <!-- Sprint Hedefi -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Hedefi (isteğe bağlı)</label>
-              <textarea
+              <UiLabel>Sprint Hedefi (isteğe bağlı)</UiLabel>
+              <UiTextarea
                   v-model="form.goal"
                   rows="3"
                   placeholder="Bu sprintte yapılacak ana işler..."
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none"
+                  class="resize-none"
                   :disabled="submitting"
               />
             </div>
 
             <!-- Buton -->
             <div class="flex justify-end">
-              <button
-                  type="submit"
-                  :disabled="submitting || loading"
-                  class="bg-sky-600 hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 py-2 rounded-xl shadow transition"
-              >
+              <UiButton type="submit" :disabled="submitting || loading">
                 {{ submitting ? 'Oluşturuluyor…' : 'Sprint Oluştur' }}
-              </button>
+              </UiButton>
             </div>
-          </form>
+          </UiForm>
         </div>
       </div>
     </main>

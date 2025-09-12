@@ -11,23 +11,23 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ad</label>
-              <input v-model="form.firstName" type="text" class="input" placeholder="Ad girin" />
+              <UiLabel>Ad</UiLabel>
+              <UiInput v-model="form.firstName" type="text" placeholder="Ad girin" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Soyad</label>
-              <input v-model="form.lastName" type="text" class="input" placeholder="Soyad girin" />
+              <UiLabel>Soyad</UiLabel>
+              <UiInput v-model="form.lastName" type="text" placeholder="Soyad girin" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input v-model="form.email" type="email" class="input" placeholder="ornek@mail.com" />
+              <UiLabel>E-posta</UiLabel>
+              <UiInput v-model="form.email" type="email" placeholder="ornek@mail.com" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-              <select v-model="form.role" class="input">
+              <UiLabel>Rol</UiLabel>
+              <UiSelect v-model="form.role">
                 <option value="" disabled>Rol seçin</option>
                 <option
                     v-for="role in roles"
@@ -36,17 +36,12 @@
                 >
                   {{ roleLabels[role] }}
                 </option>
-              </select>
+              </UiSelect>
             </div>
           </div>
 
           <div class="pt-4">
-            <button
-                class="px-6 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow"
-                @click="createUser"
-            >
-              Oluştur
-            </button>
+            <UiButton @click="createUser">Oluştur</UiButton>
           </div>
         </div>
       </div>
@@ -111,11 +106,3 @@ const createUser = async () => {
   }
 }
 </script>
-
-<style scoped>
-@reference 'tailwindcss';
-
-.input {
-  @apply w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300;
-}
-</style>

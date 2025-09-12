@@ -1,23 +1,43 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: 14 165 233;
+  --color-secondary: 251 207 232;
+  --color-accent: 254 249 195;
+  --color-background: 248 250 252;
+  --color-text: 55 65 81;
+  --radius: 0.5rem;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+.dark {
+  --color-primary: 2 132 199;
+  --color-secondary: 244 114 182;
+  --color-accent: 250 204 21;
+  --color-background: 15 23 42;
+  --color-text: 248 250 252;
+}
+
 @layer base {
   body {
-    @apply bg-background text-text;
-  }
-
-  button {
-    @apply bg-primary text-white rounded-md px-4 py-2 transition-colors hover:bg-primary/90;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-text));
+    font-family: var(--font-sans);
   }
 
   table {
-    @apply w-full bg-white rounded-md shadow-sm;
+    @apply w-full bg-white rounded shadow-sm;
   }
 
   th {
-    @apply bg-secondary text-text px-4 py-2 text-left;
+    background-color: rgb(var(--color-secondary));
+    color: rgb(var(--color-text));
+    @apply px-4 py-2 text-left;
   }
 
   td {
-    @apply border-t border-secondary/60 px-4 py-2;
+    border-top: 1px solid rgba(var(--color-secondary) / 0.6);
+    @apply px-4 py-2;
   }
 }
