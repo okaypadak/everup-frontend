@@ -1,4 +1,5 @@
 <template>
+  <div>
   <nav class="bg-white px-4 py-2 flex items-center justify-between w-full border-b border-gray-200 shadow-sm">
     <!-- Logo -->
     <div class="flex items-center gap-2">
@@ -21,10 +22,12 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div v-if="showSprintMenu" class="dropdown-panel" @mouseenter="cancelClose('sprint')" @mouseleave="delayedClose('sprint')">
-          <NuxtLink v-if="hasAnyRole(['admin', 'director'])" to="/sprint/create" class="dropdown-item">Sprint Oluştur</NuxtLink>
-          <NuxtLink v-if="hasAnyRole(['admin', 'director'])" to="/sprint/task-list" class="dropdown-item">Sprint Görev Listesi</NuxtLink>
-          <NuxtLink to="/sprint/meta" class="dropdown-item">Sprint Meta Bilgileri</NuxtLink>
-          <NuxtLink to="/sprint/chart" class="dropdown-item">Sprint Charts</NuxtLink>
+          <NuxtLink
+              v-for="item in sprintMenuItems"
+              :key="item.to"
+              :to="item.to"
+              class="dropdown-item"
+          >{{ item.label }}</NuxtLink>
         </div>
       </div>
 
@@ -111,17 +114,11 @@
     <div v-if="canSeeSprintMenu" class="mt-4">
       <p class="font-semibold text-gray-700 mb-2">Sprint Yönetimi</p>
       <NuxtLink
-          v-if="hasAnyRole(['admin', 'director'])"
-          to="/sprint/create"
+          v-for="item in sprintMenuItems"
+          :key="item.to"
+          :to="item.to"
           class="block py-1 pl-4 nav-link"
-      >Sprint Oluştur</NuxtLink>
-      <NuxtLink
-          v-if="hasAnyRole(['admin', 'director'])"
-          to="/sprint/task-list"
-          class="block py-1 pl-4 nav-link"
-      >Sprint Görev Listesi</NuxtLink>
-      <NuxtLink to="/sprint/meta" class="block py-1 pl-4 nav-link">Sprint Meta Bilgileri</NuxtLink>
-      <NuxtLink to="/sprint/chart" class="block py-1 pl-4 nav-link">Sprint Charts</NuxtLink>
+      >{{ item.label }}</NuxtLink>
     </div>
 
     <div v-if="canSeeProjectMenu" class="mt-4">
@@ -150,6 +147,7 @@
       <slot name="mobile-menu" />
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -169,6 +167,20 @@ const canSeeSprintMenu = computed(() => hasAnyRole(['admin', 'lead', 'director',
 const canSeeProjectMenu = computed(() => hasAnyRole(['admin', 'director']))
 const canSeeUserMenu = computed(() => hasRole('admin'))
 const canSeeCustomerMenu = computed(() => hasAnyRole(['admin', 'director', 'marketer']))
+
+const sprintMenuItems = computed(() => {
+  const items: { to: string; label: string; roles?: string[] }[] = [
+    { to: '/sprint/meta', label: 'Sprint Meta Bilgileri' },
+    { to: '/sprint/chart', label: 'Sprint Charts' },
+  ]
+
+  if (hasAnyRole(['admin', 'director'])) {
+    items.unshift({ to: '/sprint/task-list', label: 'Sprint Görev Listesi' })
+    items.unshift({ to: '/sprint/create', label: 'Sprint Oluştur' })
+  }
+
+  return items
+})
 
 const showSprintMenu = ref(false)
 const showProjectMenu = ref(false)
