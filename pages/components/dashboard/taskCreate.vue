@@ -63,7 +63,7 @@
       <label class="block">
         <input
             v-model="userSearch"
-            class="mb-2 w-full rounded px-2 py-1 border border-gray-300 focus:ring-2 focus:ring-blue-200"
+            class="mb-2 w-full rounded px-2 py-1 border border-gray-300 text-black focus:ring-2 focus:ring-blue-200"
             placeholder="Kişi ara..."
             autocomplete="off"
             type="text"
@@ -135,7 +135,7 @@
         <input
             v-model="newTaskDeadline"
             type="date"
-            class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            class="rounded-md bg-gray-100 px-3 py-2 font-medium text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
         >
       </label>
 
@@ -143,7 +143,7 @@
       <input
           v-model="newTaskTitle"
           placeholder="Yeni görev başlığı"
-          class="rounded-md bg-gray-100 px-3 py-2 font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          class="rounded-md bg-gray-100 px-3 py-2 font-medium text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
       >
 
       <!-- Açıklama -->
@@ -151,7 +151,7 @@
           v-model="newTaskDesc"
           rows="10"
           placeholder="Açıklama"
-          class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 min-h-[300px]"
+          class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-blue-200 min-h-[300px]"
       />
 
       <!-- Görev Oluştur Butonu -->
@@ -196,7 +196,7 @@
           v-model="bulkJson"
           rows="16"
           spellcheck="false"
-          class="rounded-md bg-gray-100 px-3 py-2 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 font-mono text-sm"
+          class="rounded-md bg-gray-100 px-3 py-2 border border-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-blue-200 font-mono text-sm"
           placeholder='[ { "title": "…", "assignedTo": 1, "project": 1 } ]'
       />
 

@@ -117,7 +117,7 @@
             <textarea
               v-model="newComment"
               rows="4"
-              class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-200"
+              class="w-full p-3 border border-gray-300 rounded-md text-black focus:ring-2 focus:ring-blue-200"
               placeholder="Yorumunuzu yazın..."
             />
             <button

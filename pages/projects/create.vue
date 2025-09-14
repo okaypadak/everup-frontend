@@ -19,11 +19,11 @@
         <!-- Etiket Ekleme Formu -->
         <div class="mb-6">
           <div class="flex items-center gap-2">
-            <input 
-              v-model="newLabelName" 
-              type="text" 
-              placeholder="Yeni etiket adı" 
-              class="flex-1 p-2 border rounded-lg"
+            <input
+              v-model="newLabelName"
+              type="text"
+              placeholder="Yeni etiket adı"
+              class="flex-1 p-2 border rounded-lg text-black"
             />
             <button 
               @click="createLabel" 
@@ -82,7 +82,7 @@
                   v-model="form.title"
                   type="text"
                   required
-                  class="w-full mt-1 p-2 border rounded-lg"
+                  class="w-full mt-1 p-2 border rounded-lg text-black"
               />
             </div>
 
@@ -92,7 +92,7 @@
                   v-model="form.description"
                   rows="4"
                   required
-                  class="w-full mt-1 p-2 border rounded-lg"
+                  class="w-full mt-1 p-2 border rounded-lg text-black"
               />
             </div>
 
@@ -102,7 +102,7 @@
                   v-model="form.startDate"
                   type="date"
                   required
-                  class="w-full mt-1 p-2 border rounded-lg"
+                  class="w-full mt-1 p-2 border rounded-lg text-black"
               />
             </div>
 
