@@ -3,8 +3,8 @@
     <h2 class="text-lg font-semibold text-sky-700 mb-2">📈 Sprint İlerleme Durumu</h2>
 
     <div class="flex items-center justify-between mb-2">
-      <span class="text-sm text-gray-600">Tamamlanan Görevler:</span>
-      <span class="text-sm text-gray-800 font-medium">
+      <span class="text-sm text-black">Tamamlanan Görevler:</span>
+      <span class="text-sm text-black font-medium">
         {{ completed }} / {{ total }} ({{ percent }}%)
       </span>
     </div>

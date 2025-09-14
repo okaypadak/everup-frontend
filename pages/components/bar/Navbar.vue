@@ -88,8 +88,8 @@
       <!-- Kullanıcı Profili -->
       <div v-if="isLoggedName" class="relative" @mouseenter="showProfileMenu = true" @mouseleave="delayedClose('profile')">
         <button class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-sky-100 transition">
-          <span class="font-semibold text-gray-700 hidden sm:inline">{{ user?.name }}</span>
-          <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+          <span class="font-semibold text-black hidden sm:inline">{{ user?.name }}</span>
+          <svg class="w-4 h-4 text-black ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div v-if="showProfileMenu" class="dropdown-panel right-0" @mouseenter="cancelClose('profile')" @mouseleave="delayedClose('profile')">
           <button class="dropdown-item text-red-600" @click="logout">Çıkış Yap</button>
@@ -112,7 +112,7 @@
     <NuxtLink to="/documents/list" class="block py-2 nav-link">Döküman Yaz</NuxtLink>
 
     <div v-if="canSeeSprintMenu" class="mt-4">
-      <p class="font-semibold text-gray-700 mb-2">Sprint Yönetimi</p>
+      <p class="font-semibold text-black mb-2">Sprint Yönetimi</p>
       <NuxtLink
           v-for="item in sprintMenuItems"
           :key="item.to"
@@ -122,13 +122,13 @@
     </div>
 
     <div v-if="canSeeProjectMenu" class="mt-4">
-      <p class="font-semibold text-gray-700 mb-2">Proje Yönetimi</p>
+      <p class="font-semibold text-black mb-2">Proje Yönetimi</p>
       <NuxtLink to="/projects/create" class="block py-1 pl-4 nav-link">Proje Oluştur</NuxtLink>
       <NuxtLink to="/projects/members" class="block py-1 pl-4 nav-link">Katılımcılar</NuxtLink>
     </div>
 
     <div v-if="canSeeCustomerMenu" class="mt-4">
-      <p class="font-semibold text-gray-700 mb-2">Müşteri Yönetimi</p>
+      <p class="font-semibold text-black mb-2">Müşteri Yönetimi</p>
       <NuxtLink
           v-if="user?.role !== 'marketer'"
           to="/customers/create"
@@ -138,7 +138,7 @@
     </div>
 
     <div v-if="canSeeUserMenu" class="mt-4">
-      <p class="font-semibold text-gray-700 mb-2">Kullanıcı Yönetimi</p>
+      <p class="font-semibold text-black mb-2">Kullanıcı Yönetimi</p>
       <NuxtLink to="/users/create" class="block py-1 pl-4 nav-link">Kullanıcı Oluştur</NuxtLink>
       <NuxtLink to="/users/update" class="block py-1 pl-4 nav-link">Kullanıcı rol güncelle</NuxtLink>
     </div>

@@ -13,15 +13,15 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
       </div>
 
       <h2 class="text-3xl font-bold text-sky-700 mb-2 tracking-tight">EverUp</h2>
-      <p class="text-sm text-gray-500 mb-8 text-center">Projelerini kolayca yönet, sürdürülebilir başarıya ulaş.</p>
+      <p class="text-sm text-black mb-8 text-center">Projelerini kolayca yönet, sürdürülebilir başarıya ulaş.</p>
 
       <form class="w-full space-y-5" @submit.prevent="login">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Eposta</label>
+          <label class="block text-sm font-semibold text-black mb-1">Eposta</label>
           <input v-model="email" type="text" placeholder="eposta gir" class="input-field text-black" required >
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Şifre</label>
+          <label class="block text-sm font-semibold text-black mb-1">Şifre</label>
           <input v-model="password" type="password" placeholder="••••••••" class="input-field text-black" required >
         </div>
 
@@ -35,7 +35,7 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
         <p v-if="error" class="text-red-600 text-sm mt-2 text-center">{{ error }}</p>
       </form>
 
-      <div class="mt-8 text-xs text-gray-400 text-center">
+      <div class="mt-8 text-xs text-black text-center">
         <span>© 2025 EverUp • Sürdürülebilir Proje Asistanı</span>
       </div>
     </div>

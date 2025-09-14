@@ -57,12 +57,12 @@
                 @refresh="fetchDocuments"
             />
 
-            <div v-if="rootDocuments.length === 0" class="text-gray-400 text-center mt-8">
+            <div v-if="rootDocuments.length === 0" class="text-black text-center mt-8">
               Bu projede henüz döküman yok. Yeni ana döküman ekleyin.
             </div>
           </div>
 
-          <div v-else class="text-gray-400 text-center mt-12">
+          <div v-else class="text-black text-center mt-12">
             Proje seçiniz. Dökümanlar burada listelenecek.
           </div>
 

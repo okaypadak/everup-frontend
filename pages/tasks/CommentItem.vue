@@ -1,9 +1,9 @@
 <template>
   <div class="ml-4 mt-2">
     <div class="bg-white p-3 rounded-md border border-gray-200 shadow-sm">
-      <p class="text-gray-800">{{ comment.content }}</p>
+      <p class="text-black">{{ comment.content }}</p>
       <div class="flex justify-between items-center mt-2">
-        <p class="text-xs text-gray-500">{{ comment.author }} – {{ formatDate(comment.createdAt) }}</p>
+        <p class="text-xs text-black">{{ comment.author }} – {{ formatDate(comment.createdAt) }}</p>
         <button
             class="text-xs text-blue-500 hover:underline"
             @click="$emit('replyToggle', comment.id)"

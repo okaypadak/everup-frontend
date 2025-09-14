@@ -4,7 +4,7 @@
       <!-- Başlık kısmı yönlendirme için router-link oldu -->
       <NuxtLink
           :to="`/documents/writer/${document.id}`"
-          class="text-gray-800 font-medium hover:underline"
+          class="text-black font-medium hover:underline"
       >
         {{ document.title }}
       </NuxtLink>

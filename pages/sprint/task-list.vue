@@ -9,7 +9,7 @@
 
           <!-- Proje Seç -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
+            <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
             <select
                 v-model="selectedProjectId"
                 class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -23,14 +23,14 @@
           <!-- Aktif Sprint ve Görevler -->
           <div v-if="activeSprint">
             <div class="mb-4">
-              <h2 class="text-xl font-semibold text-gray-800">
+              <h2 class="text-xl font-semibold text-black">
                 📋 {{ activeSprint.name }} ({{ activeSprint.startDate }} - {{ activeSprint.endDate }})
               </h2>
             </div>
 
             <!-- Atanmış Görevler -->
             <div>
-              <h3 class="text-lg font-medium text-gray-700 mb-2">Atanmış Görevler</h3>
+              <h3 class="text-lg font-medium text-black mb-2">Atanmış Görevler</h3>
               <ul class="space-y-2">
                 <li
                     v-for="task in assignedTasks"
@@ -46,16 +46,16 @@
                     {{ pending.has(task.id) ? 'Çıkarılıyor…' : 'Sprint\'ten Çıkar' }}
                   </button>
                 </li>
-                <li v-if="!assignedTasks.length && !loadingTasks" class="text-gray-500">
+                <li v-if="!assignedTasks.length && !loadingTasks" class="text-black">
                   Henüz görev atanmadı.
                 </li>
-                <li v-if="loadingTasks" class="text-gray-400">Yükleniyor…</li>
+                <li v-if="loadingTasks" class="text-black">Yükleniyor…</li>
               </ul>
             </div>
 
             <!-- Hazır Görevler -->
             <div class="mt-6">
-              <h3 class="text-lg font-medium text-gray-700 mb-2">Hazır Görevler</h3>
+              <h3 class="text-lg font-medium text-black mb-2">Hazır Görevler</h3>
               <ul class="space-y-2">
                 <li
                     v-for="task in availableTasks"
@@ -71,15 +71,15 @@
                     {{ pending.has(task.id) ? 'Atanıyor…' : 'Ata' }}
                   </button>
                 </li>
-                <li v-if="!availableTasks.length && !loadingTasks" class="text-gray-500">
+                <li v-if="!availableTasks.length && !loadingTasks" class="text-black">
                   Atanabilir görev kalmadı.
                 </li>
-                <li v-if="loadingTasks" class="text-gray-400">Yükleniyor…</li>
+                <li v-if="loadingTasks" class="text-black">Yükleniyor…</li>
               </ul>
             </div>
           </div>
 
-          <div v-else class="py-10 text-center text-gray-400">
+          <div v-else class="py-10 text-center text-black">
             <template v-if="selectedProjectId">
               Aktif sprint yok
             </template>

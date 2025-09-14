@@ -14,7 +14,7 @@
 
           <!-- Proje Seçimi -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
+            <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
             <select v-model="selectedProjectId" class="w-full border p-2 rounded-lg">
               <option value="">-- Proje Seçin --</option>
               <option v-for="project in projects" :key="project.id" :value="project.id">
@@ -30,8 +30,8 @@
                 <div class="flex justify-between items-center">
                   <div>
                     <p class="text-lg font-semibold">{{ member.firstName }} {{ member.lastName }}</p>
-                    <p class="text-sm text-gray-600">{{ member.email }}</p>
-                    <p class="text-sm text-gray-500" v-if="member.role">Rol: {{ roleLabel(member.role) }}</p>
+                    <p class="text-sm text-black">{{ member.email }}</p>
+                    <p class="text-sm text-black" v-if="member.role">Rol: {{ roleLabel(member.role) }}</p>
                   </div>
                   <button class="text-red-500 hover:underline text-sm" @click="removeMember(member.id)">
                     ❌ Kaldır
@@ -39,14 +39,14 @@
                 </div>
               </div>
             </div>
-            <div v-else class="text-gray-500 mt-4">Bu projeye henüz katılımcı eklenmemiş.</div>
+            <div v-else class="text-black mt-4">Bu projeye henüz katılımcı eklenmemiş.</div>
 
             <!-- Katılımcı Ekleme -->
             <form class="bg-gray-50 p-4 rounded-xl border space-y-4 mt-6" @submit.prevent="addMember">
               <h2 class="text-lg font-semibold text-sky-700">Yeni Katılımcı Ekle</h2>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">Kullanıcı Seç</label>
+                <label class="block text-sm font-medium text-black">Kullanıcı Seç</label>
                 <select v-model="newMember.userId" class="w-full mt-1 p-2 border rounded-lg">
                   <option value="">-- Seçiniz --</option>
                   <option v-for="user in allUsers" :key="user.id" :value="user.id">
@@ -56,7 +56,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">Projede Rolü</label>
+                <label class="block text-sm font-medium text-black">Projede Rolü</label>
                 <select v-model="newMember.role" class="w-full mt-1 p-2 border rounded-lg">
                   <option value="">-- Rol Seçin --</option>
                   <option v-for="role in roles" :key="role.value" :value="role.value">

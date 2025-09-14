@@ -6,7 +6,7 @@
       <Line :data="chartData" :options="chartOptions" class="w-full h-full" />
     </div>
 
-    <div v-else class="text-gray-400 text-sm py-8 text-center">
+    <div v-else class="text-black text-sm py-8 text-center">
       Gösterilecek veri bulunamadı.
     </div>
   </div>

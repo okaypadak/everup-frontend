@@ -5,8 +5,8 @@
         :key="task.id"
         class="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm flex justify-between items-center"
     >
-      <span class="text-gray-800 font-medium">{{ task.title }}</span>
-      <span class="text-sm text-gray-500 italic">Durum: {{ task.status }}</span>
+      <span class="text-black font-medium">{{ task.title }}</span>
+      <span class="text-sm text-black italic">Durum: {{ task.status }}</span>
     </div>
   </div>
 </template>

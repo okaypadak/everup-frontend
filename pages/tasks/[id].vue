@@ -11,9 +11,9 @@
 
             <!-- Unique Code + Copy -->
             <div class="mt-2 flex flex-wrap items-center gap-2">
-              <span class="text-xs text-gray-500">Görev Kodu:</span>
+              <span class="text-xs text-black">Görev Kodu:</span>
               <code
-              class="text-xs font-mono bg-gray-100 text-gray-800 px-2 py-1 rounded border border-gray-200">
+              class="text-xs font-mono bg-gray-100 text-black px-2 py-1 rounded border border-gray-200">
                 {{ task.uniqueCode || '—' }}
               </code>
               <button
@@ -31,8 +31,8 @@
               </button>
             </div>
 
-            <p class="mt-2 text-sm text-gray-500">Oluşturulma Tarihi: {{ formatDate(task.createdAt) }}</p>
-            <p class="text-xs text-gray-400 italic">{{ formatDurationSince(task.createdAt) }}</p>
+            <p class="mt-2 text-sm text-black">Oluşturulma Tarihi: {{ formatDate(task.createdAt) }}</p>
+            <p class="text-xs text-black italic">{{ formatDurationSince(task.createdAt) }}</p>
             <p v-if="task.status === 'Ready'" class="mt-1 text-xs text-green-600 font-medium">Başlamaya hazır ✅</p>
           </div>
 
@@ -45,7 +45,7 @@
                 'px-3 py-1 text-sm rounded-lg font-medium border shadow-sm transition-all',
                 task.status === statusOption.value
                   ? statusOption.activeClass
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100',
+                  : 'bg-white text-black border-gray-300 hover:bg-gray-100',
                 !canManuallyUpdateStatus ? 'opacity-50 cursor-not-allowed' : ''
               ]"
               @click="updateStatus(statusOption.value)"
@@ -58,28 +58,28 @@
         <!-- Açıklama -->
         <section>
           <h2 class="text-lg font-semibold text-blue-700 mb-2">📄 Görev Açıklaması</h2>
-          <p class="text-gray-700 bg-blue-50 p-4 rounded-md border border-blue-100 whitespace-pre-line">
+          <p class="text-black bg-blue-50 p-4 rounded-md border border-blue-100 whitespace-pre-line">
             {{ task.description }}
           </p>
         </section>
 
         <!-- Bağlı Görevler -->
         <section v-if="task.dependencies?.length">
-          <h2 class="text-lg font-semibold text-gray-700 mb-4">🔗 Bağlı Görevler</h2>
+          <h2 class="text-lg font-semibold text-black mb-4">🔗 Bağlı Görevler</h2>
           <ul class="grid sm:grid-cols-2 gap-4">
             <li
               v-for="dep in task.dependencies"
               :key="dep.id"
               class="flex justify-between items-center p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
             >
-              <span class="text-gray-800 font-medium">{{ dep.title }}</span>
+              <span class="text-black font-medium">{{ dep.title }}</span>
               <span
                   class="text-xs font-semibold px-2 py-1 rounded"
                   :class="{
                   'bg-green-100 text-green-700': dep.status === 'Completed',
                   'bg-yellow-100 text-yellow-800': dep.status === 'In Progress',
                   'bg-blue-100 text-blue-700': dep.status === 'Ready',
-                  'bg-gray-200 text-gray-600': dep.status === 'Waiting'
+                  'bg-gray-200 text-black': dep.status === 'Waiting'
                 }"
               >
                 {{ dep.status }}
@@ -90,7 +90,7 @@
 
         <!-- Yorumlar -->
         <section>
-          <h2 class="text-lg font-semibold text-gray-700 mb-4">💬 Yorumlar</h2>
+          <h2 class="text-lg font-semibold text-black mb-4">💬 Yorumlar</h2>
 
           <div v-if="commentTree.length" class="space-y-3 max-h-96 overflow-y-auto pr-1">
             <CommentItem
@@ -100,11 +100,11 @@
               @reply-toggle="toggleReply"
             />
           </div>
-          <p v-else class="text-gray-400 italic">Henüz yorum yapılmamış.</p>
+          <p v-else class="text-black italic">Henüz yorum yapılmamış.</p>
 
           <!-- Yorum Yazma -->
           <form class="mt-6 space-y-2" @submit.prevent="submitComment">
-            <div v-if="selectedParentAuthor" class="text-xs text-gray-500 italic">
+            <div v-if="selectedParentAuthor" class="text-xs text-black italic">
               {{ selectedParentAuthor }} adlı yoruma yanıt yazıyorsunuz.
               <button
                 type="button"
@@ -130,7 +130,7 @@
         </section>
       </div>
 
-      <div v-else class="text-center text-gray-500 py-10">
+      <div v-else class="text-center text-black py-10">
         <p>Görev yükleniyor...</p>
       </div>
     </div>
@@ -186,7 +186,7 @@ const statusOptions = [
   { value: 'Ready', label: 'Başlamaya Hazır', activeClass: 'bg-blue-100 text-blue-700 border-blue-300' },
   { value: 'In Progress', label: 'Görev Başlatıldı', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
   { value: 'Completed', label: 'Tamamlandı', activeClass: 'bg-green-100 text-green-700 border-green-300' },
-  { value: 'Waiting', label: 'Bekliyor', activeClass: 'bg-gray-100 text-gray-600 border-gray-300' }
+  { value: 'Waiting', label: 'Bekliyor', activeClass: 'bg-gray-100 text-black border-gray-300' }
 ]
 
 const canManuallyUpdateStatus = computed(() => {

@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-xl p-4 flex flex-col gap-4">
-    <div class="flex items-center gap-2 text-lg font-semibold text-gray-700 mb-2">
+    <div class="flex items-center gap-2 text-lg font-semibold text-black mb-2">
       <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -19,13 +19,13 @@
             <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <div class="flex-1">
-            <div class="text-sm text-gray-800">{{ n.message }}</div>
-            <div class="text-xs text-gray-400 mt-1">{{ n.time }}</div>
+            <div class="text-sm text-black">{{ n.message }}</div>
+            <div class="text-xs text-black mt-1">{{ n.time }}</div>
           </div>
         </li>
       </template>
       <template v-else>
-        <li class="text-gray-400 text-center py-6 select-none">
+        <li class="text-black text-center py-6 select-none">
           Henüz bir bildirim yok.
         </li>
       </template>

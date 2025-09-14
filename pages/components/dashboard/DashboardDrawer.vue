@@ -2,7 +2,7 @@
   <transition name="slide">
     <div v-if="true" class="fixed inset-0 bg-white z-50 md:hidden overflow-y-auto">
       <div class="p-4">
-        <button class="mb-4 text-gray-500" @click="$emit('close')">
+        <button class="mb-4 text-black" @click="$emit('close')">
           Kapat
         </button>
         <NotificationsPanel
