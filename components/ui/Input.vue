@@ -2,7 +2,7 @@
   <input
     :value="modelValue"
     @input="onInput"
-    class="w-full px-4 py-2 border rounded bg-background text-black focus:outline-none focus:ring-2 focus:ring-primary"
+    class="input"
     v-bind="$attrs"
   />
 </template>

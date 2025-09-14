@@ -45,3 +45,36 @@
     color: #000;
   }
 }
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 font-medium text-white rounded hover:opacity-90 focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed;
+    background-color: rgb(var(--color-primary));
+    --tw-ring-color: rgb(var(--color-primary));
+  }
+
+  .input {
+    @apply w-full px-4 py-2 border rounded text-black focus:outline-none focus:ring-2;
+    background-color: rgb(var(--color-background));
+    --tw-ring-color: rgb(var(--color-primary));
+  }
+
+  .text-base-style {
+    @apply text-base leading-relaxed;
+    color: rgb(var(--color-text));
+  }
+
+  .faq-item {
+    @apply border-b py-4;
+    border-color: rgb(var(--color-secondary));
+  }
+
+  .faq-question {
+    @apply flex justify-between items-center cursor-pointer font-medium;
+  }
+
+  .faq-answer {
+    @apply mt-2 text-sm;
+    color: rgb(var(--color-text));
+  }
+}

@@ -1,7 +1,7 @@
 <template>
   <button
     :type="type"
-    class="px-4 py-2 font-medium bg-primary text-white rounded hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
+    class="btn"
     v-bind="$attrs"
   >
     <slot />
