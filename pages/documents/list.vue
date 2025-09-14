@@ -18,7 +18,8 @@
 
             <select
                 v-model="selectedProject"
-                class="px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300 min-w-[220px]"
+                class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-black
+                     focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 min-w-[220px]"
             >
               <option value="" disabled>Proje Seçiniz</option>
               <option
@@ -36,11 +37,12 @@
             <input
                 v-model="newRootTitle"
                 placeholder="Ana doküman başlığı"
-                class="px-3 py-2 border rounded w-full text-black focus:outline-none focus:ring"
+                class="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-black
+                     focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
             />
             <button
                 @click="addRootDocument"
-                class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition"
+                class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-5 py-2 rounded-xl shadow transition"
             >
               ➕ Ekle
             </button>
@@ -71,6 +73,7 @@
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
