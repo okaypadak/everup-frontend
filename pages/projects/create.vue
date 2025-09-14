@@ -6,10 +6,10 @@
     <div v-if="showLabelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold text-gray-800">
+          <h3 class="text-lg font-bold text-black">
             {{ selectedProject?.name }} - Etiket Yönetimi
           </h3>
-          <button @click="showLabelModal = false" class="text-gray-500 hover:text-gray-700">
+          <button @click="showLabelModal = false" class="text-black hover:text-black">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -36,9 +36,9 @@
         
         <!-- Etiket Listesi -->
         <div class="space-y-2">
-          <h4 class="font-medium text-gray-700 mb-2">Mevcut Etiketler</h4>
+          <h4 class="font-medium text-black mb-2">Mevcut Etiketler</h4>
           
-          <div v-if="projectLabels.length === 0" class="text-gray-500 text-center py-4">
+          <div v-if="projectLabels.length === 0" class="text-black text-center py-4">
             Bu projede henüz etiket bulunmuyor.
           </div>
           
@@ -77,7 +77,7 @@
 
           <form class="space-y-4" @submit.prevent="submitForm">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Proje Adı</label>
+              <label class="block text-sm font-medium text-black">Proje Adı</label>
               <input
                   v-model="form.title"
                   type="text"
@@ -87,7 +87,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Açıklama</label>
+              <label class="block text-sm font-medium text-black">Açıklama</label>
               <textarea
                   v-model="form.description"
                   rows="4"
@@ -97,7 +97,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Başlangıç Tarihi</label>
+              <label class="block text-sm font-medium text-black">Başlangıç Tarihi</label>
               <input
                   v-model="form.startDate"
                   type="date"
@@ -127,7 +127,7 @@
             Mevcut Projeler
           </h2>
           
-          <div v-if="projects.length === 0" class="text-gray-500 text-center py-8">
+          <div v-if="projects.length === 0" class="text-black text-center py-8">
             Henüz proje bulunmuyor.
           </div>
           
@@ -138,12 +138,12 @@
               class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
               @click="openLabelModal(project)"
             >
-              <div class="font-medium text-lg text-gray-800">{{ project.name }}</div>
-              <div class="text-sm text-gray-500 mt-1 line-clamp-2">{{ project.description }}</div>
+              <div class="font-medium text-lg text-black">{{ project.name }}</div>
+              <div class="text-sm text-black mt-1 line-clamp-2">{{ project.description }}</div>
               <div class="text-xs text-blue-500 mt-2">
                 Başlangıç: {{ new Date(project.startDate).toLocaleDateString('tr-TR') }}
               </div>
-              <div class="mt-2 text-xs text-gray-500 italic">
+              <div class="mt-2 text-xs text-black italic">
                 Etiket eklemek için tıklayın
               </div>
             </div>

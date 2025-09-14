@@ -2,7 +2,7 @@
   <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 space-y-4">
     <!-- Sprint Seç -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Sprint Seç</label>
+      <label class="block text-sm font-medium text-black mb-1">Sprint Seç</label>
       <select
           v-model="selectedSprintId"
           class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -17,7 +17,7 @@
 
     <!-- Görev Seçimi -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">Görevler (hazır durumdakiler)</label>
+      <label class="block text-sm font-medium text-black mb-2">Görevler (hazır durumdakiler)</label>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div
             v-for="task in filteredTasks"
@@ -30,7 +30,7 @@
               :value="task.id"
               class="accent-sky-600 w-4 h-4 text-black"
           >
-          <span class="text-gray-700">{{ task.title }}</span>
+          <span class="text-black">{{ task.title }}</span>
         </div>
       </div>
     </div>

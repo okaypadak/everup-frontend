@@ -10,7 +10,7 @@
 
           <!-- Proje Seç -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
+            <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
             <select
                 v-model="selectedProjectId"
                 class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -25,15 +25,15 @@
 
           <!-- İçerik -->
           <div v-if="selectedProjectId">
-            <div v-if="loadingSummary" class="py-6 text-center text-gray-400">Yükleniyor…</div>
+            <div v-if="loadingSummary" class="py-6 text-center text-black">Yükleniyor…</div>
 
             <div v-else-if="selectedSprint" class="space-y-6">
               <div class="space-y-2">
-                <h2 class="text-lg font-semibold text-gray-700">📌 {{ selectedSprint.name }}</h2>
-                <p class="text-sm text-gray-600">
+                <h2 class="text-lg font-semibold text-black">📌 {{ selectedSprint.name }}</h2>
+                <p class="text-sm text-black">
                   Tarih: {{ formatDate(selectedSprint.startDate) }} – {{ formatDate(selectedSprint.endDate) }}
                 </p>
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-black">
                   Kalan Gün: {{ remainingDays }} gün
                 </p>
               </div>
@@ -54,7 +54,7 @@
               </div>
             </div>
 
-            <div v-else class="py-6 text-center text-gray-500">
+            <div v-else class="py-6 text-center text-black">
               📭 Bu projeye ait aktif bir sprint bulunmamaktadır.
             </div>
           </div>

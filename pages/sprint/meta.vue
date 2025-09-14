@@ -10,7 +10,7 @@
 
           <!-- Proje Seçimi -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
+            <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
             <select
                 v-model="selectedProjectId"
                 class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -25,7 +25,7 @@
 
           <!-- Sprint İçeriği -->
           <div v-if="selectedProjectId">
-            <div v-if="loadingSummary" class="text-gray-400 py-10 text-center">Yükleniyor…</div>
+            <div v-if="loadingSummary" class="text-black py-10 text-center">Yükleniyor…</div>
 
             <div v-else-if="activeSprint" class="space-y-6">
               <SprintMetaInfo :sprint="activeSprint" />
@@ -33,7 +33,7 @@
               <SprintTaskTable :tasks="projectSprintTasks" />
             </div>
 
-            <div v-else class="text-center py-10 text-gray-500">
+            <div v-else class="text-center py-10 text-black">
               📭 Bu projeye ait aktif bir sprint bulunmamaktadır.
             </div>
           </div>

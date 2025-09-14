@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4 h-full overflow-y-auto min-h-0">
     <!-- Başlık -->
-    <div class="flex items-center gap-2 mb-2 text-xl font-bold text-gray-700">
+    <div class="flex items-center gap-2 mb-2 text-xl font-bold text-black">
       <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path d="M4 7h16M4 12h8m-8 5h16" stroke-width="2" stroke-linecap="round"/>
       </svg>
@@ -14,7 +14,7 @@
           class="px-4 py-2 -mb-px border-b-2"
           :class="activeTab === 'single'
           ? 'border-blue-500 text-blue-600 font-semibold'
-          : 'border-transparent text-gray-500 hover:text-gray-700'"
+          : 'border-transparent text-black hover:text-black'"
           @click="activeTab = 'single'"
       >
         Tekil Oluştur
@@ -23,7 +23,7 @@
           class="px-4 py-2 -mb-px border-b-2"
           :class="activeTab === 'bulk'
           ? 'border-blue-500 text-blue-600 font-semibold'
-          : 'border-transparent text-gray-500 hover:text-gray-700'"
+          : 'border-transparent text-black hover:text-black'"
           @click="activeTab = 'bulk'"
       >
         Toplu (JSON)
@@ -34,10 +34,10 @@
     <div v-if="activeTab === 'single'" class="flex flex-col gap-4">
       <!-- Proje Seç -->
       <label class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Proje Seç</span>
+        <span class="block text-black text-base font-semibold mb-1">Proje Seç</span>
         <select
             v-model="selectedProject"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-gray-700 shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-black shadow-sm px-3 py-2"
         >
           <option value="">Proje seçiniz</option>
           <option v-for="p in projects" :key="p.id" :value="String(p.id)">{{ p.name }}</option>
@@ -46,10 +46,10 @@
 
       <!-- Tür -->
       <label class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Tür</span>
+        <span class="block text-black text-base font-semibold mb-1">Tür</span>
         <select
             v-model="newTaskType"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
         >
           <option value="">Tür Seçiniz</option>
           <option value="task">Görev</option>
@@ -68,10 +68,10 @@
             autocomplete="off"
             type="text"
         >
-        <span class="block text-gray-700 text-base font-semibold mb-1">Atanacak Kişi</span>
+        <span class="block text-black text-base font-semibold mb-1">Atanacak Kişi</span>
         <select
             v-model="assignedUser"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
         >
           <option value="" disabled>Kişi seçiniz</option>
           <option v-for="user in filteredUsers" :key="user.id" :value="String(user.id)">{{ user.name }}</option>
@@ -80,10 +80,10 @@
 
       <!-- Seviye -->
       <label class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Seviye</span>
+        <span class="block text-black text-base font-semibold mb-1">Seviye</span>
         <select
             v-model="newTaskLevel"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
         >
           <template v-if="newTaskType === 'task'">
             <option value="normal">Normal</option>
@@ -98,7 +98,7 @@
 
       <!-- Etiketler -->
       <div v-if="projectLabels.length > 0" class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Etiketler</span>
+        <span class="block text-black text-base font-semibold mb-1">Etiketler</span>
         <div class="flex flex-wrap gap-2 mt-1">
           <button
               v-for="label in projectLabels"
@@ -109,7 +109,7 @@
               'text-xs font-semibold px-3 py-1 rounded-full border transition-all',
               selectedLabels.includes(label.id)
                 ? 'bg-green-500 text-white border-green-600'
-                : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-green-100'
+                : 'bg-gray-100 text-black border-gray-200 hover:bg-green-100'
             ]"
           >
             {{ label.name }}
@@ -119,11 +119,11 @@
 
       <!-- Çoklu Bağlı Görev -->
       <label v-if="newTaskType === 'task'" class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Bağlı Görevler</span>
+        <span class="block text-black text-base font-semibold mb-1">Bağlı Görevler</span>
         <select
             v-model="bagliGorevler"
             multiple
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700 shadow-sm px-3 py-2 h-32"
+            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2 h-32"
         >
           <option v-for="g in tumGorevler" :key="g.id" :value="g.id">{{ g.title }}</option>
         </select>
@@ -131,7 +131,7 @@
 
       <!-- Deadline -->
       <label class="block">
-        <span class="block text-gray-700 text-base font-semibold mb-1">Bitiş Tarihi</span>
+        <span class="block text-black text-base font-semibold mb-1">Bitiş Tarihi</span>
         <input
             v-model="newTaskDeadline"
             type="date"
@@ -222,7 +222,7 @@
           </svg>
           Toplu Görev Oluştur
         </button>
-        <span v-if="bulkSummary" class="text-sm text-gray-600">{{ bulkSummary }}</span>
+        <span v-if="bulkSummary" class="text-sm text-black">{{ bulkSummary }}</span>
       </div>
     </div>
   </div>

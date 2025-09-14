@@ -2,7 +2,7 @@
   <div class="bg-white rounded-xl p-4 shadow flex flex-col gap-4 h-full overflow-y-auto min-h-0">
     <!-- Başlık -->
     <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center gap-2 text-lg font-semibold text-gray-700">
+      <div class="flex items-center gap-2 text-lg font-semibold text-black">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <rect x="3" y="8" width="18" height="13" rx="2" stroke-width="2" />
           <path d="M16 3v4M8 3v4" stroke-width="2" stroke-linecap="round" />
@@ -33,19 +33,19 @@
       </div>
 
       <div class="flex flex-col min-w-[220px]">
-        <label class="text-sm font-medium text-gray-600 mb-1">Proje:</label>
+        <label class="text-sm font-medium text-black mb-1">Proje:</label>
         <div class="relative">
           <select
               v-model="selectedProjectId"
               @change="onProjectSelect"
-              class="appearance-none w-full bg-white border border-gray-300 text-gray-700 text-sm py-2 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+              class="appearance-none w-full bg-white border border-gray-300 text-black text-sm py-2 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           >
             <option disabled :value="null">Proje seçiniz</option>
             <option v-for="project in projects" :key="project.id" :value="project.id">
               {{ project.name }}
             </option>
           </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-black">
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 011.08 1.04l-4.24 4.25a.75.75 0 01-1.08 0l-4.25-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
             </svg>
@@ -64,7 +64,7 @@
           'text-xs font-semibold px-3 py-1 rounded-full border transition-all',
           selectedLabelIds.includes(label.id)
             ? 'bg-green-500 text-white border-green-600'
-            : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-green-100'
+            : 'bg-gray-100 text-black border-gray-200 hover:bg-green-100'
         ]"
       >
         {{ label.name }}
@@ -95,10 +95,10 @@
               <span :class="[getLevelClass(task.level), 'text-xs font-bold rounded-full px-2 py-0.5']">
                 {{ getLevelLabel(task.level) }}
               </span>
-              <span v-if="task.dependentTaskId" class="bg-yellow-300 text-gray-900 text-xs font-bold rounded-full px-2 py-0.5">
+              <span v-if="task.dependentTaskId" class="bg-yellow-300 text-black text-xs font-bold rounded-full px-2 py-0.5">
                 Önce: {{ task.dependentTaskTitle || 'Bağlı görev' }}
               </span>
-              <span :class="task.status === 'Completed' ? 'line-through text-green-800' : 'text-gray-900'" class="font-medium">
+              <span :class="task.status === 'Completed' ? 'line-through text-green-800' : 'text-black'" class="font-medium">
                 {{ task.title }}
               </span>
             </div>
@@ -108,7 +108,7 @@
             <span v-else-if="task.status === 'Ready'" class="bg-blue-200 text-blue-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1">
               🔔 Başlamaya Hazır
             </span>
-            <span v-else-if="task.status === 'Waiting'" class="bg-gray-300 text-gray-700 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1">
+            <span v-else-if="task.status === 'Waiting'" class="bg-gray-300 text-black text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1">
               ⏱ Beklemede
             </span>
             <span v-else-if="task.status === 'Completed'" class="bg-green-200 text-green-800 text-xs rounded-full px-2 py-0.5 font-bold flex items-center gap-1">
@@ -116,7 +116,7 @@
             </span>
           </div>
 
-          <div class="text-xs text-gray-400 mt-1">{{ task.time }}</div>
+          <div class="text-xs text-black mt-1">{{ task.time }}</div>
           <div v-if="task.formattedDeadline" class="text-xs text-blue-500 mt-1">
             Bitiş Tarihi: {{ task.formattedDeadline }}
           </div>
@@ -144,7 +144,7 @@
         </li>
       </template>
       <template v-else>
-        <li class="text-gray-400 text-center py-6 select-none">
+        <li class="text-black text-center py-6 select-none">
           Hiç görev bulunamadı.
         </li>
       </template>
@@ -153,8 +153,8 @@
     <!-- Confirm Modal -->
     <div v-if="showConfirm" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div class="bg-white rounded-xl shadow-xl w-80 p-6 text-center">
-        <h2 class="text-lg font-semibold text-gray-700 mb-3">Görev Silinsin mi?</h2>
-        <p class="text-sm text-gray-500 mb-5">
+        <h2 class="text-lg font-semibold text-black mb-3">Görev Silinsin mi?</h2>
+        <p class="text-sm text-black mb-5">
           "{{ taskToDelete?.title }}" görevini silmek istediğine emin misin?
         </p>
         <div class="flex justify-center gap-4">
@@ -167,7 +167,7 @@
           </button>
           <button
               @click="closeConfirm"
-              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              class="px-4 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300"
           >
             Hayır
           </button>
@@ -224,7 +224,7 @@ function tabClass(type: string) {
     'px-4 py-2 text-sm font-semibold -mb-px border-b-2 transition-all duration-200',
     taskFilter.value === type
         ? 'border-blue-600 text-blue-600'
-        : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
+        : 'border-transparent text-black hover:text-blue-600 hover:border-blue-300'
   ]
 }
 
@@ -394,7 +394,7 @@ function getLevelClass(level: string) {
     case 'critical': return 'bg-red-600 text-white'
     case 'urgent': return 'bg-orange-500 text-white'
     case 'priority': return 'bg-yellow-500 text-white'
-    default: return 'bg-gray-300 text-gray-800'
+    default: return 'bg-gray-300 text-black'
   }
 }
 

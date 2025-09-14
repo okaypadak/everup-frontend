@@ -6,17 +6,17 @@
     </div>
 
     <!-- Tarihler -->
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-black">
       <strong>Tarih:</strong> {{ formatDate(sprint.startDate) }} – {{ formatDate(sprint.endDate) }}
     </p>
 
     <!-- Kalan Gün -->
-    <p class="text-sm text-gray-600">
+    <p class="text-sm text-black">
       <strong>Kalan Gün:</strong> {{ daysRemaining }} gün
     </p>
 
     <!-- Sprint Hedefi -->
-    <div v-if="sprint.goal" class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-gray-700 text-sm">
+    <div v-if="sprint.goal" class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-black text-sm">
       <strong>Hedef:</strong>
       <p class="mt-1">{{ sprint.goal }}</p>
     </div>

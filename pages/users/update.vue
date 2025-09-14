@@ -10,8 +10,8 @@
           <div v-for="user in users" :key="user.id" class="border p-4 rounded-lg bg-blue-50 shadow-sm space-y-2">
             <div class="flex justify-between items-center">
               <div>
-                <p class="font-semibold text-lg text-gray-800">{{ user.firstName }} {{ user.lastName }}</p>
-                <p class="text-sm text-gray-600">{{ user.email }}</p>
+                <p class="font-semibold text-lg text-black">{{ user.firstName }} {{ user.lastName }}</p>
+                <p class="text-sm text-black">{{ user.email }}</p>
               </div>
 
               <div class="flex items-center gap-3">
