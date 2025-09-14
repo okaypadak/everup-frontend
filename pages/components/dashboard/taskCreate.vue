@@ -13,7 +13,7 @@
       <button
           class="px-4 py-2 -mb-px border-b-2"
           :class="activeTab === 'single'
-          ? 'border-blue-500 text-blue-600 font-semibold'
+          ? 'border-sky-500 text-sky-600 font-semibold'
           : 'border-transparent text-black hover:text-black'"
           @click="activeTab = 'single'"
       >
@@ -22,7 +22,7 @@
       <button
           class="px-4 py-2 -mb-px border-b-2"
           :class="activeTab === 'bulk'
-          ? 'border-blue-500 text-blue-600 font-semibold'
+          ? 'border-sky-500 text-sky-600 font-semibold'
           : 'border-transparent text-black hover:text-black'"
           @click="activeTab = 'bulk'"
       >
@@ -30,14 +30,15 @@
       </button>
     </div>
 
-    <!-- TAB İÇERİKLERİ -->
+    <!-- Tekil -->
     <div v-if="activeTab === 'single'" class="flex flex-col gap-4">
       <!-- Proje Seç -->
       <label class="block">
         <span class="block text-black text-base font-semibold mb-1">Proje Seç</span>
         <select
             v-model="selectedProject"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-100 text-black shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
         >
           <option value="">Proje seçiniz</option>
           <option v-for="p in projects" :key="p.id" :value="String(p.id)">{{ p.name }}</option>
@@ -49,7 +50,8 @@
         <span class="block text-black text-base font-semibold mb-1">Tür</span>
         <select
             v-model="newTaskType"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
         >
           <option value="">Tür Seçiniz</option>
           <option value="task">Görev</option>
@@ -59,19 +61,21 @@
         </select>
       </label>
 
-      <!-- Kişi Arama ve Seç -->
+      <!-- Kullanıcı -->
       <label class="block">
         <input
             v-model="userSearch"
-            class="mb-2 w-full rounded px-2 py-1 border border-gray-300 text-black focus:ring-2 focus:ring-blue-200"
             placeholder="Kişi ara..."
-            autocomplete="off"
             type="text"
-        >
+            autocomplete="off"
+            class="mb-2 w-full rounded-lg border border-gray-300 bg-gray-100 text-black px-2 py-1
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+        />
         <span class="block text-black text-base font-semibold mb-1">Atanacak Kişi</span>
         <select
             v-model="assignedUser"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
         >
           <option value="" disabled>Kişi seçiniz</option>
           <option v-for="user in filteredUsers" :key="user.id" :value="String(user.id)">{{ user.name }}</option>
@@ -83,7 +87,8 @@
         <span class="block text-black text-base font-semibold mb-1">Seviye</span>
         <select
             v-model="newTaskLevel"
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2"
+            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
         >
           <template v-if="newTaskType === 'task'">
             <option value="normal">Normal</option>
@@ -117,13 +122,14 @@
         </div>
       </div>
 
-      <!-- Çoklu Bağlı Görev -->
+      <!-- Bağlı Görevler -->
       <label v-if="newTaskType === 'task'" class="block">
         <span class="block text-black text-base font-semibold mb-1">Bağlı Görevler</span>
         <select
             v-model="bagliGorevler"
             multiple
-            class="block w-full mt-1 rounded-md border border-gray-300 bg-gray-50 text-black shadow-sm px-3 py-2 h-32"
+            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2 h-32
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
         >
           <option v-for="g in tumGorevler" :key="g.id" :value="g.id">{{ g.title }}</option>
         </select>
@@ -135,26 +141,29 @@
         <input
             v-model="newTaskDeadline"
             type="date"
-            class="rounded-md bg-gray-100 px-3 py-2 font-medium text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-        >
+            class="w-full rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+        />
       </label>
 
       <!-- Başlık -->
       <input
           v-model="newTaskTitle"
           placeholder="Yeni görev başlığı"
-          class="rounded-md bg-gray-100 px-3 py-2 font-medium text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-      >
+          class="w-full rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
+               focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+      />
 
       <!-- Açıklama -->
       <textarea
           v-model="newTaskDesc"
           rows="10"
           placeholder="Açıklama"
-          class="rounded-md bg-gray-100 px-3 py-2 resize-none border border-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-blue-200 min-h-[300px]"
-      />
+          class="w-full rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2 resize-none min-h-[300px]
+               focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
+      ></textarea>
 
-      <!-- Görev Oluştur Butonu -->
+      <!-- Görev Oluştur -->
       <button
           :disabled="isSingleDisabled"
           :class="[
@@ -170,11 +179,11 @@
       </button>
     </div>
 
-    <!-- BULK TAB -->
+    <!-- Toplu -->
     <div v-else class="flex flex-col gap-4">
-      <div class="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm leading-6">
-        <div class="font-semibold text-blue-700 mb-1">JSON formatı</div>
-        <p class="text-blue-800">
+      <div class="rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm leading-6">
+        <div class="font-semibold text-sky-700 mb-1">JSON formatı</div>
+        <p class="text-sky-800">
           Aşağıya bir <b>dizi</b> halinde görevler gir. Zorunlu alanlar:
           <code class="bg-white/70 px-1 rounded">title</code>,
           <code class="bg-white/70 px-1 rounded">assignedTo</code>,
@@ -196,11 +205,11 @@
           v-model="bulkJson"
           rows="16"
           spellcheck="false"
-          class="rounded-md bg-gray-100 px-3 py-2 border border-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-blue-200 font-mono text-sm"
+          class="w-full rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2 font-mono text-sm
+               focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
           placeholder='[ { "title": "…", "assignedTo": 1, "project": 1 } ]'
-      />
+      ></textarea>
 
-      <!-- Hata listesi -->
       <div v-if="bulkErrors.length" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm">
         <div class="font-semibold text-red-700 mb-1">Hatalar</div>
         <ul class="list-disc ml-5 text-red-800 space-y-1">
@@ -227,6 +236,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
