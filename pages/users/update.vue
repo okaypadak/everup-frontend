@@ -10,18 +10,26 @@
           <div v-for="user in users" :key="user.id" class="border p-4 rounded-lg bg-blue-50 shadow-sm space-y-2">
             <div class="flex justify-between items-center">
               <div>
-                <p class="font-semibold text-lg text-black">{{ user.firstName }} {{ user.lastName }}</p>
-                <p class="text-sm text-black">{{ user.email }}</p>
+                <p class="font-semibold text-lg text-gray-800">{{ user.firstName }} {{ user.lastName }}</p>
+                <p class="text-sm text-gray-600">{{ user.email }}</p>
               </div>
 
               <div class="flex items-center gap-3">
-                <UiSelect v-model="user.role">
+                <select
+                    v-model="user.role"
+                    class="px-3 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-300"
+                >
                   <option v-for="role in roles" :key="role" :value="role">
                     {{ role }}
                   </option>
-                </UiSelect>
+                </select>
 
-                <UiButton @click="updateRole(user)">Kaydet</UiButton>
+                <button
+                    @click="updateRole(user)"
+                    class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-4 py-2 rounded-xl transition"
+                >
+                  Kaydet
+                </button>
               </div>
             </div>
           </div>
