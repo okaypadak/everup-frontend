@@ -1,7 +1,7 @@
 # ----------------------------
 # 1. BUILD aşaması
 # ----------------------------
-FROM node:20.11.1-slim AS builder
+FROM node:20.14.0-slim AS builder
 
 RUN apt-get update && apt-get install -y python3 make g++
 
@@ -20,7 +20,7 @@ RUN npm run build
 # ----------------------------
 # 2. PRODUCTION aşaması
 # ----------------------------
-FROM node:20.11.1-slim
+FROM node:20.14.0-slim
 
 WORKDIR /app
 
