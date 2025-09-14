@@ -36,7 +36,7 @@
             <input
                 v-model="newRootTitle"
                 placeholder="Ana doküman başlığı"
-                class="px-3 py-2 border rounded w-full focus:outline-none focus:ring"
+                class="px-3 py-2 border rounded w-full text-black focus:outline-none focus:ring"
             />
             <button
                 @click="addRootDocument"

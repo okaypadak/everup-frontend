@@ -31,7 +31,7 @@
           v-model="newTitle"
           @keydown.enter="addChild"
           placeholder="Alt başlık yazın ve Enter’a basın"
-          class="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring"
+          class="w-full px-2 py-1 text-sm border rounded text-black focus:outline-none focus:ring"
       />
     </div>
 

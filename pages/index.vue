@@ -18,11 +18,11 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
       <form class="w-full space-y-5" @submit.prevent="login">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Eposta</label>
-          <input v-model="email" type="text" placeholder="eposta gir" class="input-field" required >
+          <input v-model="email" type="text" placeholder="eposta gir" class="input-field text-black" required >
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Şifre</label>
-          <input v-model="password" type="password" placeholder="••••••••" class="input-field" required >
+          <input v-model="password" type="password" placeholder="••••••••" class="input-field text-black" required >
         </div>
 
         <button

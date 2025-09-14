@@ -22,25 +22,25 @@
           <form class="space-y-6" @submit.prevent="submitCustomer">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Firma Adı</label>
-              <input v-model="form.firmaAdi" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50" required >
+              <input v-model="form.firmaAdi" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 text-black" required >
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Yetkili Kişi</label>
-              <input v-model="form.yetkiliKisi" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50" required >
+              <input v-model="form.yetkiliKisi" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 text-black" required >
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input v-model="form.email" type="email" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50" >
+                <input v-model="form.email" type="email" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 text-black" >
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                <input v-model="form.telefon" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50" >
+                <input v-model="form.telefon" type="text" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 text-black" >
               </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Notlar</label>
-              <textarea v-model="form.notlar" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 resize-none" />
+              <textarea v-model="form.notlar" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 resize-none text-black" />
             </div>
             <div class="flex justify-end">
               <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-6 py-2 rounded-xl shadow">
@@ -56,7 +56,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Müşteri ara..."
-              class="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-sky-300"
+              class="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:ring-2 focus:ring-sky-300"
           />
           <button class="bg-sky-600 text-white px-5 py-2 rounded-lg shadow hover:bg-sky-700">
             + Müşteri bul
@@ -86,12 +86,12 @@
               <button @click="selectedCustomer = null" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
             <form class="space-y-4" @submit.prevent="updateCustomer">
-              <input v-model="selectedCustomer.firmaAdi" type="text" class="w-full px-4 py-2 rounded border border-gray-300" placeholder="Firma Adı" required />
-              <input v-model="selectedCustomer.yetkiliKisi" type="text" class="w-full px-4 py-2 rounded border border-gray-300" placeholder="Yetkili Kişi" required />
-              <input v-model="selectedCustomer.email" type="email" class="w-full px-4 py-2 rounded border border-gray-300" placeholder="Email" />
-              <input v-model="selectedCustomer.telefon" type="text" class="w-full px-4 py-2 rounded border border-gray-300" placeholder="Telefon" />
+              <input v-model="selectedCustomer.firmaAdi" type="text" class="w-full px-4 py-2 rounded border border-gray-300 text-black" placeholder="Firma Adı" required />
+              <input v-model="selectedCustomer.yetkiliKisi" type="text" class="w-full px-4 py-2 rounded border border-gray-300 text-black" placeholder="Yetkili Kişi" required />
+              <input v-model="selectedCustomer.email" type="email" class="w-full px-4 py-2 rounded border border-gray-300 text-black" placeholder="Email" />
+              <input v-model="selectedCustomer.telefon" type="text" class="w-full px-4 py-2 rounded border border-gray-300 text-black" placeholder="Telefon" />
               <label class="block text-sm font-medium text-gray-700">Açıklama / Hikaye</label>
-              <textarea v-model="selectedCustomer.notlar" rows="5" class="w-full px-4 py-2 rounded border border-gray-300 resize-none bg-blue-50"></textarea>
+              <textarea v-model="selectedCustomer.notlar" rows="5" class="w-full px-4 py-2 rounded border border-gray-300 resize-none bg-blue-50 text-black"></textarea>
               <div class="flex justify-end">
                 <button type="submit" class="bg-sky-600 text-white px-6 py-2 rounded shadow hover:bg-sky-700">
                   Kaydet

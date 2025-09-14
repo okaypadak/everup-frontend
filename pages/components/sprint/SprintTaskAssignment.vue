@@ -28,7 +28,7 @@
               v-model="selectedTaskIds"
               type="checkbox"
               :value="task.id"
-              class="accent-sky-600 w-4 h-4"
+              class="accent-sky-600 w-4 h-4 text-black"
           >
           <span class="text-gray-700">{{ task.title }}</span>
         </div>
