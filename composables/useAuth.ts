@@ -22,5 +22,8 @@ export function useAuth() {
 
   const isAuthenticated = computed(() => !!user.value)
 
-  return { user, isAuthenticated, fetchMe, login, logout }
+  const hasRole = (role: string) => user.value?.role === role
+  const hasAnyRole = (roles: string[]) => roles.includes(user.value?.role ?? '')
+
+  return { user, isAuthenticated, fetchMe, login, logout, hasRole, hasAnyRole }
 }

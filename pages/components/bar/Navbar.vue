@@ -153,15 +153,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '~/composables/useAuth'
 
-const auth = useAuthStore()
+const { user, hasRole, hasAnyRole, logout: authLogout } = useAuth()
 const router = useRouter()
 
-const user = computed(() => auth.user)
-const isLoggedName = computed(() => auth.userName)
-const hasRole = auth.hasRole
-const hasAnyRole = auth.hasAnyRole
+const isLoggedName = computed(() => user.value?.name ?? '')
 
 const canSeeSprintMenu = computed(() => hasAnyRole(['admin', 'lead', 'director', 'developer']))
 const canSeeProjectMenu = computed(() => hasAnyRole(['admin', 'director']))
@@ -219,8 +216,7 @@ const cancelClose = (target: string) => {
 }
 
 const logout = async () => {
-  await $fetch('/api/logout', { method: 'POST' })
-  auth.clearUser()
+  await authLogout()
   router.push('/')
 }
 
