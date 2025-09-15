@@ -6,30 +6,30 @@
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <ellipse cx="32" cy="32" rx="27" ry="15" stroke="#3CB371" stroke-width="4" />
           <ellipse cx="32" cy="32" rx="15" ry="27" stroke="#38BDF8" stroke-width="4" />
-          <path
-d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
-                fill="#3CB371" fill-opacity="0.12" />
+          <path d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z" fill="#3CB371" fill-opacity="0.12" />
         </svg>
       </div>
 
       <h2 class="text-3xl font-bold text-sky-700 mb-2 tracking-tight">EverUp</h2>
       <p class="text-sm text-black mb-8 text-center">Projelerini kolayca yönet, sürdürülebilir başarıya ulaş.</p>
 
-      <form class="w-full space-y-5" @submit.prevent="login">
+      <form class="w-full space-y-5" @submit.prevent="onSubmit">
         <div>
           <label class="block text-sm font-semibold text-black mb-1">Eposta</label>
-          <input v-model="email" type="text" placeholder="eposta gir" class="input-field text-black" required >
+          <input v-model="email" type="email" placeholder="eposta gir" class="input-field text-black" required />
         </div>
         <div>
           <label class="block text-sm font-semibold text-black mb-1">Şifre</label>
-          <input v-model="password" type="password" placeholder="••••••••" class="input-field text-black" required >
+          <input v-model="password" type="password" placeholder="••••••••" class="input-field text-black" required />
         </div>
 
         <button
-            type="submit"
-            class="w-full py-2.5 bg-gradient-to-r from-sky-600 to-green-500 text-white font-semibold rounded-lg shadow hover:scale-105 transition transform duration-150"
+          type="submit"
+          :disabled="loading"
+          class="w-full py-2.5 bg-gradient-to-r from-sky-600 to-green-500 text-white font-semibold rounded-lg shadow hover:scale-105 transition transform duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Giriş Yap
+          <span v-if="!loading">Giriş Yap</span>
+          <span v-else>Giriş yapılıyor…</span>
         </button>
 
         <p v-if="error" class="text-red-600 text-sm mt-2 text-center">{{ error }}</p>
@@ -46,53 +46,27 @@ d="M32 16 C38 10, 54 20, 38 32 Q32 38, 26 32 C10 20, 26 10, 32 16 Z"
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '~/composables/useAuth'
-import {useAuthStore} from "~/stores/authStore";
 
-const { user } = useAuth()
 const router = useRouter()
-const error = ref('')
+const { login } = useAuth()
+
 const email = ref('')
 const password = ref('')
-const authStore = useAuthStore()
+const loading = ref(false)
+const error = ref('')
 
-async function login(): Promise<void> {
+async function onSubmit() {
+  error.value = ''
+  loading.value = true
   try {
-    const res = await $fetch<any>('/api/auth/login', {
-      method: 'POST',
-      body: {
-        email: email.value,
-        password: password.value
-      }
-    })
-
-    if (res.statusCode === 200) {
-      // 1. Token varsa sakla
-      if (res.token) {
-        localStorage.setItem('token', res.token)
-      }
-
-      // 2. Kullanıcı bilgisi al ve store'a set et
-      const response = await $fetch('/api/me') // -> { name: 'Okay Padak', role: 'admin' }
-
-      console.log(response)
-
-      authStore.setUser({
-        name: response.user.name,
-        role: response.user.role
-      })
-
-      // 3. Yönlendirme
-      router.push('/dashboard')
-    } else {
-      error.value = res.message || 'Kullanıcı adı veya şifre hatalı'
-    }
-
-  } catch (err) {
-    console.error('İstek hatası:', err)
-    error.value = 'Sunucuya erişilemiyor. Lütfen daha sonra tekrar deneyin.'
+    await login(email.value, password.value) // cookie set + fetchMe içeride
+    await router.push('/dashboard')
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Kullanıcı adı veya şifre hatalı'
+  } finally {
+    loading.value = false
   }
 }
-
 </script>
 
 <style scoped>
