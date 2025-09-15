@@ -1,17 +1,19 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+  const PUBLIC = new Set(['/login'])
 
-    const PUBLIC = new Set(['/login']);
+  const { user, fetchMe } = useAuth()
 
-    if (to.path === '/login') {
-        const { user, fetchMe } = useAuth();
-        if (!user.value) await fetchMe();
-        if (user.value) return navigateTo('/dashboard');
-        return;
-    }
+  // Login sayfası: zaten auth'luysa dashboard'a
+  if (to.path === '/login') {
+    if (!user.value) await fetchMe()
+    if (user.value) return navigateTo('/dashboard')
+    return
+  }
 
-    if (PUBLIC.has(to.path)) return;
+  // Public sayfalar serbest
+  if (PUBLIC.has(to.path)) return
 
-    const { user, fetchMe } = useAuth();
-    if (!user.value) await fetchMe();
-    if (!user.value) return navigateTo('/login');
-});
+  // Diğerleri için auth zorunlu
+  if (!user.value) await fetchMe()
+  if (!user.value) return navigateTo('/login')
+})
