@@ -4,7 +4,7 @@ export function useAuth() {
   const user = useState<AuthSession['user'] | null>('auth_user', () => null)
 
   const fetchMe = async () => {
-    const res = await $fetch<{ user: AuthSession['user'] | null }>('/api/me', { method: 'GET' })
+    const res = await $fetch<{ user: AuthSession['user'] | null }>('/api/auth/me', { method: 'GET' })
     user.value = res?.user ?? null
     return user.value
   }

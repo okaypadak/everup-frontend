@@ -45,7 +45,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '~/composables/useAuth'
 
 const router = useRouter()
 const { login } = useAuth()

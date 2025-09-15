@@ -153,7 +153,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '~/composables/useAuth'
 
 const { user, logout } = useAuth()
 const router = useRouter()
@@ -220,7 +219,7 @@ const cancelClose = (target: string) => {
 
 const handleLogout = async () => {
   await logout()
-  router.push('/')
+  router.push('/login')
 }
 
 </script>
