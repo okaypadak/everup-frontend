@@ -40,6 +40,7 @@
           <NuxtLink to="/projects/create" class="dropdown-item">Proje Oluştur</NuxtLink>
           <NuxtLink to="/projects/members" class="dropdown-item">Katılımcılar</NuxtLink>
           <NuxtLink to="/projects/meetings" class="dropdown-item">Toplantılar</NuxtLink>
+          <NuxtLink to="/projects/timeline" class="dropdown-item">Proje Timeline</NuxtLink>
         </div>
       </div>
 
@@ -127,6 +128,7 @@
       <NuxtLink to="/projects/create" class="block py-1 pl-4 nav-link">Proje Oluştur</NuxtLink>
       <NuxtLink to="/projects/members" class="block py-1 pl-4 nav-link">Katılımcılar</NuxtLink>
       <NuxtLink to="/projects/meetings" class="block py-1 pl-4 nav-link">Toplantılar</NuxtLink>
+      <NuxtLink to="/projects/timeline" class="block py-1 pl-4 nav-link">Proje Timeline</NuxtLink>
     </div>
 
     <div v-if="canSeeCustomerMenu" class="mt-4">
