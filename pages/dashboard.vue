@@ -17,20 +17,12 @@
     <div class="md:hidden p-4 space-y-4">
       <TaskListPanel />
       <PomodoroTimer v-if="isPomodoroVisible" @hide="handlePomodoroHide" />
-      <button
-        v-else
-        type="button"
-        class="w-full rounded-lg border border-dashed border-gray-300 bg-white px-4 py-6 text-center text-sm font-medium text-gray-600"
-        @click="showPomodoroPanel"
-      >
-        Pomodoro sayaç panelini göster
-      </button>
     </div>
 
     <!-- Masaüstü görünüm: 1:3:2:2 oranında grid -->
     <div
         class="hidden md:grid px-8 gap-6 py-6"
-        style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr 2fr;"
+        :style="desktopGridStyle"
     >
       <!-- Bildirimler + Yorumlar -->
       <div class="bg-white rounded-xl shadow h-full flex flex-col overflow-hidden">
@@ -58,22 +50,18 @@
         class="flex flex-col h-full"
         @hide="handlePomodoroHide"
       />
-      <div
-        v-else
-        class="flex h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white text-center"
-      >
-        <div class="space-y-4 px-6">
-          <p class="text-sm text-gray-600">Pomodoro sayaç paneli gizlendi.</p>
-          <button
-            type="button"
-            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-            @click="showPomodoroPanel"
-          >
-            Pomodoro sayacını geri getir
-          </button>
-        </div>
-      </div>
     </div>
+
+    <button
+      v-if="!isPomodoroVisible"
+      type="button"
+      class="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-red-500 text-2xl shadow-lg transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+      aria-label="Pomodoro sayacını aç"
+      @click="showPomodoroPanel"
+    >
+      <span aria-hidden="true">🍅</span>
+      <span class="sr-only">Pomodoro sayacını aç</span>
+    </button>
 
     <DashboardDrawer
         v-if="drawerType"
@@ -85,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
@@ -112,6 +100,11 @@ const handlePomodoroHide = () => {
 const showPomodoroPanel = () => {
   isPomodoroVisible.value = true
 }
+
+const desktopGridStyle = computed(() => ({
+  height: 'calc(100vh - 4rem)',
+  gridTemplateColumns: isPomodoroVisible.value ? '1fr 3fr 2fr 2fr' : '1fr 3fr 2fr',
+}))
 
 onMounted(async () => {
   if (process.client) {
