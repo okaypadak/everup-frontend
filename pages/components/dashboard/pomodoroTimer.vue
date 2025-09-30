@@ -113,6 +113,26 @@
           </li>
         </ul>
       </div>
+      <div class="mt-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Projelere Göre Toplam Odak Süresi</h3>
+        <ul v-if="projectTotalsList.length" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+          <li
+            v-for="projectTotal in projectTotalsList"
+            :key="projectTotal.projectId"
+            class="flex items-center justify-between text-sm text-gray-600"
+          >
+            <span class="font-medium text-gray-800">
+              {{ projectTotal.projectName ?? `Proje #${projectTotal.projectId}` }}
+            </span>
+            <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+              {{ projectTotal.totalFocusMinutes }} dk
+            </span>
+          </li>
+        </ul>
+        <p v-else class="text-sm text-gray-400 text-center py-2">
+          Henüz projelere bağlı odak süresi bulunmuyor.
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -137,7 +157,8 @@ const {
   completedSessions,
   sessionHistory,
   linkedProjectName,
-  linkedProjectId
+  linkedProjectId,
+  projectTotals
 } = storeToRefs(pomodoroStore)
 
 const workDurationInput = ref(workDuration.value)
@@ -169,6 +190,9 @@ const progress = computed(() => {
 })
 
 const recentSessions = computed(() => sessionHistory.value.slice(0, 5))
+const projectTotalsList = computed(() =>
+  Object.values(projectTotals.value).sort((a, b) => b.totalFocusMinutes - a.totalFocusMinutes)
+)
 
 const handleStartPause = () => {
   if (isActive.value) {

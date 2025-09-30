@@ -14,6 +14,12 @@ export interface PomodoroSession {
     taskId: number | null
 }
 
+export interface PomodoroProjectTotal {
+    projectId: number
+    projectName: string | null
+    totalFocusMinutes: number
+}
+
 interface PomodoroSettings {
     workDuration: number
     breakDuration: number
@@ -24,6 +30,7 @@ interface PomodoroSettings {
 
 const SESSION_STORAGE_KEY = 'everup:pomodoro:sessions'
 const SETTINGS_STORAGE_KEY = 'everup:pomodoro:settings'
+const PROJECT_TOTALS_STORAGE_KEY = 'everup:pomodoro:projectTotals'
 
 export const usePomodoroStore = defineStore('pomodoro', {
     state: () => ({
@@ -34,6 +41,7 @@ export const usePomodoroStore = defineStore('pomodoro', {
         isActive: false,
         completedSessions: 0,
         sessionHistory: [] as PomodoroSession[],
+        projectTotals: {} as Record<string, PomodoroProjectTotal>,
         timerId: null as ReturnType<typeof setInterval> | null,
         cycleStartedAt: null as string | null,
         linkedProjectId: null as number | null,
@@ -54,6 +62,16 @@ export const usePomodoroStore = defineStore('pomodoro', {
                     this.completedSessions = parsed.length
                 } catch (error) {
                     console.warn('Pomodoro oturumları yüklenirken hata oluştu:', error)
+                }
+            }
+
+            const storedTotals = window.localStorage.getItem(PROJECT_TOTALS_STORAGE_KEY)
+            if (storedTotals) {
+                try {
+                    const parsed: Record<string, PomodoroProjectTotal> = JSON.parse(storedTotals)
+                    this.projectTotals = parsed
+                } catch (error) {
+                    console.warn('Pomodoro proje toplamları yüklenirken hata oluştu:', error)
                 }
             }
 
@@ -95,6 +113,20 @@ export const usePomodoroStore = defineStore('pomodoro', {
         linkProject(projectId: number | null, projectName: string | null) {
             this.linkedProjectId = projectId
             this.linkedProjectName = projectName
+            if (projectId !== null) {
+                const key = String(projectId)
+                const existing = this.projectTotals[key]
+                const total: PomodoroProjectTotal = {
+                    projectId,
+                    projectName,
+                    totalFocusMinutes: existing?.totalFocusMinutes ?? 0
+                }
+                this.projectTotals = {
+                    ...this.projectTotals,
+                    [key]: total
+                }
+                this.persistProjectTotals()
+            }
             this.persistSettings()
         },
         linkTask(taskId: number | null) {
@@ -180,6 +212,9 @@ export const usePomodoroStore = defineStore('pomodoro', {
             }
             this.sessionHistory = [session, ...this.sessionHistory]
             this.persistSessions()
+            if (session.projectId !== null) {
+                this.incrementProjectTotal(session.projectId, session.projectName, session.focusDuration)
+            }
         },
         clearTimerInterval() {
             if (this.timerId) {
@@ -197,6 +232,31 @@ export const usePomodoroStore = defineStore('pomodoro', {
             } catch (error) {
                 console.warn('Pomodoro oturumları kaydedilirken hata oluştu:', error)
             }
+        },
+        persistProjectTotals() {
+            if (!process.client) {
+                return
+            }
+
+            try {
+                window.localStorage.setItem(PROJECT_TOTALS_STORAGE_KEY, JSON.stringify(this.projectTotals))
+            } catch (error) {
+                console.warn('Pomodoro proje toplamları kaydedilirken hata oluştu:', error)
+            }
+        },
+        incrementProjectTotal(projectId: number, projectName: string | null, focusDuration: number) {
+            const key = String(projectId)
+            const existing = this.projectTotals[key]
+            const total: PomodoroProjectTotal = {
+                projectId,
+                projectName: projectName ?? existing?.projectName ?? null,
+                totalFocusMinutes: (existing?.totalFocusMinutes ?? 0) + focusDuration
+            }
+            this.projectTotals = {
+                ...this.projectTotals,
+                [key]: total
+            }
+            this.persistProjectTotals()
         },
         persistSettings() {
             if (!process.client) {

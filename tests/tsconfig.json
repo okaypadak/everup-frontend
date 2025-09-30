@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "outDir": "../.tmp-tests",
+    "rootDir": "..",
+    "resolveJsonModule": true
+  },
+  "include": [
+    "../stores/pomodoroStore.ts",
+    "./pomodoroStore.spec.ts",
+    "./globals.d.ts"
+  ]
+}

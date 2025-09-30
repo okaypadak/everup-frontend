@@ -10,6 +10,7 @@ pnpm-lock.yaml
 .output/
 dist/
 .cache/
+.tmp-tests/
 
 # Static build artifacts
 *.log
