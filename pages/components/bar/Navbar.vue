@@ -39,6 +39,7 @@
         <div v-if="showProjectMenu" class="dropdown-panel" @mouseenter="cancelClose('project')" @mouseleave="delayedClose('project')">
           <NuxtLink to="/projects/create" class="dropdown-item">Proje Oluştur</NuxtLink>
           <NuxtLink to="/projects/members" class="dropdown-item">Katılımcılar</NuxtLink>
+          <NuxtLink to="/projects/meetings" class="dropdown-item">Toplantılar</NuxtLink>
         </div>
       </div>
 
@@ -125,6 +126,7 @@
       <p class="font-semibold text-black mb-2">Proje Yönetimi</p>
       <NuxtLink to="/projects/create" class="block py-1 pl-4 nav-link">Proje Oluştur</NuxtLink>
       <NuxtLink to="/projects/members" class="block py-1 pl-4 nav-link">Katılımcılar</NuxtLink>
+      <NuxtLink to="/projects/meetings" class="block py-1 pl-4 nav-link">Toplantılar</NuxtLink>
     </div>
 
     <div v-if="canSeeCustomerMenu" class="mt-4">
