@@ -16,7 +16,15 @@
 
     <div class="md:hidden p-4 space-y-4">
       <TaskListPanel />
-      <PomodoroTimer />
+      <PomodoroTimer v-if="isPomodoroVisible" @hide="handlePomodoroHide" />
+      <button
+        v-else
+        type="button"
+        class="w-full rounded-lg border border-dashed border-gray-300 bg-white px-4 py-6 text-center text-sm font-medium text-gray-600"
+        @click="showPomodoroPanel"
+      >
+        Pomodoro sayaç panelini göster
+      </button>
     </div>
 
     <!-- Masaüstü görünüm: 1:3:2:2 oranında grid -->
@@ -45,7 +53,26 @@
       <TaskCreatePanel class="flex flex-col h-full"/>
 
       <!-- Pomodoro Zamanlayıcı -->
-      <PomodoroTimer class="flex flex-col h-full" />
+      <PomodoroTimer
+        v-if="isPomodoroVisible"
+        class="flex flex-col h-full"
+        @hide="handlePomodoroHide"
+      />
+      <div
+        v-else
+        class="flex h-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white text-center"
+      >
+        <div class="space-y-4 px-6">
+          <p class="text-sm text-gray-600">Pomodoro sayaç paneli gizlendi.</p>
+          <button
+            type="button"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+            @click="showPomodoroPanel"
+          >
+            Pomodoro sayacını geri getir
+          </button>
+        </div>
+      </div>
     </div>
 
     <DashboardDrawer
@@ -58,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
@@ -71,12 +98,29 @@ import { useFetch } from '#app'
 const comments = ref([])
 const notifications = ref([])
 const drawerType = ref<null | 'notifications' | 'taskCreate' | 'pomodoro'>(null)
+const isPomodoroVisible = ref(true)
+const POMODORO_VISIBILITY_KEY = 'dashboard:pomodoroVisible'
 
 const openDrawer = (type: 'notifications' | 'taskCreate' | 'pomodoro') => {
   drawerType.value = type
 }
 
+const handlePomodoroHide = () => {
+  isPomodoroVisible.value = false
+}
+
+const showPomodoroPanel = () => {
+  isPomodoroVisible.value = true
+}
+
 onMounted(async () => {
+  if (process.client) {
+    const storedVisibility = localStorage.getItem(POMODORO_VISIBILITY_KEY)
+    if (storedVisibility !== null) {
+      isPomodoroVisible.value = storedVisibility === 'true'
+    }
+  }
+
   try {
     // Yorumları çek
     const { data: commentData, error: commentError } = await useFetch('/api/comments/mine')
@@ -95,6 +139,12 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error('Veriler alınırken beklenmeyen hata:', err)
+  }
+})
+
+watch(isPomodoroVisible, (visible) => {
+  if (process.client) {
+    localStorage.setItem(POMODORO_VISIBILITY_KEY, String(visible))
   }
 })
 </script>
