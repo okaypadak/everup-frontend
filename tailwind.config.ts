@@ -13,13 +13,13 @@ export default {
       borderRadius: {
         DEFAULT: 'var(--radius)',
         md: 'var(--radius)',
-        lg: 'calc(var(--radius) * 1.5)'
+        lg: 'calc(var(--radius) * 1.5)',
       },
       fontFamily: {
         sans: 'var(--font-sans)',
-        mono: 'var(--font-mono, monospace)'
-      }
-    }
+        mono: 'var(--font-mono, monospace)',
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 } satisfies Config

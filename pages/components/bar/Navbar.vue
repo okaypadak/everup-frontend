@@ -94,7 +94,7 @@
           <svg class="w-4 h-4 text-black ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
         </button>
         <div v-if="showProfileMenu" class="dropdown-panel right-0" @mouseenter="cancelClose('profile')" @mouseleave="delayedClose('profile')">
-          <button class="dropdown-item text-red-600" @click="logout">Çıkış Yap</button>
+          <button class="dropdown-item text-red-600" @click="handleLogout">Çıkış Yap</button>
         </div>
       </div>
     </div>
@@ -157,15 +157,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
 
-const auth = useAuthStore()
+const { user, logout } = useAuth()
 const router = useRouter()
 
-const user = computed(() => auth.user)
-const isLoggedName = computed(() => auth.userName)
-const hasRole = auth.hasRole
-const hasAnyRole = auth.hasAnyRole
+const isLoggedName = computed(() => user.value?.name ?? '')
+const userRole = computed(() => user.value?.role ?? '')
+const hasRole = (role: string) => userRole.value === role
+const hasAnyRole = (roles: string[]) => roles.includes(userRole.value)
 
 const canSeeSprintMenu = computed(() => hasAnyRole(['admin', 'lead', 'director', 'developer']))
 const canSeeProjectMenu = computed(() => hasAnyRole(['admin', 'director']))
@@ -222,10 +221,9 @@ const cancelClose = (target: string) => {
   clears[target]?.()
 }
 
-const logout = async () => {
-  await $fetch('/api/logout', { method: 'POST' })
-  auth.clearUser()
-  router.push('/')
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
 }
 
 </script>

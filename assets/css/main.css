@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+:root {
+    --color-primary: 14 165 233;
+    --color-secondary: 251 207 232;
+    --color-accent: 254 249 195;
+    --color-background: 248 250 252;
+    --radius: 0.5rem;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'Fira Code', monospace;
+}
+
+.dark {
+    --color-primary: 2 132 199;
+    --color-secondary: 244 114 182;
+    --color-accent: 250 204 21;
+    --color-background: 15 23 42;
+    --color-text: 255 255 255;
+}
