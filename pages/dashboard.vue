@@ -8,17 +8,21 @@
         <button @click="openDrawer('taskCreate')" class="px-4 py-2 rounded bg-green-500 text-white w-full text-left">
           Görev Oluştur
         </button>
+        <button @click="openDrawer('pomodoro')" class="mt-2 px-4 py-2 rounded bg-red-500 text-white w-full text-left">
+          Pomodoro Sayacı
+        </button>
       </template>
     </Navbar>
 
-    <div class="md:hidden p-4">
+    <div class="md:hidden p-4 space-y-4">
       <TaskListPanel />
+      <PomodoroTimer />
     </div>
 
-    <!-- Masaüstü görünüm: 1:3:2 oranında grid -->
+    <!-- Masaüstü görünüm: 1:3:2:2 oranında grid -->
     <div
         class="hidden md:grid px-8 gap-6 py-6"
-        style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr;"
+        style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr 2fr;"
     >
       <!-- Bildirimler + Yorumlar -->
       <div class="bg-white rounded-xl shadow h-full flex flex-col overflow-hidden">
@@ -39,6 +43,9 @@
 
       <!-- Görev Oluştur -->
       <TaskCreatePanel class="flex flex-col h-full"/>
+
+      <!-- Pomodoro Zamanlayıcı -->
+      <PomodoroTimer class="flex flex-col h-full" />
     </div>
 
     <DashboardDrawer
@@ -56,15 +63,16 @@ import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
 import CommentListPanel from './components/dashboard/commentList.vue'
+import PomodoroTimer from './components/dashboard/pomodoroTimer.vue'
 import Navbar from './components/bar/Navbar.vue'
 import DashboardDrawer from './components/dashboard/DashboardDrawer.vue'
 import { useFetch } from '#app'
 
 const comments = ref([])
 const notifications = ref([])
-const drawerType = ref<null | 'notifications' | 'taskCreate'>(null)
+const drawerType = ref<null | 'notifications' | 'taskCreate' | 'pomodoro'>(null)
 
-const openDrawer = (type: 'notifications' | 'taskCreate') => {
+const openDrawer = (type: 'notifications' | 'taskCreate' | 'pomodoro') => {
   drawerType.value = type
 }
 
