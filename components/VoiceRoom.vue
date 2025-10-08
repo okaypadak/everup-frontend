@@ -54,25 +54,11 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRuntimeConfig } from '#imports'
 import { useVoiceStore } from '~/stores/voiceStore'
-import { createVoiceSocket, type VoiceSocket } from '~/composables/voice/socket'
-import {
-  createRecvTransport,
-  createSendTransport,
-  type RecvTransport,
-  type SendTransport,
-  type TransportOptions,
-} from '~/composables/voice/webrtc'
 
 type ParticipantPayload = {
   id: string
   username: string
   muted?: boolean
-}
-
-type ParticipantListResponse = Array<ParticipantPayload>
-
-type JoinResponse = {
-  id: string
 }
 
 interface JoinRoomProps {
@@ -87,10 +73,9 @@ const voiceStore = useVoiceStore()
 const localVideo = ref<HTMLVideoElement | null>(null)
 const localStream = ref<MediaStream | null>(null)
 const remoteVideoRefs = ref<Record<string, HTMLVideoElement | null>>({})
-const socket = ref<VoiceSocket | null>(null)
-const sendTransport = ref<SendTransport | null>(null)
-const recvTransports = ref<Record<string, RecvTransport>>({})
-const detachSocketEvents = ref<(() => void) | null>(null)
+const socket = ref<WebSocket | null>(null)
+const peerConnections = ref<Record<string, RTCPeerConnection>>({})
+const clientId = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 const isJoining = ref(false)
 
@@ -98,8 +83,14 @@ const joined = computed(() => voiceStore.joined)
 const remoteParticipants = computed(() => voiceStore.remoteParticipants)
 
 const runtimeConfig = useRuntimeConfig()
-const resolveSignalingUrl = () =>
-  props.signalingUrl || runtimeConfig.public?.voiceSignalingUrl || 'ws://localhost:4000/voice'
+const resolveSignalingUrl = () => {
+  if (props.signalingUrl) return props.signalingUrl
+  if (!process.client) return ''
+  const runtimeUrl = runtimeConfig.public?.voiceSignalingUrl
+  if (runtimeUrl) return runtimeUrl
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}/voice`
+}
 
 const attachLocalStream = () => {
   if (!process.client) return
@@ -129,56 +120,80 @@ const setRemoteVideoRef = (participantId: string, el: HTMLVideoElement | null) =
   }
 }
 
-const setupRecvForParticipant = async (payload: ParticipantPayload) => {
-  if (!socket.value || recvTransports.value[payload.id]) return
-  try {
-    const transportOptions = (await socket.value.request('create-transport', {
-      direction: 'recv',
-      participantId: payload.id,
-    })) as TransportOptions
-    const transport = await createRecvTransport(socket.value, {
-      ...transportOptions,
-      participantId: payload.id,
-    })
-    recvTransports.value[payload.id] = transport
-    voiceStore.setParticipantStream(payload.id, transport.stream)
-    attachRemoteStream(payload.id)
-  } catch (error) {
-    console.error('[voice] failed to create recv transport', error)
-  }
+const sendSignal = (payload: Record<string, unknown>) => {
+  if (!socket.value || socket.value.readyState !== WebSocket.OPEN) return
+  socket.value.send(JSON.stringify(payload))
 }
 
-const registerSocketEvents = (voiceSocket: VoiceSocket) => {
-  const handleParticipantJoined = async (payload: ParticipantPayload) => {
-    voiceStore.upsertParticipant(payload)
-    await setupRecvForParticipant(payload)
+const closePeerConnection = (participantId: string) => {
+  const connection = peerConnections.value[participantId]
+  if (!connection) return
+  connection.ontrack = null
+  connection.onicecandidate = null
+  connection.onconnectionstatechange = null
+  connection.close()
+  delete peerConnections.value[participantId]
+}
+
+const ensurePeerConnection = (participantId: string) => {
+  let connection = peerConnections.value[participantId]
+  if (connection) return connection
+  connection = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+    ],
+  })
+
+  connection.ontrack = (event) => {
+    const [stream] = event.streams
+    if (stream) {
+      voiceStore.setParticipantStream(participantId, stream)
+      attachRemoteStream(participantId)
+    }
   }
 
-  const handleParticipantLeft = (payload: { id: string }) => {
-    const transport = recvTransports.value[payload.id]
-    transport?.close()
-    delete recvTransports.value[payload.id]
-    voiceStore.removeParticipant(payload.id)
+  connection.onicecandidate = (event) => {
+    if (!event.candidate) return
+    sendSignal({
+      type: 'ice-candidate',
+      targetId: participantId,
+      candidate: {
+        candidate: event.candidate.candidate,
+        sdpMid: event.candidate.sdpMid ?? null,
+        sdpMLineIndex: event.candidate.sdpMLineIndex ?? null,
+      },
+    })
   }
 
-  const handleParticipantMuted = (payload: { id: string; muted: boolean }) => {
-    voiceStore.setParticipantMuted(payload.id, payload.muted)
+  connection.onconnectionstatechange = () => {
+    if (
+      connection.connectionState === 'failed' ||
+      connection.connectionState === 'disconnected' ||
+      connection.connectionState === 'closed'
+    ) {
+      closePeerConnection(participantId)
+    }
   }
 
-  const handleParticipantUpdated = (payload: ParticipantPayload) => {
-    voiceStore.upsertParticipant(payload)
+  if (localStream.value) {
+    localStream.value.getTracks().forEach((track) => {
+      connection.addTrack(track, localStream.value as MediaStream)
+    })
   }
 
-  voiceSocket.on('participant-joined', handleParticipantJoined)
-  voiceSocket.on('participant-left', handleParticipantLeft)
-  voiceSocket.on('participant-muted', handleParticipantMuted)
-  voiceSocket.on('participant-updated', handleParticipantUpdated)
+  peerConnections.value[participantId] = connection
+  return connection
+}
 
-  return () => {
-    voiceSocket.off('participant-joined', handleParticipantJoined)
-    voiceSocket.off('participant-left', handleParticipantLeft)
-    voiceSocket.off('participant-muted', handleParticipantMuted)
-    voiceSocket.off('participant-updated', handleParticipantUpdated)
+const createOfferForParticipant = async (participantId: string) => {
+  try {
+    const connection = ensurePeerConnection(participantId)
+    const offer = await connection.createOffer()
+    await connection.setLocalDescription(offer)
+    sendSignal({ type: 'offer', targetId: participantId, sdp: offer.sdp })
+  } catch (error) {
+    console.error('[voice] failed to create offer', error)
   }
 }
 
@@ -194,16 +209,6 @@ const joinRoom = async () => {
 
   try {
     voiceStore.setIdentity({ roomId: props.roomId, username: props.username })
-
-    const voiceSocket = createVoiceSocket(resolveSignalingUrl())
-    socket.value = voiceSocket
-    await voiceSocket.connect()
-
-    await voiceSocket.request<JoinResponse>('join-room', {
-      roomId: props.roomId,
-      username: props.username,
-    })
-
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
@@ -212,22 +217,115 @@ const joinRoom = async () => {
     voiceStore.setLocalStream(mediaStream)
     attachLocalStream()
 
-    const sendTransportOptions = (await voiceSocket.request('create-transport', {
-      direction: 'send',
-    })) as TransportOptions
-    sendTransport.value = await createSendTransport(voiceSocket, sendTransportOptions)
-    await sendTransport.value.publish(mediaStream)
+    await new Promise<void>((resolve, reject) => {
+      const url = resolveSignalingUrl()
+      if (!url) {
+        reject(new Error('Geçerli bir sinyalleşme adresi bulunamadı.'))
+        return
+      }
+      const voiceSocket = new WebSocket(url)
+      socket.value = voiceSocket
 
-    const participants = (await voiceSocket.request('participants')) as ParticipantListResponse
-    await Promise.all(
-      participants.map(async (participant) => {
-        voiceStore.upsertParticipant(participant)
-        await setupRecvForParticipant(participant)
-      }),
-    )
+      voiceSocket.addEventListener('open', () => {
+        voiceSocket.send(
+          JSON.stringify({
+            type: 'join',
+            roomId: props.roomId,
+            username: props.username,
+          }),
+        )
+        resolve()
+      })
 
-    detachSocketEvents.value = registerSocketEvents(voiceSocket)
-    voiceStore.markJoined(true)
+      voiceSocket.addEventListener('error', (event) => {
+        console.error('[voice] socket error', event)
+        reject(new Error('Sinyalleşme sunucusuna bağlanırken hata oluştu.'))
+      })
+
+      voiceSocket.addEventListener('close', () => {
+        if (joined.value) {
+          errorMessage.value = 'Bağlantı kesildi.'
+        }
+        cleanup()
+      })
+
+      voiceSocket.addEventListener('message', async (event) => {
+        try {
+          const data = JSON.parse(event.data as string) as Record<string, any>
+          switch (data.type) {
+            case 'joined': {
+              clientId.value = data.id as string
+              const participants = (data.participants as ParticipantPayload[]) || []
+              participants.forEach((participant) => {
+                voiceStore.upsertParticipant(participant)
+              })
+              await Promise.all(
+                participants.map(async (participant) => {
+                  await createOfferForParticipant(participant.id)
+                }),
+              )
+              voiceStore.markJoined(true)
+              break
+            }
+            case 'participant-joined': {
+              voiceStore.upsertParticipant(data.participant as ParticipantPayload)
+              break
+            }
+            case 'participant-left': {
+              closePeerConnection(data.id as string)
+              voiceStore.removeParticipant(data.id as string)
+              break
+            }
+            case 'participant-muted': {
+              voiceStore.setParticipantMuted(data.id as string, Boolean(data.muted))
+              break
+            }
+            case 'offer': {
+              if (!localStream.value) break
+              voiceStore.upsertParticipant({ id: data.fromId as string, username: data.username ?? 'Katılımcı' })
+              {
+                const connection = ensurePeerConnection(data.fromId as string)
+                if (data.sdp) {
+                  await connection.setRemoteDescription({ type: 'offer', sdp: data.sdp })
+                  const answer = await connection.createAnswer()
+                  await connection.setLocalDescription(answer)
+                  sendSignal({ type: 'answer', targetId: data.fromId, sdp: answer.sdp })
+                }
+              }
+              break
+            }
+            case 'answer': {
+              const connection = peerConnections.value[data.fromId as string]
+              if (connection && data.sdp) {
+                await connection.setRemoteDescription({ type: 'answer', sdp: data.sdp })
+              }
+              break
+            }
+            case 'ice-candidate': {
+              const connection = peerConnections.value[data.fromId as string]
+              if (connection && data.candidate) {
+                try {
+                  await connection.addIceCandidate({
+                    candidate: data.candidate.candidate,
+                    sdpMid: data.candidate.sdpMid ?? undefined,
+                    sdpMLineIndex: data.candidate.sdpMLineIndex ?? undefined,
+                  })
+                } catch (iceError) {
+                  console.warn('[voice] failed to add ice candidate', iceError)
+                }
+              }
+              break
+            }
+            case 'error': {
+              errorMessage.value = typeof data.message === 'string' ? data.message : 'Bir hata oluştu.'
+              break
+            }
+          }
+        } catch (parseError) {
+          console.warn('[voice] failed to parse signaling message', parseError)
+        }
+      })
+    })
   } catch (error) {
     console.error('[voice] failed to join room', error)
     errorMessage.value =
@@ -246,40 +344,28 @@ const toggleMute = async () => {
   localStream.value.getAudioTracks().forEach((track) => {
     track.enabled = !shouldMute
   })
-  if (shouldMute) {
-    sendTransport.value?.pause(localStream.value)
-  } else {
-    sendTransport.value?.resume(localStream.value)
-  }
   voiceStore.setLocalMuted(shouldMute)
-  socket.value?.emit('set-mute', {
-    muted: shouldMute,
-  })
+  sendSignal({ type: 'set-mute', muted: shouldMute })
 }
 
 const cleanup = async () => {
-  sendTransport.value?.close()
-  sendTransport.value = null
+  Object.keys(peerConnections.value).forEach((participantId) => {
+    closePeerConnection(participantId)
+  })
+  peerConnections.value = {}
 
-  Object.values(recvTransports.value).forEach((transport) => transport.close())
-  recvTransports.value = {}
+  if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+    socket.value.send(JSON.stringify({ type: 'leave' }))
+  }
+  socket.value?.close()
+  socket.value = null
+  clientId.value = null
 
   if (localStream.value) {
     localStream.value.getTracks().forEach((track) => track.stop())
   }
   localStream.value = null
   voiceStore.setLocalStream(null)
-
-  detachSocketEvents.value?.()
-  detachSocketEvents.value = null
-
-  if (socket.value?.isConnected()) {
-    socket.value.emit('leave-room', {
-      roomId: voiceStore.roomId,
-    })
-  }
-  socket.value?.disconnect()
-  socket.value = null
 
   Object.keys(voiceStore.participants).forEach((participantId) => {
     voiceStore.removeParticipant(participantId)
