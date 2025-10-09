@@ -3,7 +3,7 @@
     <header class="voice-room__header">
       <button
         class="voice-room__join"
-        :disabled="isJoining || joined"
+        :disabled="isJoining || joined || !props.roomId || !props.username"
         @click="joinRoom"
       >
         {{ joined ? 'Bağlandın' : 'Odaya Katıl' }}
@@ -85,11 +85,37 @@ const remoteParticipants = computed(() => voiceStore.remoteParticipants)
 const runtimeConfig = useRuntimeConfig()
 const resolveSignalingUrl = () => {
   if (props.signalingUrl) return props.signalingUrl
-  if (!process.client) return ''
   const runtimeUrl = runtimeConfig.public?.voiceSignalingUrl
   if (runtimeUrl) return runtimeUrl
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${protocol}//${window.location.host}/voice`
+  if (process.client && process.dev) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${protocol}//${window.location.host}/voice`
+  }
+  return ''
+}
+
+const normalizeParticipant = (payload: any): ParticipantPayload | null => {
+  if (!payload || typeof payload !== 'object') return null
+  const id =
+    (payload.id as string | undefined) ||
+    (payload.participantId as string | undefined) ||
+    (payload.clientId as string | undefined) ||
+    (payload.userId as string | undefined)
+  if (!id || typeof id !== 'string') return null
+  return {
+    id,
+    username:
+      (payload.username as string | undefined) ||
+      (payload.name as string | undefined) ||
+      'Katılımcı',
+    muted: Boolean(payload.muted),
+  }
+}
+
+const extractParticipantId = (payload: Record<string, any>) => {
+  const candidate =
+    payload.id || payload.participantId || payload.clientId || payload.userId || payload.targetId
+  return typeof candidate === 'string' ? candidate : ''
 }
 
 const attachLocalStream = () => {
@@ -122,7 +148,14 @@ const setRemoteVideoRef = (participantId: string, el: HTMLVideoElement | null) =
 
 const sendSignal = (payload: Record<string, unknown>) => {
   if (!socket.value || socket.value.readyState !== WebSocket.OPEN) return
-  socket.value.send(JSON.stringify(payload))
+  const enrichedPayload: Record<string, unknown> = {
+    ...payload,
+    ...(props.roomId ? { meetingId: props.roomId, roomId: props.roomId } : {}),
+  }
+  if (clientId.value && typeof enrichedPayload.participantId === 'undefined') {
+    enrichedPayload.participantId = clientId.value
+  }
+  socket.value.send(JSON.stringify(enrichedPayload))
 }
 
 const closePeerConnection = (participantId: string) => {
@@ -158,6 +191,7 @@ const ensurePeerConnection = (participantId: string) => {
     sendSignal({
       type: 'ice-candidate',
       targetId: participantId,
+      participantId,
       candidate: {
         candidate: event.candidate.candidate,
         sdpMid: event.candidate.sdpMid ?? null,
@@ -191,7 +225,7 @@ const createOfferForParticipant = async (participantId: string) => {
     const connection = ensurePeerConnection(participantId)
     const offer = await connection.createOffer()
     await connection.setLocalDescription(offer)
-    sendSignal({ type: 'offer', targetId: participantId, sdp: offer.sdp })
+    sendSignal({ type: 'offer', targetId: participantId, participantId, sdp: offer.sdp })
   } catch (error) {
     console.error('[voice] failed to create offer', error)
   }
@@ -230,6 +264,7 @@ const joinRoom = async () => {
         voiceSocket.send(
           JSON.stringify({
             type: 'join',
+            meetingId: props.roomId,
             roomId: props.roomId,
             username: props.username,
           }),
@@ -254,8 +289,18 @@ const joinRoom = async () => {
           const data = JSON.parse(event.data as string) as Record<string, any>
           switch (data.type) {
             case 'joined': {
-              clientId.value = data.id as string
-              const participants = (data.participants as ParticipantPayload[]) || []
+              const selfId = extractParticipantId(data)
+              if (selfId) {
+                clientId.value = selfId
+              }
+              const participantsRaw = Array.isArray(data.participants)
+                ? data.participants
+                : Array.isArray((data.participants as any)?.items)
+                  ? ((data.participants as any).items as any[])
+                  : []
+              const participants = participantsRaw
+                .map((participant) => normalizeParticipant(participant))
+                .filter((participant): participant is ParticipantPayload => Boolean(participant))
               participants.forEach((participant) => {
                 voiceStore.upsertParticipant(participant)
               })
@@ -268,41 +313,57 @@ const joinRoom = async () => {
               break
             }
             case 'participant-joined': {
-              voiceStore.upsertParticipant(data.participant as ParticipantPayload)
+              const participant = normalizeParticipant(data.participant ?? data)
+              if (participant) {
+                voiceStore.upsertParticipant(participant)
+              }
               break
             }
             case 'participant-left': {
-              closePeerConnection(data.id as string)
-              voiceStore.removeParticipant(data.id as string)
+              const departingId = extractParticipantId(data)
+              if (departingId) {
+                closePeerConnection(departingId)
+                voiceStore.removeParticipant(departingId)
+              }
               break
             }
             case 'participant-muted': {
-              voiceStore.setParticipantMuted(data.id as string, Boolean(data.muted))
+              const targetId = extractParticipantId(data)
+              if (targetId) {
+                voiceStore.setParticipantMuted(targetId, Boolean(data.muted))
+              }
               break
             }
             case 'offer': {
               if (!localStream.value) break
-              voiceStore.upsertParticipant({ id: data.fromId as string, username: data.username ?? 'Katılımcı' })
-              {
-                const connection = ensurePeerConnection(data.fromId as string)
-                if (data.sdp) {
-                  await connection.setRemoteDescription({ type: 'offer', sdp: data.sdp })
-                  const answer = await connection.createAnswer()
-                  await connection.setLocalDescription(answer)
-                  sendSignal({ type: 'answer', targetId: data.fromId, sdp: answer.sdp })
-                }
+              const senderId = extractParticipantId({ ...data, fromId: data.fromId })
+              if (!senderId) break
+              voiceStore.upsertParticipant({
+                id: senderId,
+                username: (data.username as string | undefined) ?? 'Katılımcı',
+              })
+              const connection = ensurePeerConnection(senderId)
+              if (data.sdp) {
+                await connection.setRemoteDescription({ type: 'offer', sdp: data.sdp })
+                const answer = await connection.createAnswer()
+                await connection.setLocalDescription(answer)
+                sendSignal({ type: 'answer', targetId: senderId, participantId: senderId, sdp: answer.sdp })
               }
               break
             }
             case 'answer': {
-              const connection = peerConnections.value[data.fromId as string]
+              const senderId = extractParticipantId({ ...data, fromId: data.fromId })
+              if (!senderId) break
+              const connection = peerConnections.value[senderId]
               if (connection && data.sdp) {
                 await connection.setRemoteDescription({ type: 'answer', sdp: data.sdp })
               }
               break
             }
             case 'ice-candidate': {
-              const connection = peerConnections.value[data.fromId as string]
+              const senderId = extractParticipantId({ ...data, fromId: data.fromId })
+              if (!senderId) break
+              const connection = peerConnections.value[senderId]
               if (connection && data.candidate) {
                 try {
                   await connection.addIceCandidate({
@@ -355,7 +416,7 @@ const cleanup = async () => {
   peerConnections.value = {}
 
   if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-    socket.value.send(JSON.stringify({ type: 'leave' }))
+    sendSignal({ type: 'leave' })
   }
   socket.value?.close()
   socket.value = null

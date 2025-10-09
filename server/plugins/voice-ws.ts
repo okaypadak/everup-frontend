@@ -73,6 +73,10 @@ const broadcast = (room: Map<string, VoiceClient>, message: VoiceServerMessage, 
 }
 
 export default defineNitroPlugin((nitroApp) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return
+  }
+
   nitroApp.hooks.hook('listen', (listener) => {
     if (!listener.server) return
 
