@@ -1,7 +1,7 @@
-import type { IncomingMessage } from "node:http";
 import { randomUUID } from "node:crypto";
 import type { WebSocket } from "ws";
 import { WebSocketServer } from "ws";
+import { defineNitroPlugin } from "nitro/app";
 
 type IceCandidatePayload = {
   candidate: string;
@@ -76,35 +76,24 @@ const broadcast = (
   });
 };
 
-// 🔧 IMPORTSUZ NITRO PLUGIN: default export edilen fonksiyon
-export default (nitroApp: any) => {
-  nitroApp.hooks.hook("listen", (listener: any) => {
+export default defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("listen", (listener) => {
+    const httpServer = listener.server;
+    if (!httpServer) {
+      console.warn("[voice] No HTTP server available to attach WebSocket server");
+      return;
+    }
 
-    console.log(`Listening on ${listener.address}:${listener.port}`);
-
-    if (!listener.server) return;
-
-    const wss = new WebSocketServer({ noServer: true });
-
-    const handleUpgrade = (
-        request: IncomingMessage,
-        socket: any,
-        head: Buffer
-    ) => {
-      const url = request.url || "";
-      if (!url.startsWith("/voice")) {
-        return;
-      }
-      wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit("connection", ws, request);
-      });
-    };
-
-    listener.server.on("upgrade", handleUpgrade);
+    const wss = new WebSocketServer({ server: httpServer, path: "/voice" });
 
     console.log(
         "\x1b[32m[voice] WebSocket signaling server listening at /voice\x1b[0m"
     );
+
+    nitroApp.hooks.hookOnce("close", () => {
+      wss.clients.forEach((client) => client.close());
+      wss.close();
+    });
 
     wss.on("connection", (socket: WebSocket) => {
       console.log("\x1b[36m[voice] client connected\x1b[0m");
