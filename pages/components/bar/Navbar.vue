@@ -15,7 +15,7 @@
     <div class="hidden md:flex gap-6 items-center">
       <NuxtLink to="/dashboard" class="nav-link">Kontrol Paneli</NuxtLink>
       <NuxtLink to="/documents/list" class="nav-link">Döküman Yaz</NuxtLink>
-      <NuxtLink to="/voice-room" class="nav-link">Toplantı</NuxtLink>
+      <NuxtLink to="/voice-room/enter" class="nav-link">Toplantı</NuxtLink>
 
       <div v-if="canSeeSprintMenu" class="relative">
         <button class="nav-link flex items-center gap-1" @mouseenter="showSprintMenu = true" @mouseleave="delayedClose('sprint')">
@@ -113,7 +113,7 @@
 
     <NuxtLink to="/dashboard" class="block py-2 nav-link">Kontrol Paneli</NuxtLink>
     <NuxtLink to="/documents/list" class="block py-2 nav-link">Döküman Yaz</NuxtLink>
-    <NuxtLink to="/voice-room" class="block py-2 nav-link">Toplantı</NuxtLink>
+    <NuxtLink to="/voice-room/enter" class="block py-2 nav-link">Toplantı</NuxtLink>
 
     <div v-if="canSeeSprintMenu" class="mt-4">
       <p class="font-semibold text-black mb-2">Sprint Yönetimi</p>

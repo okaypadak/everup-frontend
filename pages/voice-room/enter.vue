@@ -56,8 +56,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Navbar from './components/bar/Navbar.vue'
-import VoiceRoom from '~/components/VoiceRoom.vue'
+import Navbar from '/pages/components/bar/Navbar.vue'
+import VoiceRoom from '~/pages/voice-room/components/VoiceRoom.vue'
 
 const { user } = useAuth()
 const route = useRoute()

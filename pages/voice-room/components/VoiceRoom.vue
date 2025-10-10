@@ -245,7 +245,7 @@ const joinRoom = async () => {
     voiceStore.setIdentity({ roomId: props.roomId, username: props.username })
     const mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
-      video: true,
+      video: false,
     })
     localStream.value = mediaStream
     voiceStore.setLocalStream(mediaStream)
