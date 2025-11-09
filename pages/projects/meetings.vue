@@ -18,25 +18,14 @@
           </h1>
 
           <form class="space-y-6" @submit.prevent="submitMeeting">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                Proje
-                <span v-if="loadingProjects" class="text-xs text-sky-600">Yükleniyor...</span>
-              </label>
-              <select
-                  v-model="form.projectId"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                  required
-              >
-                <option value="">-- Proje Seçin --</option>
-                <option
-                    v-for="project in projects"
-                    :key="project.id"
-                    :value="String(project.id)"
-                >
-                  {{ project.name }}
-                </option>
-              </select>
+            <div class="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+              <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+              <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+                {{ projectStore.selectedProjectName }}
+              </p>
+              <p v-else class="text-slate-500">
+                Görevler panelinden proje seçin.
+              </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -201,15 +190,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
 import Navbar from '~/pages/components/bar/Navbar.vue'
-
-interface ProjectSummary {
-  id: number
-  name: string
-  description?: string
-}
+import { useProjectStore } from '@/stores/projectStore'
 
 interface ProjectMember {
   id?: number | string
@@ -237,7 +221,6 @@ interface ProjectMeeting {
 }
 
 interface MeetingFormState {
-  projectId: string
   title: string
   agenda: string
   meetingDate: string
@@ -247,17 +230,15 @@ interface MeetingFormState {
   notes: string
 }
 
-const projects = ref<ProjectSummary[]>([])
+const projectStore = useProjectStore()
 const projectMembers = ref<ProjectMember[]>([])
 const meetings = ref<ProjectMeeting[]>([])
 
-const loadingProjects = ref(false)
 const loadingMembers = ref(false)
 const isLoadingMeetings = ref(false)
 const isSubmitting = ref(false)
 
 const form = reactive<MeetingFormState>({
-  projectId: '',
   title: '',
   agenda: '',
   meetingDate: '',
@@ -267,46 +248,22 @@ const form = reactive<MeetingFormState>({
   notes: ''
 })
 
-const selectedProjectId = computed(() => (form.projectId ? Number(form.projectId) : null))
+const selectedProjectId = computed(() => projectStore.selectedProjectId ?? null)
 
-watch(selectedProjectId, async (projectId) => {
-  if (!projectId) {
-    projectMembers.value = []
-    meetings.value = []
-    form.attendees = []
-    return
-  }
-
-  await Promise.all([loadProjectMembers(projectId), loadMeetings(projectId)])
-})
-
-onMounted(async () => {
-  await loadProjects()
-})
-
-async function loadProjects() {
-  loadingProjects.value = true
-  try {
-    const response = await $fetch<ProjectSummary[] | { projects: ProjectSummary[] }>('/api/projects')
-
-    if (Array.isArray(response)) {
-      projects.value = response
-    } else if (Array.isArray(response?.projects)) {
-      projects.value = response.projects
-    } else {
-      projects.value = []
+watch(
+  selectedProjectId,
+  async (projectId) => {
+    if (!projectId) {
+      projectMembers.value = []
+      meetings.value = []
+      form.attendees = []
+      return
     }
 
-    if (!form.projectId && projects.value.length === 1) {
-      form.projectId = String(projects.value[0].id)
-    }
-  } catch (error) {
-    console.error('Projeler alınamadı:', error)
-    toast.error('Projeler alınırken bir hata oluştu')
-  } finally {
-    loadingProjects.value = false
-  }
-}
+    await Promise.all([loadProjectMembers(projectId), loadMeetings(projectId)])
+  },
+  { immediate: true }
+)
 
 async function loadProjectMembers(projectId: number) {
   loadingMembers.value = true
@@ -468,8 +425,6 @@ async function submitMeeting() {
 
     toast.success('Toplantı başarıyla oluşturuldu')
 
-    const preservedProject = form.projectId
-
     form.title = ''
     form.agenda = ''
     form.meetingDate = ''
@@ -477,7 +432,6 @@ async function submitMeeting() {
     form.location = ''
     form.attendees = []
     form.notes = ''
-    form.projectId = preservedProject
 
     await loadMeetings(selectedProjectId.value)
   } catch (error) {

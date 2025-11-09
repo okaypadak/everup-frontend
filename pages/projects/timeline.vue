@@ -18,26 +18,14 @@
               </p>
             </div>
 
-            <div class="flex flex-col gap-3 w-full md:w-auto">
-              <label class="text-sm font-semibold text-slate-600" for="project-select">
-                Proje Seçin
-              </label>
-              <select
-                id="project-select"
-                v-model="selectedProjectId"
-                class="w-full md:w-72 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white"
-              >
-                <option disabled value="">
-                  Bir proje seçin
-                </option>
-                <option
-                  v-for="project in projects"
-                  :key="project.id"
-                  :value="project.id"
-                >
-                  {{ project.name }}
-                </option>
-              </select>
+            <div class="flex flex-col gap-1 w-full md:w-auto px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Aktif Proje</p>
+              <p v-if="projectStore.selectedProjectName" class="text-base font-semibold text-slate-800">
+                {{ projectStore.selectedProjectName }}
+              </p>
+              <p v-else class="text-slate-500 text-sm">
+                Görevler panelinden proje seçin.
+              </p>
             </div>
           </div>
 
@@ -191,14 +179,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Navbar from '@/pages/components/bar/Navbar.vue'
 import { useProjectStore } from '@/stores/projectStore'
-
-interface Project {
-  id: number
-  name: string
-}
 
 interface TimelineEvent {
   id: string
@@ -221,9 +204,8 @@ interface TimelineStats {
   sprintsCompleted: number
 }
 
-const projects = ref<Project[]>([])
 const projectStore = useProjectStore()
-const selectedProjectId = ref<number | ''>(projectStore.selectedProjectId ?? '')
+const selectedProjectId = computed(() => projectStore.selectedProjectId)
 const events = ref<TimelineEvent[]>([])
 const stats = ref<TimelineStats | null>(null)
 const loading = ref(false)
@@ -378,19 +360,6 @@ function toggleSort() {
   sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc'
 }
 
-async function loadProjects() {
-  try {
-    const response = await $fetch<Project[]>('/api/projects')
-    projects.value = response || []
-
-    if (!selectedProjectId.value && projects.value.length === 1) {
-      selectedProjectId.value = projects.value[0].id
-    }
-  } catch (error) {
-    console.error('Projeler alınamadı:', error)
-  }
-}
-
 async function loadTimeline(projectId: number) {
   loading.value = true
   errorMessage.value = null
@@ -409,32 +378,18 @@ async function loadTimeline(projectId: number) {
   }
 }
 
-watch(selectedProjectId, (value) => {
-  const numericId = typeof value === 'number' ? value : Number(value)
+watch(
+  selectedProjectId,
+  (value) => {
+    const numericId = typeof value === 'number' ? value : Number(value)
 
-  if (!numericId) {
-    events.value = []
-    stats.value = null
-    projectStore.clearProject()
-    return
-  }
-  const project = projects.value.find(p => p.id === numericId)
-  if (project) {
-    projectStore.setProject(project.id, project.name)
-  } else {
-    projectStore.setProject(numericId, '')
-  }
-  loadTimeline(numericId)
-})
-
-onMounted(async () => {
-  await loadProjects()
-  const numericId = typeof selectedProjectId.value === 'number'
-    ? selectedProjectId.value
-    : Number(selectedProjectId.value)
-
-  if (numericId) {
+    if (!numericId) {
+      events.value = []
+      stats.value = null
+      return
+    }
     loadTimeline(numericId)
-  }
-})
+  },
+  { immediate: true }
+)
 </script>

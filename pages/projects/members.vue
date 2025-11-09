@@ -17,18 +17,15 @@
             Proje Katılımcıları
           </h1>
 
-          <!-- Proje Seçimi -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
-            <select
-                v-model="selectedProjectId"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-            >
-              <option value="">-- Proje Seçin --</option>
-              <option v-for="project in projects" :key="project.id" :value="project.id">
-                {{ project.name }}
-              </option>
-            </select>
+          <!-- Aktif proje bilgisi -->
+          <div class="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+            <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+            <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+              {{ projectStore.selectedProjectName }}
+            </p>
+            <p v-else class="text-slate-500">
+              Görevler panelinden proje seçin.
+            </p>
           </div>
 
           <!-- Katılımcılar -->
@@ -112,16 +109,17 @@
 
 <script setup>
 import Navbar from '/pages/components/bar/Navbar.vue'
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useFetch } from '#app'
 import { toast } from 'vue3-toastify'
+import { useProjectStore } from '@/stores/projectStore'
 
-const projects = ref([])
 const allUsers = ref([])
-const selectedProjectId = ref('')
 const projectMembers = ref([])
 
 const newMember = ref({ userId: '', role: '' })
+const projectStore = useProjectStore()
+const selectedProjectId = computed(() => projectStore.selectedProjectId ? String(projectStore.selectedProjectId) : '')
 
 // ✅ ProjectRole + UserRole birleşik ve etiketli gösterim
 const roles = [
@@ -144,13 +142,6 @@ function roleLabel(role) {
 
 onMounted(async () => {
   try {
-    const { data: projectData } = await useFetch('/api/projects')
-    projects.value = projectData.value || []
-  } catch (err) {
-    toast.error('Projeler alınamadı')
-  }
-
-  try {
     const { data: userData } = await useFetch('/api/users')
     allUsers.value = userData.value || []
   } catch (err) {
@@ -158,10 +149,17 @@ onMounted(async () => {
   }
 })
 
-watch(selectedProjectId, async (id) => {
-  if (!id) return (projectMembers.value = [])
-  await reloadMembers()
-})
+watch(
+  selectedProjectId,
+  async (id) => {
+    if (!id) {
+      projectMembers.value = []
+      return
+    }
+    await reloadMembers()
+  },
+  { immediate: true }
+)
 
 async function reloadMembers() {
   try {

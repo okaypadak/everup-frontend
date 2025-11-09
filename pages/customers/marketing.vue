@@ -3,17 +3,19 @@
     <Navbar />
     <main class="flex-1">
       <div class="max-w-6xl mx-auto px-4 py-10">
-        <!-- Proje Seçimi -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
-          <select v-model="selectedProjectId" class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50">
-            <option value="">Bir proje seçin</option>
-            <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
-          </select>
+        <!-- Aktif proje bilgisi -->
+        <div class="mb-6 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+          <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+            {{ projectStore.selectedProjectName }}
+          </p>
+          <p v-else class="text-slate-500">
+            Görevler panelinden proje seçin.
+          </p>
         </div>
 
         <!-- Kanban Görünümü -->
-        <div v-if="selectedProjectId">
+        <div v-if="hasActiveProject">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
             <div v-for="stage in stages" :key="stage.value" class="bg-gray-100 rounded-xl p-3 shadow-inner flex flex-col gap-2">
               <h3 class="text-sm font-semibold text-black px-2">{{ stage.label }}</h3>
@@ -69,7 +71,7 @@
           </div>
         </div>
 
-        <p v-else class="text-sm text-black italic mt-4">Lütfen önce bir proje seçin.</p>
+        <p v-else class="text-sm text-black italic mt-4">Görevler panelinden proje seçmeden müşteri panosu yüklenemez.</p>
       </div>
     </main>
     <Footer />
@@ -77,15 +79,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
 import draggable from 'vuedraggable'
+import { useProjectStore } from '@/stores/projectStore'
 
-const selectedProjectId = ref('')
+const projectStore = useProjectStore()
+const selectedProjectId = computed(() => projectStore.selectedProjectId)
+const hasActiveProject = computed(() => !!selectedProjectId.value)
 const selectedCustomer = ref(null)
 const newComment = ref('')
-const projects = ref([])
 const customers = ref([])
 
 const stages = [
@@ -97,18 +101,11 @@ const stages = [
   { value: 'LOST', label: '❌ Vazgeçti' }
 ]
 
-onMounted(async () => {
-  try {
-    const { data, error } = await useFetch('/api/projects')
-    if (error.value) throw error.value
-    projects.value = data.value
-  } catch (e) {
-    console.error('Proje verisi alınamadı:', e)
-  }
-})
-
 const refreshCustomers = async () => {
-  if (!selectedProjectId.value) return
+  if (!selectedProjectId.value) {
+    customers.value = []
+    return
+  }
   try {
     const response = await $fetch(`/api/customers/kanban/${selectedProjectId.value}`)
     customers.value = Array.isArray(response) ? response : []
@@ -118,7 +115,7 @@ const refreshCustomers = async () => {
   }
 }
 
-watch(selectedProjectId, refreshCustomers)
+watch(selectedProjectId, refreshCustomers, { immediate: true })
 
 const filteredCustomersByStage = (stage) => {
   return customers.value.filter(c => normalizeStatus(c.marketingStatus) === stage)

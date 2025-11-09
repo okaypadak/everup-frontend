@@ -10,23 +10,15 @@
           <h2 class="text-2xl font-bold text-sky-700 mb-6">🌀 Yeni Sprint Oluştur</h2>
 
           <form class="space-y-6" @submit.prevent="submitSprint">
-            <!-- Proje Seçimi -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
-              <select
-                  v-model="form.projectId"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                  required
-              >
-                <option value="" disabled selected>Bir proje seçin</option>
-                <option
-                    v-for="project in projects"
-                    :key="project.id"
-                    :value="project.id"
-                >
-                  {{ project.name }}
-                </option>
-              </select>
+            <!-- Aktif proje -->
+            <div class="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+              <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+              <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+                {{ projectStore.selectedProjectName }}
+              </p>
+              <p v-else class="text-slate-500">
+                Görevler panelinden proje seçin.
+              </p>
             </div>
 
             <!-- Sprint Adı -->
@@ -93,12 +85,15 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
 import { toast } from 'vue3-toastify'
+import { useProjectStore } from '@/stores/projectStore'
 
 const emit = defineEmits(['created'])
+
+const projectStore = useProjectStore()
 
 const form = reactive({
   projectId: '',
@@ -108,16 +103,17 @@ const form = reactive({
   goal: ''
 })
 
-// Geçici örnek proje listesi (props ile almak istersen aşağıda gösterdim)
-const projects = [
-  { id: '1', name: 'Mobil App Projesi' },
-  { id: '2', name: 'Web CRM Geliştirme' },
-  { id: '3', name: 'API Refactoring' }
-]
+watch(
+  () => projectStore.selectedProjectId,
+  (id) => {
+    form.projectId = id ? String(id) : ''
+  },
+  { immediate: true }
+)
 
 const submitSprint = () => {
   if (!form.projectId) {
-    toast.success('Lütfen bir proje seçin.')
+    toast.warn('Lütfen bir proje seçin.')
     return
   }
 

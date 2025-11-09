@@ -6,7 +6,7 @@
       <div class="max-w-5xl mx-auto px-4 py-10">
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 space-y-6">
 
-          <!-- 🔖 Başlık ve Proje Seçici -->
+          <!-- 🔖 Başlık ve aktif proje özeti -->
           <div class="flex flex-col sm:flex-row sm:items-center gap-4">
             <div class="flex items-center gap-2 flex-1">
               <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,24 +16,19 @@
               <h1 class="text-2xl font-bold text-sky-700">Dökümanlar</h1>
             </div>
 
-            <select
-                v-model="selectedProject"
-                class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-black
-                     focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 min-w-[220px]"
-            >
-              <option value="" disabled>Proje Seçiniz</option>
-              <option
-                  v-for="proj in projects"
-                  :key="proj.id"
-                  :value="proj.id.toString()"
-              >
-                {{ proj.name }}
-              </option>
-            </select>
+            <div class="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 min-w-[240px]">
+              <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+              <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+                {{ projectStore.selectedProjectName }}
+              </p>
+              <p v-else class="text-slate-500">
+                Görevler panelinden proje seçin.
+              </p>
+            </div>
           </div>
 
           <!-- Ana Döküman Ekleme -->
-          <div v-if="selectedProject" class="flex items-center gap-2">
+          <div v-if="hasActiveProject" class="flex items-center gap-2">
             <input
                 v-model="newRootTitle"
                 placeholder="Ana doküman başlığı"
@@ -49,13 +44,13 @@
           </div>
 
           <!-- Döküman Ağacı -->
-          <div v-if="selectedProject">
+          <div v-if="hasActiveProject">
             <TreeItem
                 v-for="doc in rootDocuments"
                 :key="doc.id"
                 :document="doc"
                 :all-documents="documents"
-                :project-id="Number(selectedProject)"
+                :project-id="projectStore.selectedProjectId"
                 @refresh="fetchDocuments"
             />
 
@@ -65,7 +60,7 @@
           </div>
 
           <div v-else class="text-black text-center mt-12">
-            Proje seçiniz. Dökümanlar burada listelenecek.
+            Projenizi Görevler panelinden seçtiğinizde dökümanlar burada listelenir.
           </div>
 
         </div>
@@ -76,27 +71,25 @@
 
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import TreeItem from './TreeItem.vue'
 import Navbar from '/pages/components/bar/Navbar.vue'
 import { useProjectStore } from '@/stores/projectStore'
 
 const projectStore = useProjectStore()
 
-const selectedProject = ref('')
-const projects = ref([])
 const documents = ref([])
 const newRootTitle = ref('')
 
 const rootDocuments = computed(() =>
     documents.value.filter(d => d.parentId === null)
 )
+const hasActiveProject = computed(() => !!projectStore.selectedProjectId)
 
 async function fetchDocuments() {
-  if (!selectedProject.value) return
-  const res = await $fetch(`/api/documents/project/${selectedProject.value}`)
+  if (!projectStore.selectedProjectId) return
+  const res = await $fetch(`/api/documents/project/${projectStore.selectedProjectId}`)
   documents.value = res || []
-  console.log(documents.value)
 }
 
 async function addRootDocument() {
@@ -107,7 +100,7 @@ async function addRootDocument() {
     body: {
       title: newRootTitle.value,
       parentId: null,
-      projectId: Number(selectedProject.value)
+      projectId: Number(projectStore.selectedProjectId)
     }
   })
 
@@ -115,26 +108,15 @@ async function addRootDocument() {
   await fetchDocuments()
 }
 
-// Projeleri getir
-onMounted(async () => {
-  const { data, error } = await useFetch('/api/projects')
-
-  if (!error.value) {
-    projects.value = data.value || []
-
-    // Pinia store'da proje seçiliyse, otomatik set et
-    if (projectStore.selectedProjectId) {
-      selectedProject.value = projectStore.selectedProjectId.toString()
-      await fetchDocuments()
+watch(
+  () => projectStore.selectedProjectId,
+  async (projectId) => {
+    if (!projectId) {
+      documents.value = []
+      return
     }
-  }
-})
-
-// Select değişince Pinia store'a yaz
-watch(selectedProject, (newVal) => {
-  const selected = projects.value.find(p => p.id === Number(newVal))
-  if (selected) {
-    projectStore.setProject(selected.id, selected.name)
-  }
-})
+    await fetchDocuments()
+  },
+  { immediate: true }
+)
 </script>

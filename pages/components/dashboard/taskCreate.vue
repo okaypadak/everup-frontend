@@ -32,18 +32,16 @@
 
     <!-- Tekil -->
     <div v-if="activeTab === 'single'" class="flex flex-col gap-4">
-      <!-- Proje Seç -->
-      <label class="block">
-        <span class="block text-black text-base font-semibold mb-1">Proje Seç</span>
-        <select
-            v-model="selectedProject"
-            class="block w-full mt-1 rounded-lg border border-gray-300 bg-gray-100 text-black px-3 py-2
-                 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300"
-        >
-          <option value="">Proje seçiniz</option>
-          <option v-for="p in projects" :key="p.id" :value="String(p.id)">{{ p.name }}</option>
-        </select>
-      </label>
+      <!-- Aktif Proje -->
+      <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+        <span class="block text-black text-base font-semibold mb-1">Aktif Proje</span>
+        <p v-if="projectStore.selectedProjectName" class="text-sm text-black">
+          {{ projectStore.selectedProjectName }}
+        </p>
+        <p v-else class="text-sm text-gray-500">
+          Görevler panelinden proje seçin.
+        </p>
+      </div>
 
       <!-- Tür -->
       <label class="block">
@@ -239,24 +237,24 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { toast } from 'vue3-toastify'
 import { useTaskStore } from '@/stores/taskStore'
+import { useProjectStore } from '@/stores/projectStore'
 
 const emit = defineEmits(['add-task'])
 
-interface Project { id: number; name: string }
 interface User { id: number; name: string }
 interface Task { id: number | string; title: string; status: string; type: string; level: string; assignedTo: number; project: number; deadline: string | null; dependencyIds: number[]; labelIds: number[]; description: string; }
 interface TaskLabel { id: number; name: string }
 
 const taskStore = useTaskStore()
+const projectStore = useProjectStore()
 
 /** Tabs */
 const activeTab = ref<'single' | 'bulk'>('single')
 
 /** Tekil form state */
-const selectedProject = ref<string>('')
 const assignedUser = ref<string>('')
 const userSearch = ref('')
 const newTaskType = ref<'task' | 'bug' | 'test' | 'approval' | ''>('task')
@@ -267,7 +265,6 @@ const newTaskDeadline = ref('')
 const bagliGorevler = ref<(string | number)[]>([])
 const selectedLabels = ref<number[]>([])
 
-const projects = ref<Project[]>([])
 const allUsers = ref<User[]>([])
 const tumGorevler = ref<Task[]>([])
 const projectLabels = ref<TaskLabel[]>([])
@@ -279,20 +276,16 @@ const isBulkSubmitting = ref(false)
 const bulkSummary = ref('')
 
 /** Disable controls */
-const isSingleDisabled = computed(() => !newTaskTitle.value || !selectedProject.value || !assignedUser.value)
+const activeProjectId = computed(() => projectStore.selectedProjectId ? String(projectStore.selectedProjectId) : '')
+const isSingleDisabled = computed(() => !newTaskTitle.value || !activeProjectId.value || !assignedUser.value)
 
-/** Lifecycle */
-onMounted(async () => {
-  try {
-    const data = await $fetch<Project[]>('/api/projects')
-    projects.value = data
-  } catch (err) {
-    console.error('Projeler yüklenemedi:', err)
+watch(activeProjectId, async (newId) => {
+  if (!newId) {
+    allUsers.value = []
+    tumGorevler.value = []
+    projectLabels.value = []
+    return
   }
-})
-
-watch(() => selectedProject.value, async (newId) => {
-  if (!newId) return
 
   try {
     const projectUsers = await $fetch<{ id: number; members: any[] }>(`/api/projects/${newId}/users`)
@@ -315,7 +308,7 @@ watch(() => selectedProject.value, async (newId) => {
     console.error('Etiketler yüklenemedi:', err)
     projectLabels.value = []
   }
-})
+}, { immediate: true })
 
 /** Computeds */
 const filteredUsers = computed(() => {
@@ -335,11 +328,15 @@ function toggleLabel(labelId: number) {
 }
 
 function addTaskLocal() {
+  if (!activeProjectId.value) {
+    toast.warn('Lütfen Görevler panelinden bir proje seçin.')
+    return
+  }
   const payload = {
     title: newTaskTitle.value.trim(),
     description: newTaskDesc.value?.trim() || '',
     assignedTo: Number(assignedUser.value),
-    project: Number(selectedProject.value),
+    project: Number(activeProjectId.value),
     type: newTaskType.value || 'task',
     level: newTaskLevel.value || 'normal',
     deadline: newTaskDeadline.value ? new Date(newTaskDeadline.value + 'T00:00:00').toISOString() : null,

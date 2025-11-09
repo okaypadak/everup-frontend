@@ -4,23 +4,19 @@
 
     <main class="flex-1">
       <div class="max-w-6xl mx-auto px-4 py-10">
-        <!-- Proje Seçimi -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Proje Seç</label>
-          <select
-              v-model="selectedProjectId"
-              @change="fetchCustomers"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-          >
-            <option value="" disabled>Bir proje seçin</option>
-            <option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.name }}
-            </option>
-          </select>
+        <!-- Aktif proje bilgisi -->
+        <div class="mb-6 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+          <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+          <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+            {{ projectStore.selectedProjectName }}
+          </p>
+          <p v-else class="text-slate-500">
+            Görevler panelinden proje seçin.
+          </p>
         </div>
 
         <!-- Müşteri Ekleme Formu -->
-        <div v-if="selectedProjectId" class="bg-white p-6 rounded-xl shadow-lg mb-10">
+        <div v-if="hasActiveProject" class="bg-white p-6 rounded-xl shadow-lg mb-10">
           <h2 class="text-2xl font-bold text-sky-700 mb-6">🧾 Yeni Müşteri Kaydı</h2>
           <form class="space-y-6" @submit.prevent="submitCustomer">
             <div>
@@ -131,15 +127,14 @@
 
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
+import { useProjectStore } from '@/stores/projectStore'
 
 const searchQuery = ref('')
-const selectedProjectId = ref('')
 const selectedCustomer = ref(null)
 
-const projects = ref([])
 const customers = ref([])
 
 const form = ref({
@@ -150,28 +145,29 @@ const form = ref({
   notlar: ''
 })
 
-onMounted(async () => {
-  try {
-    const { data, error } = await useFetch('/api/projects')
-    if (error.value) throw error.value
-    projects.value = data.value
-  } catch (e) {
-    console.error('Proje verisi alınamadı:', e)
-  }
-})
+const projectStore = useProjectStore()
+const selectedProjectId = computed(() => projectStore.selectedProjectId)
+const hasActiveProject = computed(() => !!selectedProjectId.value)
 
 const fetchCustomers = async () => {
-  if (!selectedProjectId.value) return
+  if (!selectedProjectId.value) {
+    customers.value = []
+    return
+  }
   try {
     const { data, error } = await useFetch(`/api/customers/project/${selectedProjectId.value}`)
     if (error.value) throw error.value
     customers.value = data.value
   } catch (e) {
     console.error('Müşteri verisi alınamadı:', e)
+    customers.value = []
   }
 }
 
+watch(selectedProjectId, fetchCustomers, { immediate: true })
+
 const submitCustomer = async () => {
+  if (!selectedProjectId.value) return
   try {
     await $fetch('/api/customers', {
       method: 'POST',

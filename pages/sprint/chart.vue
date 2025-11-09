@@ -8,19 +8,15 @@
             🚀 Aktif Sprint Özeti
           </h1>
 
-          <!-- Proje Seç -->
-          <div>
-            <label class="block text-sm font-medium text-black mb-1">Proje Seç</label>
-            <select
-                v-model="selectedProjectId"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-blue-50 focus:outline-none focus:ring-2 focus:ring-sky-300"
-                :disabled="loadingProjects || loadingSummary"
-            >
-              <option disabled value="">Bir proje seçin</option>
-              <option v-for="project in projects" :key="project.id" :value="project.id">
-                {{ project.name }}
-              </option>
-            </select>
+          <!-- Aktif proje bilgisi -->
+          <div class="px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700">
+            <p class="text-xs uppercase tracking-wide text-slate-500">Aktif Proje</p>
+            <p v-if="projectStore.selectedProjectName" class="font-semibold text-slate-800">
+              {{ projectStore.selectedProjectName }}
+            </p>
+            <p v-else class="text-slate-500">
+              Görevler panelinden proje seçin.
+            </p>
           </div>
 
           <!-- İçerik -->
@@ -66,20 +62,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Navbar from '../components/bar/Navbar.vue'
 import Footer from '../components/bar/Footer.vue'
 
 import SprintBurndownChart from '../components/sprint/SprintBurndownChart.vue'
 import SprintCompletedTasksChart from '../components/sprint/SprintCompletedBarChart.vue'
-import SprintMetaInfo from '../components/sprint/SprintMetaInfo.vue'
 import BurnupChart from '../components/sprint/BurnupChart.vue'
 import ThroughputChart from '../components/sprint/ThroughputChart.vue'
 import VelocityChart from '../components/sprint/VelocityChart.vue'
 
 import { toast } from 'vue3-toastify'
+import { useProjectStore } from '@/stores/projectStore'
 
-type Project = { id: number; name: string }
 type Sprint = { id: number; name: string; startDate: string; endDate: string; goal?: string }
 type TaskLite = {
   id: number
@@ -99,9 +94,8 @@ type Summary = {
   charts: any
 }
 
-const projects = ref<Project[]>([])
-const selectedProjectId = ref<number | ''>('')
-const loadingProjects = ref(false)
+const projectStore = useProjectStore()
+const selectedProjectId = computed(() => projectStore.selectedProjectId)
 const loadingSummary = ref(false)
 
 const summary = ref<Summary | null>(null)
@@ -119,21 +113,6 @@ const formatDate = (dateStr: string) => {
 
 const remainingDays = computed(() => (selectedSprint.value ? summary.value?.remainingDays ?? 0 : 0))
 
-/* loaders */
-const loadProjects = async () => {
-  loadingProjects.value = true
-  try {
-    const res = await $fetch<any>('/api/projects')
-    const items: Project[] = Array.isArray(res) ? res : (res?.items ?? [])
-    projects.value = items.map(p => ({ id: Number(p.id), name: p.name }))
-  } catch (e: any) {
-    console.error('[projects] hata:', e)
-    toast.error('Projeler alınamadı')
-  } finally {
-    loadingProjects.value = false
-  }
-}
-
 const loadSummary = async (projectId: number) => {
   loadingSummary.value = true
   summary.value = null
@@ -148,12 +127,14 @@ const loadSummary = async (projectId: number) => {
   }
 }
 
-onMounted(loadProjects)
-
-watch(selectedProjectId, (val) => {
-  if (!val) { summary.value = null; return }
-  loadSummary(Number(val))
-})
+watch(
+  selectedProjectId,
+  (val) => {
+    if (!val) { summary.value = null; return }
+    loadSummary(Number(val))
+  },
+  { immediate: true }
+)
 
 // ayrı watch ile diğer chart verileri
 const loadingCharts = ref(false)
@@ -195,6 +176,6 @@ watch(selectedProjectId, async (pid) => {
   } finally {
     if (myReq === chartsReqId) loadingCharts.value = false
   }
-})
+}, { immediate: true })
 
 </script>
