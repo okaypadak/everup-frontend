@@ -19,10 +19,10 @@
       <PomodoroTimer />
     </div>
 
-    <!-- Masaüstü görünüm: 1:3:2:2 oranında grid -->
+    <!-- Masaüstü görünüm -->
     <div
         class="hidden md:grid px-8 gap-6 py-6"
-        style="height: calc(100vh - 4rem); grid-template-columns: 1fr 3fr 2fr 2fr;"
+        :style="desktopGridStyle"
     >
       <!-- Bildirimler + Yorumlar -->
       <div class="bg-white rounded-xl shadow h-full flex flex-col overflow-hidden">
@@ -45,8 +45,22 @@
       <TaskCreatePanel class="flex flex-col h-full"/>
 
       <!-- Pomodoro Zamanlayıcı -->
-      <PomodoroTimer class="flex flex-col h-full" />
+      <PomodoroTimer
+          v-if="isPomodoroVisible"
+          class="flex flex-col h-full"
+          @minimize="isPomodoroVisible = false"
+      />
     </div>
+
+    <button
+        v-if="!isPomodoroVisible"
+        type="button"
+        @click="isPomodoroVisible = true"
+        class="fixed bottom-6 right-6 z-40 h-14 w-14 flex items-center justify-center rounded-full bg-gradient-to-b from-red-400 to-red-600 text-white shadow-2xl hover:scale-105 transition focus:outline-none focus:ring-4 focus:ring-red-300"
+    >
+      <span class="sr-only">Pomodoro Zamanlayıcısını aç</span>
+      <span class="text-xl drop-shadow">🍅</span>
+    </button>
 
     <DashboardDrawer
         v-if="drawerType"
@@ -58,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import NotificationsPanel from './components/dashboard/notifications.vue'
 import TaskListPanel from './components/dashboard/taskList.vue'
 import TaskCreatePanel from './components/dashboard/taskCreate.vue'
@@ -71,6 +85,12 @@ import { useFetch } from '#app'
 const comments = ref([])
 const notifications = ref([])
 const drawerType = ref<null | 'notifications' | 'taskCreate' | 'pomodoro'>(null)
+const isPomodoroVisible = ref(false)
+
+const desktopGridStyle = computed(() => ({
+  height: 'calc(100vh - 4rem)',
+  gridTemplateColumns: isPomodoroVisible.value ? '1fr 3fr 2fr 2fr' : '1fr 3fr 2fr'
+}))
 
 const openDrawer = (type: 'notifications' | 'taskCreate' | 'pomodoro') => {
   drawerType.value = type
@@ -98,4 +118,3 @@ onMounted(async () => {
   }
 })
 </script>
-

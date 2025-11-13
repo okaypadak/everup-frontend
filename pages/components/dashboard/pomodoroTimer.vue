@@ -7,13 +7,22 @@
           Odak sürenizi yönetmek için Pomodoro yöntemi kullanın.
         </p>
       </div>
-      <span
-        class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm"
-        :class="currentPhase === 'focus' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'"
-      >
-        <span class="h-2 w-2 rounded-full" :class="currentPhase === 'focus' ? 'bg-red-500' : 'bg-emerald-500'"></span>
-        {{ phaseLabel }}
-      </span>
+      <div class="flex items-center gap-3">
+        <span
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm"
+          :class="currentPhase === 'focus' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'"
+        >
+          <span class="h-2 w-2 rounded-full" :class="currentPhase === 'focus' ? 'bg-red-500' : 'bg-emerald-500'"></span>
+          {{ phaseLabel }}
+        </span>
+        <button
+          type="button"
+          @click="emit('minimize')"
+          class="text-xs font-medium text-gray-600 border border-gray-200 rounded-full px-3 py-1 hover:bg-gray-100 transition"
+        >
+          Pomodoro Zamanlayıcısı küçült
+        </button>
+      </div>
     </div>
 
     <div class="mt-4 text-sm text-gray-600" v-if="linkedProjectName">
@@ -113,6 +122,10 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { useProjectStore } from '@/stores/projectStore'
+
+const emit = defineEmits<{
+  (event: 'minimize'): void
+}>()
 
 const pomodoroStore = usePomodoroStore()
 const projectStore = useProjectStore()
