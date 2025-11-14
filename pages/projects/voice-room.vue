@@ -96,7 +96,7 @@
                 </div>
               </div>
 
-              <div v-if="isInRoom" class="grid gap-4 md:grid-cols-2">
+              <div v-if="isInRoom">
                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                   <div class="flex items-center gap-2 text-sm text-slate-500">
                     <Icon name="i-heroicons-microphone-20-solid" class="w-4 h-4 text-slate-600" />
@@ -123,35 +123,6 @@
                         {{ isMicMuted ? 'Sessizde' : 'Canlı yayında' }}
                       </p>
                       <p v-if="localMicWarning" class="text-xs text-rose-500 mt-1">{{ localMicWarning }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div class="flex items-center gap-2 text-sm text-slate-500">
-                    <Icon name="i-heroicons-speaker-wave-20-solid" class="w-4 h-4 text-slate-600" />
-                    Gelen Akışlar
-                  </div>
-                  <div class="space-y-2">
-                    <p v-if="remoteAudioEntries.length === 0" class="text-sm text-slate-500">
-                      Henüz konuşan kimse yok. Bir katılımcı mikrofon açtığında otomatik bağlanacağız.
-                    </p>
-                    <div v-for="entry in remoteAudioEntries" :key="entry.consumerId" class="flex items-center justify-between text-sm">
-                      <div>
-                        <p class="font-semibold text-slate-800 flex items-center gap-2">
-                          <span>{{ entry.username || 'Katılımcı' }}</span>
-                          <span v-if="isSpeaking(entry.peerId)" class="text-[11px] uppercase tracking-wide text-emerald-600 font-semibold">
-                            Konuşuyor
-                          </span>
-                        </p>
-                        <p class="text-xs text-slate-500">{{ entry.peerId }}</p>
-                      </div>
-                      <span
-                          class="px-2 py-0.5 rounded-full text-xs font-semibold"
-                          :class="isSpeaking(entry.peerId) ? 'bg-emerald-600 text-white animate-pulse' : 'bg-emerald-100 text-emerald-700'"
-                      >
-                        {{ isSpeaking(entry.peerId) ? 'Konuşuyor' : 'Dinleniyor' }}
-                      </span>
                     </div>
                   </div>
                 </div>
