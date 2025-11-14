@@ -277,6 +277,7 @@ const localMicWarning = ref('')
 const hasMic = ref(false)
 const activityLog = ref<ActivityLogItem[]>([])
 const remoteAudioEntries = ref<RemoteAudioEntry[]>([])
+const wsAuthToken = ref<string | null>(null)
 
 const resolveRoomId = () => (activeRoomId.value || requestedRoomId.value.trim() || '')
 
@@ -381,16 +382,48 @@ const logActivity = (message: string) => {
   activityLog.value = [entry, ...activityLog.value].slice(0, 25)
 }
 
-const computeVoiceWsUrl = () => {
+const fetchWsAuthToken = async (): Promise<string> => {
+  if (!process.client) {
+    throw new Error('client-environment-required')
+  }
+  try {
+    const response = await fetch('/api/voice/ws-token', { credentials: 'same-origin' })
+    if (!response.ok) {
+      throw new Error(`voice-token-request-failed:${response.status}`)
+    }
+    const payload = await response.json()
+    if (!payload?.token || typeof payload.token !== 'string') {
+      throw new Error('voice-token-missing')
+    }
+    const token = payload.token as string
+    wsAuthToken.value = token
+    return token
+  } catch (error) {
+    console.error('Voice WS token fetch failed', error)
+    infoMessage.value = 'Ses servisine erişim izni alınamadı. Lütfen tekrar giriş yapın.'
+    connectionState.value = 'error'
+    throw error
+  }
+}
+
+const ensureWsAuthToken = async (): Promise<string> => {
+  if (wsAuthToken.value) return wsAuthToken.value
+  return await fetchWsAuthToken()
+}
+
+const computeVoiceWsUrl = (token?: string) => {
   const explicit = runtimeConfig.public.voiceWsUrl
-  if (explicit) return explicit
-  const base = runtimeConfig.public.apiBaseUrl
-  const source = base || (process.client ? window.location.origin : '')
+  const source = explicit || runtimeConfig.public.apiBaseUrl || (process.client ? window.location.origin : '')
   if (!source) return ''
   try {
     const url = new URL(source)
-    url.pathname = `${url.pathname.replace(/\/$/, '')}/ws/voice`
-    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    if (!explicit) {
+      url.pathname = `${url.pathname.replace(/\/$/, '')}/ws/voice`
+      url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    }
+    if (token) {
+      url.searchParams.set('token', token)
+    }
     return url.toString()
   } catch (err) {
     console.error('WS URL oluşturulamadı', err)
@@ -398,19 +431,20 @@ const computeVoiceWsUrl = () => {
   }
 }
 
-const connectSocket = () => {
+const connectSocket = async () => {
   if (!process.client) {
-    return Promise.reject(new Error('client-environment-required'))
+    throw new Error('client-environment-required')
   }
   if (wsRef.value) {
-    return Promise.resolve()
+    return
   }
 
-  const url = computeVoiceWsUrl()
+  const authToken = await ensureWsAuthToken()
+  const url = computeVoiceWsUrl(authToken)
   if (!url) {
     infoMessage.value = 'WebSocket adresi ayarlanamadı. Lütfen yapılandırmayı kontrol edin.'
     connectionState.value = 'error'
-    return Promise.reject(new Error('voice-ws-url-missing'))
+    throw new Error('voice-ws-url-missing')
   }
 
   connectionState.value = 'connecting'
@@ -450,10 +484,15 @@ const connectSocket = () => {
       }
     })
 
-    socket.addEventListener('close', () => {
+    socket.addEventListener('close', (event) => {
       socketReady.value = false
       connectionState.value = 'disconnected'
-      infoMessage.value = 'Bağlantı kapandı. Odaya katılım için tekrar bağlanın.'
+      if (event.code === 4401 || event.code === 4003) {
+        wsAuthToken.value = null
+        infoMessage.value = 'Ses servisi yetkilendirmesi doğrulanamadı. Lütfen oturumu yenileyin.'
+      } else {
+        infoMessage.value = 'Bağlantı kapandı. Odaya katılım için tekrar bağlanın.'
+      }
       wsRef.value = null
       cleanupMedia()
     })
@@ -801,7 +840,6 @@ onMounted(async () => {
     await connectSocket()
   } catch (error) {
     console.error('Voice socket connection failed', error)
-    throw error
   }
   window.addEventListener('beforeunload', leaveRoom)
 })

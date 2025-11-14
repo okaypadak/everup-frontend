@@ -18,9 +18,10 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     apiBaseUrl: process.env.API_BASE_URL || "http://backend:9120",
+    voiceWsUrl: process.env.VOICE_WS_URL || "ws://127.0.0.1:9120/ws/voice",
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || process.env.API_BASE_URL || "http://backend:9120",
-      voiceWsUrl: process.env.NUXT_PUBLIC_VOICE_WS_URL || "",
+      apiBaseUrl: process.env.API_BASE_URL || "http://backend:9120",
+      voiceWsUrl: process.env.VOICE_WS_URL || "ws://127.0.0.1:9120/ws/voice",
     },
   },
 });
