@@ -217,6 +217,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch, t
 import { toast } from 'vue3-toastify'
 import Navbar from '~/pages/components/bar/Navbar.vue'
 import type { Device as MediasoupDevice } from 'mediasoup-client'
+import type { ConnectionState } from 'mediasoup-client/lib/Transport'
 
 type MediasoupTransport = ReturnType<MediasoupDevice['createSendTransport']>
 type MediasoupProducer = Awaited<ReturnType<MediasoupTransport['produce']>>
@@ -299,6 +300,9 @@ const sendTransportRef = ref<MediasoupTransport | null>(null)
 const recvTransportRef = ref<MediasoupTransport | null>(null)
 const localProducerRef = ref<MediasoupProducer | null>(null)
 const localStreamRef = ref<MediaStream | null>(null)
+const iceServers = ref<RTCIceServer[]>([])
+let iceServersPromise: Promise<RTCIceServer[]> | null = null
+let iceServersUid: string | null = null
 
 const producerPeerMap = new Map<string, string>()
 const consumerMap = new Map<string, MediasoupConsumer>()
@@ -419,6 +423,44 @@ const fetchWsAuthToken = async (): Promise<string> => {
     throw error
   }
 }
+
+const ensureIceServers = async (): Promise<RTCIceServer[]> => {
+  if (!process.client) return []
+  const desiredUid = clientId.value || 'anon'
+  if (iceServers.value.length && iceServersUid === desiredUid) {
+    return iceServers.value
+  }
+  if (iceServersPromise) {
+    return iceServersPromise
+  }
+  iceServersPromise = (async () => {
+    try {
+      const query = desiredUid !== 'anon' ? `?uid=${encodeURIComponent(desiredUid)}` : ''
+      const response = await fetch(`/api/voice/ice${query}`, { credentials: 'same-origin' })
+      if (!response.ok) {
+        throw new Error(`voice-ice-fetch-failed:${response.status}`)
+      }
+      const payload = await response.json()
+      if (Array.isArray(payload?.iceServers)) {
+        iceServers.value = payload.iceServers as RTCIceServer[]
+        iceServersUid = desiredUid
+      } else {
+        iceServers.value = []
+        iceServersUid = null
+      }
+    } catch (error) {
+      console.error('ICE sunucu bilgileri alınamadı', error)
+      iceServers.value = []
+      iceServersUid = null
+    } finally {
+      iceServersPromise = null
+    }
+    return iceServers.value
+  })()
+  return iceServersPromise
+}
+
+const resolveIceServers = () => (iceServers.value.length ? iceServers.value : undefined)
 
 type LevelMonitor = {
   analyser: AnalyserNode;
@@ -761,6 +803,50 @@ const cleanupMedia = () => {
   resetSpeakingIndicators()
 }
 
+const notifyRoomLeaveSilently = (roomId: string) => {
+  const socket = wsRef.value
+  if (!socket || socket.readyState !== WebSocket.OPEN) return
+  try {
+    socket.send(JSON.stringify({ type: 'leave', data: { roomId } }))
+  } catch (error) {
+    console.error('[VoiceRoom] leave notification failed', error)
+  }
+}
+
+const handleTransportFailure = (direction: 'send' | 'recv', transportId: string, state: ConnectionState) => {
+  if (!activeRoomId.value) return
+  const label = direction === 'send' ? 'Ses gönderim' : 'Ses alma'
+  const message = `${label} bağlantısı kesildi. Lütfen odaya yeniden katılmayı deneyin.`
+  toast.error(`${label} transportu düştü`)
+  infoMessage.value = message
+  logActivity(`${label} transportu durumu '${state}' nedeniyle kapatıldı`)
+  const pending = pendingConnects.get(transportId)
+  if (pending) {
+    try {
+      pending.reject(new Error(`${direction}-transport-${state}`))
+    } catch (error) {
+      console.error('[VoiceRoom] transport connect reject failed', error)
+    }
+    pendingConnects.delete(transportId)
+  }
+  if (direction === 'send') {
+    while (pendingProduceCallbacks.length) {
+      const callback = pendingProduceCallbacks.shift()
+      try {
+        callback?.reject(new Error('send-transport-failed'))
+      } catch (error) {
+        console.error('[VoiceRoom] pending produce reject failed', error)
+      }
+    }
+  }
+  const roomId = activeRoomId.value
+  if (roomId) {
+    notifyRoomLeaveSilently(roomId)
+  }
+  joinLoading.value = false
+  resetRoomState()
+}
+
 const toggleMute = async () => {
   const roomId = resolveRoomId()
   if (!localProducerRef.value || !localStreamRef.value || !roomId) return
@@ -797,6 +883,7 @@ const ensureDevice = async (routerCaps: RtpCapabilities) => {
 const handleJoined = async (payload: JoinedPayload) => {
   try {
     await ensureDevice(payload.routerRtpCapabilities)
+    await ensureIceServers()
     activeRoomId.value = payload.roomId
     isRoomLocked.value = payload.locked
     participants.value = payload.participants
@@ -864,6 +951,7 @@ const handleTransportCreated = (data: TransportPayload) => {
         iceParameters: data.iceParameters,
         iceCandidates: data.iceCandidates,
         dtlsParameters: data.dtlsParameters,
+        iceServers: resolveIceServers(),
       })
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
         pendingConnects.set(transport.id, { resolve: callback, reject: errback })
@@ -880,7 +968,7 @@ const handleTransportCreated = (data: TransportPayload) => {
       })
       transport.on('connectionstatechange', state => {
         if (state === 'failed') {
-          toast.error('Ses gönderim transportu düştü')
+          handleTransportFailure('send', transport.id, state)
         }
       })
       sendTransportRef.value = transport
@@ -890,10 +978,16 @@ const handleTransportCreated = (data: TransportPayload) => {
         iceParameters: data.iceParameters,
         iceCandidates: data.iceCandidates,
         dtlsParameters: data.dtlsParameters,
+        iceServers: resolveIceServers(),
       })
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
         pendingConnects.set(transport.id, { resolve: callback, reject: errback })
         sendMessage('connect-transport', { roomId, transportId: transport.id, dtlsParameters })
+      })
+      transport.on('connectionstatechange', state => {
+        if (state === 'failed') {
+          handleTransportFailure('recv', transport.id, state)
+        }
       })
       recvTransportRef.value = transport
     }
@@ -992,6 +1086,7 @@ const handleSocketMessage = (message: { type: string; data?: any }) => {
   switch (message.type) {
     case 'connected':
       clientId.value = message.data?.clientId
+      void ensureIceServers()
       break
     case 'joined':
       handleJoined(message.data as JoinedPayload)
