@@ -103,8 +103,19 @@
                     Yerel Mikrofon
                   </div>
                   <div class="flex items-center gap-3">
-                    <div class="h-20 w-20 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-2xl font-semibold shadow-inner">
-                      <span>{{ displayInitials }}</span>
+                    <div class="relative">
+                      <div
+                          class="h-20 w-20 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-2xl font-semibold shadow-inner transition-all duration-200"
+                          :class="isLocalSpeaking ? 'ring-4 ring-emerald-300 shadow-emerald-200/80 scale-105' : ''"
+                      >
+                        <span>{{ displayInitials }}</span>
+                      </div>
+                      <span
+                          v-if="isLocalSpeaking"
+                          class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow"
+                      >
+                        Konuşuyor
+                      </span>
                     </div>
                     <div>
                       <p class="text-base font-semibold text-slate-800">{{ effectiveDisplayName }}</p>
@@ -127,10 +138,20 @@
                     </p>
                     <div v-for="entry in remoteAudioEntries" :key="entry.consumerId" class="flex items-center justify-between text-sm">
                       <div>
-                        <p class="font-semibold text-slate-800">{{ entry.username || 'Katılımcı' }}</p>
+                        <p class="font-semibold text-slate-800 flex items-center gap-2">
+                          <span>{{ entry.username || 'Katılımcı' }}</span>
+                          <span v-if="isSpeaking(entry.peerId)" class="text-[11px] uppercase tracking-wide text-emerald-600 font-semibold">
+                            Konuşuyor
+                          </span>
+                        </p>
                         <p class="text-xs text-slate-500">{{ entry.peerId }}</p>
                       </div>
-                      <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs">Dinleniyor</span>
+                      <span
+                          class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                          :class="isSpeaking(entry.peerId) ? 'bg-emerald-600 text-white animate-pulse' : 'bg-emerald-100 text-emerald-700'"
+                      >
+                        {{ isSpeaking(entry.peerId) ? 'Konuşuyor' : 'Dinleniyor' }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -154,16 +175,32 @@
                 <div
                     v-for="peer in participants"
                     :key="peer.id"
-                    class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100"
+                    class="flex items-center justify-between p-3 rounded-xl border transition shadow-sm"
+                    :class="isSpeaking(peer.id) ? 'bg-emerald-50/80 border-emerald-200 shadow-emerald-100' : 'bg-slate-50 border-slate-100'"
                 >
-                  <div>
-                    <p class="font-semibold text-slate-800">{{ peer.username }}</p>
+                  <div class="space-y-1">
+                    <p class="font-semibold text-slate-800 flex items-center gap-2">
+                      <span>{{ peer.username }}</span>
+                      <span
+                          v-if="isSpeaking(peer.id)"
+                          class="inline-flex items-center gap-1 text-[11px] font-semibold uppercase text-emerald-600"
+                      >
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Konuşuyor
+                      </span>
+                    </p>
                     <p class="text-xs text-slate-500">{{ peer.id }}</p>
                   </div>
                   <div class="text-xs flex items-center gap-2">
                     <span v-if="peer.isHost" class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Host</span>
                     <span class="px-2 py-0.5 rounded-full" :class="peer.muted ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'">
                       {{ peer.muted ? 'Sessiz' : 'Aktif' }}
+                    </span>
+                    <span
+                        v-if="isSpeaking(peer.id)"
+                        class="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-semibold uppercase text-[10px] animate-pulse"
+                    >
+                      Canlı
                     </span>
                   </div>
                 </div>
@@ -205,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch, type ComponentPublicInstance } from 'vue'
 import { toast } from 'vue3-toastify'
 import Navbar from '~/pages/components/bar/Navbar.vue'
 import type { Device as MediasoupDevice } from 'mediasoup-client'
@@ -278,6 +315,9 @@ const hasMic = ref(false)
 const activityLog = ref<ActivityLogItem[]>([])
 const remoteAudioEntries = ref<RemoteAudioEntry[]>([])
 const wsAuthToken = ref<string | null>(null)
+const speakingPeers = reactive<Record<string, boolean>>({})
+const audioContextRef = ref<AudioContext | null>(null)
+const localPeerKey = computed(() => clientId.value || 'local')
 
 const resolveRoomId = () => (activeRoomId.value || requestedRoomId.value.trim() || '')
 
@@ -293,6 +333,7 @@ const producerPeerMap = new Map<string, string>()
 const consumerMap = new Map<string, MediasoupConsumer>()
 const audioElements = new Map<string, HTMLAudioElement>()
 let localPreviewEl: HTMLAudioElement | null = null
+const SPEAKING_THRESHOLD = 0.02
 
 type DeviceCtor = new () => MediasoupDevice
 let DeviceClass: DeviceCtor | null = null
@@ -405,6 +446,157 @@ const fetchWsAuthToken = async (): Promise<string> => {
     throw error
   }
 }
+
+type LevelMonitor = {
+  analyser: AnalyserNode;
+  source: MediaStreamAudioSourceNode;
+  sink: GainNode;
+  dataArray: Uint8Array;
+  rafId: number | null;
+  streamId: string;
+  isLocal: boolean;
+}
+
+const levelMonitors = new Map<string, LevelMonitor>()
+
+const ensureAudioContext = () => {
+  if (!process.client) return null
+  if (!audioContextRef.value) {
+    audioContextRef.value = new AudioContext()
+  }
+  if (audioContextRef.value.state === 'suspended') {
+    void audioContextRef.value.resume().catch(() => {})
+  }
+  return audioContextRef.value
+}
+
+const updateSpeakingState = (peerId: string, state: boolean) => {
+  if (!peerId) return
+  if (speakingPeers[peerId] === state) return
+  speakingPeers[peerId] = state
+}
+
+const stopLevelMonitor = (peerId: string) => {
+  if (!process.client) return
+  const monitor = levelMonitors.get(peerId)
+  if (!monitor) {
+    updateSpeakingState(peerId, false)
+    return
+  }
+  if (monitor.rafId !== null) {
+    cancelAnimationFrame(monitor.rafId)
+  }
+  monitor.source.disconnect()
+  monitor.analyser.disconnect()
+  monitor.sink.disconnect()
+  levelMonitors.delete(peerId)
+  updateSpeakingState(peerId, false)
+}
+
+const startLevelMonitor = (peerId: string, stream: MediaStream, options?: { isLocal?: boolean }) => {
+  if (!process.client || !peerId) return
+  const audioContext = ensureAudioContext()
+  if (!audioContext) return
+  const existing = levelMonitors.get(peerId)
+  if (existing?.streamId === stream.id) return
+  stopLevelMonitor(peerId)
+  const source = audioContext.createMediaStreamSource(stream)
+  const analyser = audioContext.createAnalyser()
+  analyser.fftSize = 512
+  const sink = audioContext.createGain()
+  sink.gain.value = 0
+  source.connect(analyser)
+  analyser.connect(sink)
+  sink.connect(audioContext.destination)
+  const dataArray = new Uint8Array(analyser.fftSize)
+  const monitor: LevelMonitor = {
+    analyser,
+    source,
+    sink,
+    dataArray,
+    rafId: null,
+    streamId: stream.id,
+    isLocal: Boolean(options?.isLocal),
+  }
+  const update = () => {
+    analyser.getByteTimeDomainData(dataArray)
+    let sumSquares = 0
+    for (let i = 0; i < dataArray.length; i += 1) {
+      const sample = dataArray[i] ?? 128
+      const deviation = sample - 128
+      sumSquares += deviation * deviation
+    }
+    const rms = Math.sqrt(sumSquares / dataArray.length) / 128
+    const speaking = rms > SPEAKING_THRESHOLD && (!monitor.isLocal || !isMicMuted.value)
+    updateSpeakingState(peerId, speaking)
+    monitor.rafId = requestAnimationFrame(update)
+  }
+  monitor.rafId = requestAnimationFrame(update)
+  levelMonitors.set(peerId, monitor)
+}
+
+const resetSpeakingIndicators = () => {
+  if (process.client) {
+    levelMonitors.forEach((_, key) => {
+      stopLevelMonitor(key)
+    })
+  }
+  Object.keys(speakingPeers).forEach((key) => {
+    delete speakingPeers[key]
+  })
+}
+
+const isSpeaking = (peerId?: string) => Boolean(peerId && speakingPeers[peerId])
+const isLocalSpeaking = computed(() => isSpeaking(localPeerKey.value))
+
+if (process.client) {
+  watch(remoteAudioEntries, (entries) => {
+    const activePeers = new Set<string>()
+    entries.forEach((entry) => {
+      activePeers.add(entry.peerId)
+      startLevelMonitor(entry.peerId, entry.stream)
+    })
+    const stalePeers: string[] = []
+    levelMonitors.forEach((monitor, peerId) => {
+      if (monitor.isLocal) return
+      if (!activePeers.has(peerId)) {
+        stalePeers.push(peerId)
+      }
+    })
+    stalePeers.forEach(peerId => stopLevelMonitor(peerId))
+  }, { deep: true })
+}
+
+watch(clientId, (newId, oldId) => {
+  if (!newId || newId === oldId) return
+  const previousKey = oldId || 'local'
+  const wasSpeaking = Boolean(speakingPeers[previousKey])
+  if (process.client && localStreamRef.value) {
+    if (levelMonitors.has(previousKey)) {
+      stopLevelMonitor(previousKey)
+      startLevelMonitor(newId, localStreamRef.value, { isLocal: true })
+    }
+  }
+  if (wasSpeaking) {
+    speakingPeers[newId] = true
+  }
+  if (previousKey !== newId) {
+    delete speakingPeers[previousKey]
+  }
+})
+
+watch(participants, (list) => {
+  const allowed = new Set(list.map(peer => peer.id))
+  Object.keys(speakingPeers).forEach((key) => {
+    if (key === localPeerKey.value) return
+    if (!allowed.has(key)) {
+      if (process.client) {
+        stopLevelMonitor(key)
+      }
+      delete speakingPeers[key]
+    }
+  })
+})
 
 const ensureWsAuthToken = async (): Promise<string> => {
   if (wsAuthToken.value) return wsAuthToken.value
@@ -555,6 +747,7 @@ const cleanupMedia = () => {
   consumerMap.clear()
   producerPeerMap.clear()
   audioElements.clear()
+  resetSpeakingIndicators()
 }
 
 const toggleMute = async () => {
@@ -564,6 +757,9 @@ const toggleMute = async () => {
   localStreamRef.value.getAudioTracks().forEach(track => {
     track.enabled = !isMicMuted.value
   })
+  if (isMicMuted.value) {
+    updateSpeakingState(localPeerKey.value, false)
+  }
   try {
     if (isMicMuted.value) {
       await localProducerRef.value.pause()
@@ -636,6 +832,7 @@ const startLocalAudio = async () => {
     isMicMuted.value = false
     localMicWarning.value = ''
     logActivity('Mikrofon paylaşılıyor')
+    startLevelMonitor(localPeerKey.value, stream, { isLocal: true })
   } catch (error: any) {
     console.error('Mic error', error)
     hasMic.value = false
