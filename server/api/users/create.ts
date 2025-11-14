@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, getCookie, H3Event } from 'h3'
 import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event: H3Event) => {
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const config = useRuntimeConfig()
     const body = await readBody(event)
 

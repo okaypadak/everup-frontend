@@ -4,7 +4,7 @@ import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
     const userId = getRouterParam(event, 'id')
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const body = await readBody(event)
 
     if (!token) {

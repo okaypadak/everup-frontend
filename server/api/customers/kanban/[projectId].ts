@@ -3,7 +3,7 @@ import { defineEventHandler, getCookie } from 'h3'
 import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const config = useRuntimeConfig()
     const projectId = event.context.params?.projectId
 

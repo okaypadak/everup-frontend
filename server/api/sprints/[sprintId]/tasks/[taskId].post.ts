@@ -3,7 +3,7 @@ import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const { sprintId, taskId } = event.context.params as { sprintId: string, taskId: string }
 
     if (!token) return { statusCode: 401, message: 'Giriş yapmanız gerekiyor.' }

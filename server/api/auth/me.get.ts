@@ -11,7 +11,7 @@ type JwtPayload = {
 }
 
 export default defineEventHandler(async (event: H3Event) => {
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
 
     if (!token) {
         return { user: null }

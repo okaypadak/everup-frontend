@@ -3,7 +3,7 @@ import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const projectId = getRouterParam(event, 'id')
     const body = await readBody(event)
 

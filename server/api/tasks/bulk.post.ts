@@ -2,7 +2,7 @@ import { defineEventHandler, getCookie, readRawBody } from 'h3'
 import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
     const config = useRuntimeConfig()
     const raw = await readRawBody(event, 'utf8') // ham JSON string
 

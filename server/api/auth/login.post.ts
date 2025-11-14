@@ -102,13 +102,15 @@ export default defineEventHandler(async (event: H3Event): Promise<SuccessRespons
         const maxAgeSeconds = resolveMaxAge(loginResult.expiresAt)
         const secure = process.env.NODE_ENV === 'production'
 
-        setCookie(event, 'auth_token', token, {
+        const cookieOptions = {
             httpOnly: true,
             secure,
             sameSite: secure ? 'none' : 'lax',
             path: '/',
             maxAge: maxAgeSeconds
-        })
+        }
+
+        setCookie(event, 'everup_auth_token', token, cookieOptions)
 
         return {
             statusCode: 200,

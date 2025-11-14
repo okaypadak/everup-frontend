@@ -107,7 +107,7 @@ function ensureArray<T>(input: any): T[] {
 }
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, 'auth_token')
+  const token = getCookie(event, 'everup_auth_token')
   const projectIdParam = getRouterParam(event, 'id')
 
   if (!token) {

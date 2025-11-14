@@ -3,7 +3,7 @@ import { ofetch } from 'ofetch'
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
-    const token = getCookie(event, 'auth_token')
+    const token = getCookie(event, 'everup_auth_token')
 
     if (!token) {
         console.warn('[API /tasks/project/:id] Token bulunamadı, yetkisiz erişim')
