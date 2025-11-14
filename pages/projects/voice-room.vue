@@ -334,6 +334,8 @@ const consumerMap = new Map<string, MediasoupConsumer>()
 const audioElements = new Map<string, HTMLAudioElement>()
 let localPreviewEl: HTMLAudioElement | null = null
 const SPEAKING_THRESHOLD = 0.02
+const SPEAKING_HOLD_MS = 3000
+const speakingHoldMap = new Map<string, number>()
 
 type DeviceCtor = new () => MediasoupDevice
 let DeviceClass: DeviceCtor | null = null
@@ -470,17 +472,48 @@ const ensureAudioContext = () => {
   return audioContextRef.value
 }
 
-const updateSpeakingState = (peerId: string, state: boolean) => {
+const setPeerSpeaking = (peerId: string, state: boolean) => {
   if (!peerId) return
   if (speakingPeers[peerId] === state) return
   speakingPeers[peerId] = state
+  if (!state) {
+    speakingHoldMap.delete(peerId)
+  }
+}
+
+const handleSpeakingSample = (peerId: string, isActive: boolean, options?: { force?: boolean }) => {
+  if (!peerId) return
+  const force = Boolean(options?.force)
+  if (!process.client) {
+    setPeerSpeaking(peerId, isActive)
+    return
+  }
+  if (isActive) {
+    speakingHoldMap.set(peerId, performance.now())
+    setPeerSpeaking(peerId, true)
+    return
+  }
+  if (force) {
+    setPeerSpeaking(peerId, false)
+    return
+  }
+  const lastActive = speakingHoldMap.get(peerId)
+  if (typeof lastActive !== 'number') {
+    setPeerSpeaking(peerId, false)
+    return
+  }
+  if (performance.now() - lastActive >= SPEAKING_HOLD_MS) {
+    setPeerSpeaking(peerId, false)
+  } else {
+    setPeerSpeaking(peerId, true)
+  }
 }
 
 const stopLevelMonitor = (peerId: string) => {
   if (!process.client) return
   const monitor = levelMonitors.get(peerId)
   if (!monitor) {
-    updateSpeakingState(peerId, false)
+    handleSpeakingSample(peerId, false, { force: true })
     return
   }
   if (monitor.rafId !== null) {
@@ -490,7 +523,7 @@ const stopLevelMonitor = (peerId: string) => {
   monitor.analyser.disconnect()
   monitor.sink.disconnect()
   levelMonitors.delete(peerId)
-  updateSpeakingState(peerId, false)
+  handleSpeakingSample(peerId, false, { force: true })
 }
 
 const startLevelMonitor = (peerId: string, stream: MediaStream, options?: { isLocal?: boolean }) => {
@@ -528,7 +561,7 @@ const startLevelMonitor = (peerId: string, stream: MediaStream, options?: { isLo
     }
     const rms = Math.sqrt(sumSquares / dataArray.length) / 128
     const speaking = rms > SPEAKING_THRESHOLD && (!monitor.isLocal || !isMicMuted.value)
-    updateSpeakingState(peerId, speaking)
+    handleSpeakingSample(peerId, speaking)
     monitor.rafId = requestAnimationFrame(update)
   }
   monitor.rafId = requestAnimationFrame(update)
@@ -541,6 +574,7 @@ const resetSpeakingIndicators = () => {
       stopLevelMonitor(key)
     })
   }
+  speakingHoldMap.clear()
   Object.keys(speakingPeers).forEach((key) => {
     delete speakingPeers[key]
   })
@@ -578,9 +612,14 @@ watch(clientId, (newId, oldId) => {
     }
   }
   if (wasSpeaking) {
-    speakingPeers[newId] = true
+    const last = speakingHoldMap.get(previousKey)
+    if (typeof last === 'number') {
+      speakingHoldMap.set(newId, last)
+    }
+    setPeerSpeaking(newId, true)
   }
   if (previousKey !== newId) {
+    speakingHoldMap.delete(previousKey)
     delete speakingPeers[previousKey]
   }
 })
@@ -593,6 +632,7 @@ watch(participants, (list) => {
       if (process.client) {
         stopLevelMonitor(key)
       }
+      speakingHoldMap.delete(key)
       delete speakingPeers[key]
     }
   })
@@ -758,7 +798,7 @@ const toggleMute = async () => {
     track.enabled = !isMicMuted.value
   })
   if (isMicMuted.value) {
-    updateSpeakingState(localPeerKey.value, false)
+    handleSpeakingSample(localPeerKey.value, false, { force: true })
   }
   try {
     if (isMicMuted.value) {
