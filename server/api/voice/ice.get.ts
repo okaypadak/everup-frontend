@@ -19,6 +19,11 @@ export default defineEventHandler(async (event) => {
       method: 'GET',
       query: uid ? { uid } : undefined,
     })
+    console.info('[VoiceProxy] ICE response', {
+      uid,
+      count: Array.isArray(response?.iceServers) ? response.iceServers.length : 0,
+      urls: response?.iceServers?.map(server => server.urls),
+    })
     return response
   } catch (error: any) {
     console.error('Ses servisi ICE sunucuları alınamadı:', error)
