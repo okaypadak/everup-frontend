@@ -434,22 +434,25 @@ const ensureIceServers = async (): Promise<RTCIceServer[]> => {
     return iceServersPromise
   }
   iceServersPromise = (async () => {
+    const query = desiredUid !== 'anon' ? `?uid=${encodeURIComponent(desiredUid)}` : ''
+    const endpoint = `/api/voice/ice${query}`
     try {
-      const query = desiredUid !== 'anon' ? `?uid=${encodeURIComponent(desiredUid)}` : ''
-      const response = await fetch(`/api/voice/ice${query}`, { credentials: 'same-origin' })
+      const response = await fetch(endpoint, { credentials: 'same-origin' })
       if (!response.ok) {
         throw new Error(`voice-ice-fetch-failed:${response.status}`)
       }
       const payload = await response.json()
-      if (Array.isArray(payload?.iceServers)) {
+      if (Array.isArray(payload?.iceServers) && payload.iceServers.length) {
+        console.info('[VoiceRoom] ICE sunucuları alındı', { count: payload.iceServers.length, endpoint })
         iceServers.value = payload.iceServers as RTCIceServer[]
         iceServersUid = desiredUid
       } else {
         iceServers.value = []
         iceServersUid = null
+        console.warn('[VoiceRoom] ICE sunucu listesi boş döndü', { endpoint })
       }
     } catch (error) {
-      console.error('ICE sunucu bilgileri alınamadı', error)
+      console.error('[VoiceRoom] ICE sunucu isteği başarısız', { endpoint, desiredUid, error })
       iceServers.value = []
       iceServersUid = null
     } finally {
@@ -820,6 +823,14 @@ const handleTransportFailure = (direction: 'send' | 'recv', transportId: string,
   toast.error(`${label} transportu düştü`)
   infoMessage.value = message
   logActivity(`${label} transportu durumu '${state}' nedeniyle kapatıldı`)
+  console.error('[VoiceRoom] Transport connectionstatechange failure', {
+    direction,
+    transportId,
+    state,
+    roomId: activeRoomId.value,
+    wsReadyState: wsRef.value?.readyState,
+    hasIceServers: Boolean(resolveIceServers()?.length),
+  })
   const pending = pendingConnects.get(transportId)
   if (pending) {
     try {
